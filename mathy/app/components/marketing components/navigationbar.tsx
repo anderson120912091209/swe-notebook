@@ -21,7 +21,7 @@ export default function NavigationBar() {
                   <div className="relative flex items-center justify-center">
                     <div className="relative h-full w-full">
                       <Image
-                        src="/logos/mathy-font-alternate-logo.png"
+                        src="/logos/roundedlogo-text-logo.png"
                         alt="Mathy Logo"
                         width={120}
                         height={80}
