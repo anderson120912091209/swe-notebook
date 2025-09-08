@@ -29,3 +29,9 @@ body {
 .font-alternate {
   font-family: "Alternate", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
+
+/* Custom line height for reference image styling */
+
+.leading-13 {
+  line-height: 1.3;
+}

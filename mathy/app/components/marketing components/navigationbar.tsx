@@ -37,7 +37,7 @@ export default function NavigationBar() {
                   className="hover:text-primary 
                   items-center gap-1 rounded-xl p-1.75 px-3 leading-none 
                   transition-colors duration-200 flex font-semibold text-neutral-900/60
-                  hover:text-neutral-900/40"
+                  hover:text-blue-700/70"
                 >
                   Pricing
                 </Link>
@@ -47,14 +47,14 @@ export default function NavigationBar() {
                   className="hover:text-primary 
                   flex items-center gap-1 rounded-xl p-1.75 px-3 leading-none 
                   transition-colors duration-200 font-semibold text-neutral-900/60
-                  hover:text-neutral-900/40"
+                  hover:text-blue-700/70"
                 >
                   Guide
                 </Link>
                 
                 <Link 
                   href="/login"
-                  className="ml-3 rounded-xl bg-blue-700/50 p-1.25 px-3 
+                  className="ml-3 rounded-xl bg-blue-700/60 p-1.25 px-3 
                   text-sm transition-colors hover:bg-blue-700/30 text-white"
                 >
                   Login
