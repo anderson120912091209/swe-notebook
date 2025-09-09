@@ -1,7 +1,7 @@
 import Link from "next/link";   
 import Image from "next/image";
 import WaitlistSmallBtn from "../components/marketing components/waitlist-small-btn";
-import VideoFeaturesSection from "../components/marketing components/hero-video-section";
+import HeroVideoSection from "../components/marketing components/hero-video-section";
 
 export default function LandingPage() {
 
@@ -41,8 +41,8 @@ export default function LandingPage() {
                  {/* Waitlist Button */}
                  <WaitlistSmallBtn />
                  
-                 {/* Video & Features Section */}
-                 <VideoFeaturesSection />
+                 {/* Hero Video Section */}
+                 <HeroVideoSection />
               </div>
             </div>
           </div>
