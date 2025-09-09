@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image';
+import SignInCard from '../../components/auth components/signin-card';
 
 export default function LoginPage () { 
     return ( 
@@ -16,7 +17,10 @@ export default function LoginPage () {
                 </video>
             </div>
 
-            {/* Overlay Content */}
+            {/* Overlay Content - Sign In Card */}
+            <div className="absolute inset-0 flex items-center justify-center">
+                <SignInCard />
+            </div>
         </div>
     )
 }

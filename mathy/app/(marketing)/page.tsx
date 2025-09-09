@@ -1,7 +1,10 @@
+'use client'
+
 import Link from "next/link";   
 import Image from "next/image";
 import WaitlistSmallBtn from "../components/marketing components/waitlist-small-btn";
 import HeroVideoSection from "../components/marketing components/hero-video-section";
+import MathRenderer from "../components/marketing components/math-renderer";
 
 export default function LandingPage() {
 
@@ -43,11 +46,14 @@ export default function LandingPage() {
                  
                  {/* Hero Video Section */}
                  <HeroVideoSection />
+                 
+                 
+                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
   );
 }
