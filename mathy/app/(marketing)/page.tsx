@@ -1,7 +1,9 @@
 import Link from "next/link";   
 import Image from "next/image";
+import WaitlistSmallBtn from "../components/marketing components/waitlist-small-btn";
 
 export default function LandingPage() {
+
   return (
     // Landing Page Background Color Settings and Window 
     <div className="min-h-screen bg-white pt-20">
@@ -31,9 +33,12 @@ export default function LandingPage() {
                   leading-13 font-semibold tracking-tight text-neutral-900">
                   Learn all levels of math.
                 </h1>
-                <h2 className="mt-1 text-2xl font-medium text-neutral-500">
-                  with an addictive learning experience.
-                </h2>
+                 <h2 className="mt-1 text-2xl font-medium text-neutral-500">
+                   with an addictive learning experience.
+                 </h2>
+                 
+                 {/* Waitlist Button */}
+                 <WaitlistSmallBtn />
               </div>
             </div>
           </div>
