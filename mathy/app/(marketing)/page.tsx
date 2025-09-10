@@ -3,6 +3,7 @@
 import Link from "next/link";   
 import Image from "next/image";
 import WaitlistSmallBtn from "../components/marketing components/waitlist-small-btn";
+import ProductDemoWindow from "../components/marketing components/product-demo-window";
 import HeroVideoSection from "../components/marketing components/hero-video-section";
 import MathRenderer from "../components/marketing components/math-renderer";
 
@@ -43,6 +44,9 @@ export default function LandingPage() {
                  
                  {/* Waitlist Button */}
                  <WaitlistSmallBtn />
+                 
+                 {/* Product Demo Window */}
+                 <ProductDemoWindow />
                  
                  {/* Hero Video Section */}
                  <HeroVideoSection />

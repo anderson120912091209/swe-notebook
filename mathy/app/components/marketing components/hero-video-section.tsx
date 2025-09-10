@@ -64,9 +64,9 @@ export default function HeroVideoSection() {
               
               {/* Video text overlay */}
               <div className="absolute bottom-4 left-4 text-white">
-                <h3 className="text-lg font-bold mb-1">Experience Math Learning</h3>
+                <h3 className="text-lg font-bold mb-1">Experience a New Math Learning</h3>
                 <p className="text-white/90 text-sm max-w-xs">
-                  Watch our interactive platform in action.
+                  Watch our interactive platform in action. 
                 </p>
               </div>
             </div>
@@ -75,12 +75,13 @@ export default function HeroVideoSection() {
 
         {/* Right Side - Feature Cards */}
         <div className="space-y-4">
-          {/* Feature Card 1 - Math Renderer */}
-          <div className="bg-white rounded-xl border-3 border-neutral-200 p-6 
-           hover:shadow-sm transition-shadow">
-            
-            <h3 className="text-lg font-semibold text-neutral-900 mb-3">Interactive Math Editor</h3>
+            {/* Feature Card 1 - Math Renderer */}
+            <div className="bg-neutral-200 rounded-xl border-3 border-neutral-200 p-6 
+             hover:shadow-sm transition-shadow">
+              
+              <h3 className="text-lg font-semibold text-neutral-900 mb-3">Lightning Fast Math Editor</h3>
             <p className="text-neutral-600 text-sm mb-4">
+              Typing math equations has never been easier. 
               Fast, easy and intuitive math editor for teachers and students.
             </p>
             
@@ -95,24 +96,23 @@ export default function HeroVideoSection() {
           </div>
 
           {/* Feature Card 2 */}
-          <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-center h-12 w-12 bg-neutral-100 rounded-lg mb-4">
-              <div className="w-6 h-6 bg-neutral-400 rounded"></div>
-            </div>
-            <h3 className="text-lg font-semibold text-neutral-900 mb-2">Feature Two</h3>
+          <div className="bg-neutral-200 rounded-xl border 
+          border-neutral-200 p-6 shadow-sm hover:shadow-sm transition-shadow">
+            
+            <h3 className="text-lg font-semibold text-neutral-900 mb-2">Spend Less Time to Study More</h3>
             <p className="text-neutral-600 text-sm">
-              Placeholder description for your second innovative feature. Highlight the benefits students will experience.
+              No more wasting time on problems you already know. We find you problems that you need practice on. 
             </p>
           </div>
 
           {/* Feature Card 3 */}
-          <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl mb-16 border border-neutral-200 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-center h-12 w-12 bg-neutral-100 rounded-lg mb-4">
               <div className="w-6 h-6 bg-neutral-400 rounded"></div>
             </div>
             <h3 className="text-lg font-semibold text-neutral-900 mb-2">Feature Three</h3>
             <p className="text-neutral-600 text-sm">
-              Placeholder description for your third powerful feature. Explain how it enhances the learning experience.
+              Placeholder fjlajajfka;fja;lj
             </p>
           </div>
         </div>
