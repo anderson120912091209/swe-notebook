@@ -13,7 +13,7 @@ export default function LoginPage () {
                 <video autoPlay muted loop
                 className="w-full h-full object-cover"
                 style={{transform: "scale(1.17) translateY(0%)"}}>
-                <source src="/videos/sky-wide.mp4" type="video/mp4" />
+                <source src="/videos/sky-wide-4k.mp4" type="video/mp4" />
                 </video>
             </div>
 
