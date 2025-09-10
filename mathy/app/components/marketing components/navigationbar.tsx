@@ -13,7 +13,7 @@ export default function NavigationBar() {
   
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md 
-    border-gray-200/50" style={{ opacity: 1 }}>
+    border-gray-200/50 " style={{ opacity: 1 }}>
       <div className="mx-6">
         <div className="relative mx-auto flex justify-center max-w-5xl">
           <div className="w-full">
@@ -83,6 +83,28 @@ export default function NavigationBar() {
                     hover:text-blue-700/70"
                   >
                     {tNav('guide')}
+                  </Link>
+                </ClientOnly>
+                
+                <ClientOnly fallback={
+                  <Link 
+                    href="/blogs"
+                    className="hover:text-primary 
+                    flex items-center gap-1 rounded-xl p-1.75 px-3 leading-none 
+                    transition-colors duration-200 font-semibold text-neutral-900/60
+                    hover:text-blue-700/70"
+                  >
+                    Blogs
+                  </Link>
+                }>
+                  <Link 
+                    href="/blogs"
+                    className="hover:text-primary 
+                    flex items-center gap-1 rounded-xl p-1.75 px-3 leading-none 
+                    transition-colors duration-200 font-semibold text-neutral-900/60
+                    hover:text-blue-700/70"
+                  >
+                    {tNav('blogs')}
                   </Link>
                 </ClientOnly>
                 

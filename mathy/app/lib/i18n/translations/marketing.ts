@@ -101,7 +101,7 @@ export const marketing = {
     // Waitlist
     waitlistPlaceholder: "您的電子郵件地址",
     waitlistThankYou: "謝謝！",
-    waitlistSuccess: "我們很高興有您的加入！",
+    waitlistSuccess: "我們很高興有您的加入",
     waitlistSubmit: "加入等候名單",
     waitlistRequestInvite: "申請邀請，",
     waitlistLimitedAccess: "mathy 目前為限量開放。",

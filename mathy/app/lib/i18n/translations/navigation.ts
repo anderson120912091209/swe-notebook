@@ -4,6 +4,7 @@ export const navigation = {
     home: "Home",
     pricing: "Pricing",
     guide: "Guide",
+    blogs: "Blogs",
     login: "Login",
     signUp: "Sign Up",
     
@@ -11,6 +12,7 @@ export const navigation = {
     homeDescription: "Return to homepage",
     pricingDescription: "View pricing plans",
     guideDescription: "Getting started guide",
+    blogsDescription: "Read our latest blog posts",
     loginDescription: "Sign in to your account",
     signUpDescription: "Create a new account",
     
@@ -37,6 +39,7 @@ export const navigation = {
     home: "首頁",
     pricing: "價格",
     guide: "指南",
+    blogs: "數學部落格",
     login: "登入",
     signUp: "註冊",
     
@@ -44,6 +47,7 @@ export const navigation = {
     homeDescription: "返回首頁",
     pricingDescription: "查看價格方案",
     guideDescription: "入門指南",
+    blogsDescription: "閱讀我們最新的部落格文章",
     loginDescription: "登入您的帳戶",
     signUpDescription: "建立新帳戶",
     
