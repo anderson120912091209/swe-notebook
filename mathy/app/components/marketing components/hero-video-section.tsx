@@ -2,12 +2,14 @@
 
 import { useState, useRef } from "react";
 import MathRenderer from "./math-renderer";
+import { useNamespaceTranslation } from "../../lib/i18n/LanguageContext";
 
 export default function HeroVideoSection() {
   //Math Value for Math Renderer 
   const [mathValue, setMathValue] = useState("");
   //Video Ref for Handling Mouse Over and Mouse Leave 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { t: tMarketing } = useNamespaceTranslation('marketing');
 
   //On Hover MP4 Video Play, State Management for Handling Mouse Over and Mouse Leave 
   const handleMathChange = (value: string) => {
@@ -66,7 +68,7 @@ export default function HeroVideoSection() {
               <div className="absolute bottom-4 left-4 text-white">
                 <h3 className="text-lg font-bold mb-1">Experience a New Math Learning</h3>
                 <p className="text-white/90 text-sm max-w-xs">
-                  Watch our interactive platform in action. 
+                  {tMarketing('productDemoDescription')}
                 </p>
               </div>
             </div>
@@ -79,16 +81,15 @@ export default function HeroVideoSection() {
             <div className="bg-neutral-200 rounded-xl border-3 border-neutral-200 p-6 
              hover:shadow-sm transition-shadow">
               
-              <h3 className="text-lg font-semibold text-neutral-900 mb-3">Lightning Fast Math Editor</h3>
+              <h3 className="text-lg font-semibold text-neutral-900 mb-3">{tMarketing('feature1Title')}</h3>
             <p className="text-neutral-600 text-sm mb-4">
-              Typing math equations has never been easier. 
-              Fast, easy and intuitive math editor for teachers and students.
+              {tMarketing('feature1Description')}
             </p>
             
             {/* Math Renderer Integration */}
             <div className="mt-4">
               <MathRenderer 
-                placeholder="Try editing this equation..."
+                placeholder={tMarketing('feature1Try')}
                 onChange={handleMathChange}
                 className="border-2 border-blue-200"
               />
@@ -99,9 +100,9 @@ export default function HeroVideoSection() {
           <div className="bg-neutral-200 rounded-xl border 
           border-neutral-200 p-6 shadow-sm hover:shadow-sm transition-shadow">
             
-            <h3 className="text-lg font-semibold text-neutral-900 mb-2">Spend Less Time to Study More</h3>
+            <h3 className="text-lg font-semibold text-neutral-900 mb-2">{tMarketing('feature2Title')}</h3>
             <p className="text-neutral-600 text-sm">
-              No more wasting time on problems you already know. We find you problems that you need practice on. 
+              {tMarketing('feature2Description')}
             </p>
           </div>
 
@@ -110,9 +111,9 @@ export default function HeroVideoSection() {
             <div className="flex items-center justify-center h-12 w-12 bg-neutral-100 rounded-lg mb-4">
               <div className="w-6 h-6 bg-neutral-400 rounded"></div>
             </div>
-            <h3 className="text-lg font-semibold text-neutral-900 mb-2">Feature Three</h3>
+            <h3 className="text-lg font-semibold text-neutral-900 mb-2">{tMarketing('feature3Title')}</h3>
             <p className="text-neutral-600 text-sm">
-              Placeholder fjlajajfka;fja;lj
+              {tMarketing('feature3Description')}
             </p>
           </div>
         </div>

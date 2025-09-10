@@ -1,9 +1,16 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
+import { useNamespaceTranslation } from "../../lib/i18n/LanguageContext";
+import LanguageSwitcher from "../product components/LanguageSwitcher";
+import ClientOnly from "../ClientOnly";
 
 /*Navigation Bar Component == DONE
 Component used in Layout.tsx of Landing Page (marketing/layout.tsx)*/
 export default function NavigationBar() {
+  const { t: tNav } = useNamespaceTranslation('navigation');
+  
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md 
     border-gray-200/50" style={{ opacity: 1 }}>
@@ -34,34 +41,73 @@ export default function NavigationBar() {
               </Link>
 
               {/* Navigation Links */}
-              <div className="flex items-center text-sm font-medium">
-                <Link 
-                  href="/pricing"
-                  className="hover:text-primary 
-                  items-center gap-1 rounded-xl p-1.75 px-3 leading-none 
-                  transition-colors duration-200 flex font-semibold text-neutral-900/60
-                  hover:text-blue-700/70"
-                >
-                  Pricing
-                </Link>
+              <div className="flex items-center text-sm font-medium gap-3">
+                <ClientOnly fallback={
+                  <Link 
+                    href="/pricing"
+                    className="hover:text-primary 
+                    items-center gap-1 rounded-xl p-1.75 px-3 leading-none 
+                    transition-colors duration-200 flex font-semibold text-neutral-900/60
+                    hover:text-blue-700/70"
+                  >
+                    Pricing
+                  </Link>
+                }>
+                  <Link 
+                    href="/pricing"
+                    className="hover:text-primary 
+                    items-center gap-1 rounded-xl p-1.75 px-3 leading-none 
+                    transition-colors duration-200 flex font-semibold text-neutral-900/60
+                    hover:text-blue-700/70"
+                  >
+                    {tNav('pricing')}
+                  </Link>
+                </ClientOnly>
                 
-                <Link 
-                  href="/guide"
-                  className="hover:text-primary 
-                  flex items-center gap-1 rounded-xl p-1.75 px-3 leading-none 
-                  transition-colors duration-200 font-semibold text-neutral-900/60
-                  hover:text-blue-700/70"
-                >
-                  Guide
-                </Link>
+                <ClientOnly fallback={
+                  <Link 
+                    href="/guide"
+                    className="hover:text-primary 
+                    flex items-center gap-1 rounded-xl p-1.75 px-3 leading-none 
+                    transition-colors duration-200 font-semibold text-neutral-900/60
+                    hover:text-blue-700/70"
+                  >
+                    Guide
+                  </Link>
+                }>
+                  <Link 
+                    href="/guide"
+                    className="hover:text-primary 
+                    flex items-center gap-1 rounded-xl p-1.75 px-3 leading-none 
+                    transition-colors duration-200 font-semibold text-neutral-900/60
+                    hover:text-blue-700/70"
+                  >
+                    {tNav('guide')}
+                  </Link>
+                </ClientOnly>
                 
-                <Link 
-                  href="/login"
-                  className="ml-3 rounded-xl bg-blue-700/60 p-1.25 px-3 
-                  text-sm transition-colors hover:bg-blue-700/30 text-white"
-                >
-                  Login
-                </Link>
+                <ClientOnly fallback={
+                  <Link 
+                    href="/login"
+                    className="rounded-xl bg-blue-700/60 p-1.25 px-3 
+                    text-sm transition-colors hover:bg-blue-700/30 text-white"
+                  >
+                    Login
+                  </Link>
+                }>
+                  <Link 
+                    href="/login"
+                    className="rounded-xl bg-blue-700/60 p-1.25 px-3 
+                    text-sm transition-colors hover:bg-blue-700/30 text-white"
+                  >
+                    {tNav('login')}
+                  </Link>
+                </ClientOnly>
+                
+                {/* Language Switcher */}
+                <ClientOnly>
+                  <LanguageSwitcher />
+                </ClientOnly>
               </div>
             </div>
           </div>

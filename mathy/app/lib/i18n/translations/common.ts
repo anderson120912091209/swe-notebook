@@ -1,0 +1,127 @@
+export const common = {
+  en: {
+    // Common UI elements
+    loading: "Loading...",
+    error: "Error",
+    success: "Success",
+    cancel: "Cancel",
+    confirm: "Confirm",
+    save: "Save",
+    edit: "Edit",
+    delete: "Delete",
+    close: "Close",
+    back: "Back",
+    next: "Next",
+    previous: "Previous",
+    submit: "Submit",
+    search: "Search",
+    filter: "Filter",
+    sort: "Sort",
+    refresh: "Refresh",
+    retry: "Retry",
+    
+    // Common actions
+    signIn: "Sign in",
+    signUp: "Sign up",
+    signOut: "Sign out",
+    login: "Login",
+    logout: "Logout",
+    register: "Register",
+    forgotPassword: "Forgot password?",
+    resetPassword: "Reset password",
+    
+    // Common messages
+    welcome: "Welcome",
+    thankYou: "Thank you!",
+    congratulations: "Congratulations!",
+    goodJob: "Good job!",
+    tryAgain: "Try again",
+    notFound: "Not found",
+    unauthorized: "Unauthorized",
+    forbidden: "Forbidden",
+    serverError: "Server error",
+    
+    // Time and dates
+    today: "Today",
+    yesterday: "Yesterday",
+    tomorrow: "Tomorrow",
+    now: "Now",
+    ago: "ago",
+    in: "in",
+    
+    // Numbers and quantities
+    zero: "Zero",
+    one: "One",
+    two: "Two",
+    three: "Three",
+    four: "Four",
+    five: "Five",
+    many: "Many",
+    all: "All",
+    none: "None",
+    some: "Some",
+  },
+  
+  "zh-TW": {
+    // Common UI elements
+    loading: "載入中...",
+    error: "錯誤",
+    success: "成功",
+    cancel: "取消",
+    confirm: "確認",
+    save: "儲存",
+    edit: "編輯",
+    delete: "刪除",
+    close: "關閉",
+    back: "返回",
+    next: "下一步",
+    previous: "上一步",
+    submit: "提交",
+    search: "搜尋",
+    filter: "篩選",
+    sort: "排序",
+    refresh: "重新整理",
+    retry: "重試",
+    
+    // Common actions
+    signIn: "登入",
+    signUp: "註冊",
+    signOut: "登出",
+    login: "登入",
+    logout: "登出",
+    register: "註冊",
+    forgotPassword: "忘記密碼？",
+    resetPassword: "重設密碼",
+    
+    // Common messages
+    welcome: "歡迎",
+    thankYou: "謝謝！",
+    congratulations: "恭喜！",
+    goodJob: "做得好！",
+    tryAgain: "再試一次",
+    notFound: "找不到",
+    unauthorized: "未授權",
+    forbidden: "禁止",
+    serverError: "伺服器錯誤",
+    
+    // Time and dates
+    today: "今天",
+    yesterday: "昨天",
+    tomorrow: "明天",
+    now: "現在",
+    ago: "前",
+    in: "後",
+    
+    // Numbers and quantities
+    zero: "零",
+    one: "一",
+    two: "二",
+    three: "三",
+    four: "四",
+    five: "五",
+    many: "許多",
+    all: "全部",
+    none: "無",
+    some: "一些",
+  }
+} as const;

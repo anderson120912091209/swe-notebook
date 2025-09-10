@@ -6,8 +6,11 @@ import WaitlistSmallBtn from "../components/marketing components/waitlist-small-
 import ProductDemoWindow from "../components/marketing components/product-demo-window";
 import HeroVideoSection from "../components/marketing components/hero-video-section";
 import MathRenderer from "../components/marketing components/math-renderer";
+import { useNamespaceTranslation } from "../lib/i18n/LanguageContext";
+import ClientOnly from "../components/ClientOnly";
 
 export default function LandingPage() {
+  const { t: tMarketing } = useNamespaceTranslation('marketing');
 
   return (
     // Landing Page Background Color Settings and Window 
@@ -29,18 +32,33 @@ export default function LandingPage() {
                     <Image src="/logos/roundedlogo-gray-no-text.png" 
                     alt="mathy Logo" width={20} height={20} />
                   </span>
-                  <span>Beta version releasing on 2025.9.20</span>
+                  <ClientOnly fallback={<span>Beta version releasing on 2025.9.20</span>}>
+                    <span>{tMarketing('betaBadge')}</span>
+                  </ClientOnly>
                 </div>
               </div>
               {/* Hero Section Slogan */}
               <div className="text-left">
-                <h1 className="max-w-3xl text-5xl 
-                  leading-13 font-semibold tracking-tight text-neutral-900">
-                  Learn all levels of math.
-                </h1>
-                 <h2 className="mt-1 text-2xl font-medium text-neutral-500">
-                   with an addictive learning experience.
-                 </h2>
+                <ClientOnly fallback={
+                  <h1 className="max-w-3xl text-5xl 
+                    leading-13 font-semibold tracking-tight text-neutral-900">
+                    Learn all levels of math.
+                  </h1>
+                }>
+                  <h1 className="max-w-3xl text-5xl 
+                    leading-13 font-semibold tracking-tight text-neutral-900">
+                    {tMarketing('heroTitle')}
+                  </h1>
+                </ClientOnly>
+                 <ClientOnly fallback={
+                   <h2 className="mt-1 text-2xl font-medium text-neutral-500">
+                     with an addictive learning experience.
+                   </h2>
+                 }>
+                   <h2 className="mt-1 text-2xl font-medium text-neutral-500">
+                     {tMarketing('heroSubtitle')}
+                   </h2>
+                 </ClientOnly>
                  
                  {/* Waitlist Button */}
                  <WaitlistSmallBtn />

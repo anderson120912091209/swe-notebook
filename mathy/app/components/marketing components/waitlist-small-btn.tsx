@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useNamespaceTranslation } from "../../lib/i18n/LanguageContext";
 
 export default function WaitlistSmallBtn() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [email, setEmail] = useState("");
+  const { t: tMarketing } = useNamespaceTranslation('marketing');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +37,7 @@ export default function WaitlistSmallBtn() {
                 placeholder:text-gray-500 font-md outline-none flex-1 w-full text-sm ${
                   isSubmitted ? 'transform ease-in duration-500 text-blue-700/50' : 'text-gray-600'
                 }`}
-                placeholder={isSubmitted ? "Thank you!" : "Your email address"}
+                placeholder={isSubmitted ? tMarketing('waitlistThankYou') : tMarketing('waitlistPlaceholder')}
                 required
                 disabled={isSubmitted}
               />
@@ -51,7 +53,7 @@ export default function WaitlistSmallBtn() {
                   height="16"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="rgb(29, 78, 216)"
+                  stroke="rgb(93, 122, 204)"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -88,7 +90,7 @@ export default function WaitlistSmallBtn() {
         {isSubmitted && (
           <span className="text-white text-sm font-sm absolute left-6 top-1/2
            transform -translate-y-1/2 text-center whitespace-nowrap z-0">
-             Excited to have you!
+             {tMarketing('waitlistSuccess')}
           </span>
         )}
         <form onSubmit={handleSubmit} className="w-[80%]">
@@ -104,7 +106,7 @@ export default function WaitlistSmallBtn() {
                placeholder:text-gray-500 font-md outline-none flex-1 text-sm ${
                  isSubmitted ? 'text-blue-700/50' : 'text-gray-600'
                }`}
-               placeholder={isSubmitted ? "Thank you!" : "Your email address..."}
+               placeholder={isSubmitted ? tMarketing('waitlistThankYou') : tMarketing('waitlistPlaceholder')}
                required
                disabled={isSubmitted}
              />
@@ -156,8 +158,8 @@ export default function WaitlistSmallBtn() {
             </>
           ) : (
             <>
-              Request an invitation, <br />
-              mathy is in limited access.
+              {tMarketing('waitlistRequestInvite')} <br />
+              {tMarketing('waitlistLimitedAccess')}
             </>
           )}
         </div>

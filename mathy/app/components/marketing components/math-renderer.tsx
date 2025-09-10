@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useNamespaceTranslation } from '../../lib/i18n/LanguageContext';
 
 interface MathRendererProps {
   placeholder?: string;
@@ -11,12 +12,14 @@ interface MathRendererProps {
 }
 
 const MathRenderer: React.FC<MathRendererProps> = ({ 
-  placeholder = "Enter your answer here...",
+  placeholder,
   value = "",
   onChange,
   className = "",
   showSampleQuestion = true
 }) => {
+  const { t: tMath } = useNamespaceTranslation('math');
+  const defaultPlaceholder = placeholder || tMath('mathRendererPlaceholder');
   const defaultEquation = "e^{i\\pi} + 1 = 0";
   const [mathValue, setMathValue] = useState(value || defaultEquation);
   const [showSymbols, setShowSymbols] = useState(false);
@@ -284,7 +287,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({
               <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Math Symbols Library
+                     {tMath('mathSymbolsTitle')}
             </h3>
             <button 
               onClick={() => setShowSymbols(false)}
@@ -301,7 +304,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search math symbols..."
+                       placeholder={tMath('mathSymbolsSearch')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
@@ -342,10 +345,10 @@ const MathRenderer: React.FC<MathRendererProps> = ({
               <circle cx="9" cy="9" r="2"/>
               <path d="m21 15-3.086-3.086a2 2 0 00-2.828 0L6 21"/>
             </svg>
-            Image
+                   {tMath('toolbarImage')}
           </button>
           <button className="bg-blue-200 hover:bg-blue-300 text-blue-900 px-2 py-1 rounded-full text-xs font-medium">
-            New
+            {tMath('toolbarNew')}
           </button>
           <button className="bg-gray-100 hover:bg-gray-200 p-1 rounded-full">
             <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,7 +359,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
-            Draw
+                   {tMath('toolbarDraw')}
           </button>
         </div>
         
@@ -371,10 +374,10 @@ const MathRenderer: React.FC<MathRendererProps> = ({
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            f(x)
+                   {tMath('toolbarFunction')}
           </button>
           <button className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-            Check Answer
+            {tMath('toolbarCheckAnswer')}
             <svg className="w-3 h-3 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M13 2L3 14h6l-2 8 10-12h-6l2-8z" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round"/>
             </svg>
