@@ -8,7 +8,7 @@ export const marketing = {
     // Waitlist
     waitlistPlaceholder: "Your email address",
     waitlistThankYou: "Thank you!",
-    waitlistSuccess: "We're excited to have you!",
+    waitlistSuccess: "Excited to have you :)",
     waitlistSubmit: "Join Waitlist",
     waitlistRequestInvite: "Request an invitation,",
     waitlistLimitedAccess: "mathy is in limited access.",
@@ -170,7 +170,7 @@ export const marketing = {
     guideSubtitle: "學習如何充分利用您的 Mathy 體驗",
     guideStep1Title: "1. 選擇您的學習路徑",
     guideStep1Description: "首先選擇您最感興趣的數學主題。我們的適應性學習系統將根據您的目標和當前技能水平創建個人化課程。",
-    guideStep1Tip: "💡 提示：參加我們的分級測試，獲得準確的起始點建議。",
+    guideStep1Tip: "提示：參加我們的分級測試，獲得準確的起始點建議。",
     
     guideStep2Title: "2. 定期練習",
     guideStep2Description: "持續性是掌握數學的關鍵。每天留出時間練習，即使只有 15-20 分鐘。",
