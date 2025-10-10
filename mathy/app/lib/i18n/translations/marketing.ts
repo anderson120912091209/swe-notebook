@@ -1,9 +1,9 @@
 export const marketing = {
   en: {
     // Hero section
-    heroTitle: "Learn all levels of math.",
-    heroSubtitle: "with an addictive learning experience.",
-    betaBadge: "Beta version releasing on 2025.9.20",
+    heroTitle: "Write math and science notes",
+    heroSubtitle: "with a simpler, smoother and addictive experience.",
+    betaBadge: "Beta version releasing on 2025.11.20",
     
     // Waitlist
     waitlistPlaceholder: "Your email address",

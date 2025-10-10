@@ -22,12 +22,70 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Alternate", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-geist-sans), "Alternate", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Quick theme color transitions for static elements only */
+/* Exclude interactive elements (buttons, toggles, sidebars) and math */
+div:not([class*="transition"]):not(aside):not([class*="katex"]):not([class*="math"]),
+section:not([class*="transition"]):not([class*="katex"]):not([class*="math"]),
+article:not([class*="transition"]):not([class*="katex"]):not([class*="math"]),
+main:not([class*="transition"]):not([class*="katex"]):not([class*="math"]),
+header:not([class*="transition"]):not([class*="katex"]):not([class*="math"]),
+footer:not([class*="transition"]):not([class*="katex"]):not([class*="math"]),
+nav:not([class*="transition"]):not([class*="katex"]):not([class*="math"]),
+p:not([class*="transition"]):not([class*="katex"]):not([class*="math"]),
+span:not([class*="transition"]):not([style*="transition"]):not([class*="katex"]):not([class*="math"]),
+h1:not([class*="transition"]):not([class*="katex"]):not([class*="math"]), 
+h2:not([class*="transition"]):not([class*="katex"]):not([class*="math"]), 
+h3:not([class*="transition"]):not([class*="katex"]):not([class*="math"]), 
+h4:not([class*="transition"]):not([class*="katex"]):not([class*="math"]), 
+h5:not([class*="transition"]):not([class*="katex"]):not([class*="math"]), 
+h6:not([class*="transition"]):not([class*="katex"]):not([class*="math"]) {
+  transition: background-color 0.2s ease, 
+              color 0.2s ease, 
+              border-color 0.2s ease;
 }
 
 /* Define custom Alternate font family with fallbacks */
 .font-alternate {
   font-family: "Alternate", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Override BlockNote fonts with Geist - but NOT math elements */
+.bn-container :not(.katex):not(.katex *):not(.inline-math-content):not(.inline-math-content *):not([class*="katex"]) {
+  font-family: var(--font-geist-sans), "Alternate", system-ui, -apple-system, sans-serif;
+}
+
+.bn-container code:not(.katex):not(.katex *):not([class*="katex"]),
+.bn-container pre:not(.katex):not(.katex *):not([class*="katex"]) {
+  font-family: var(--font-geist-mono), monospace;
+}
+
+/* Force original KaTeX fonts for all math - highest priority */
+.katex,
+.katex *,
+.katex-html,
+.katex-html *,
+.katex-mathml,
+.katex-mathml *,
+.inline-math-content,
+.inline-math-content *,
+.inline-math-content span,
+.inline-math-content span *,
+span[class*="katex"],
+span[class*="katex"] * {
+  font-family: unset !important;
+  font-family: KaTeX_Main, "Times New Roman", serif !important;
+}
+
+/* Additional specificity for deeply nested math elements */
+.bn-container .katex,
+.bn-container .katex *,
+.bn-container .inline-math-content,
+.bn-container .inline-math-content * {
+  font-family: KaTeX_Main, "Times New Roman", serif !important;
 }
 
 /* Custom line height for reference image styling */

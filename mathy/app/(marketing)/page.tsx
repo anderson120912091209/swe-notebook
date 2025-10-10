@@ -32,7 +32,7 @@ export default function LandingPage() {
                     <Image src="/logos/roundedlogo-gray-no-text.png" 
                     alt="mathy Logo" width={20} height={20} />
                   </span>
-                  <ClientOnly fallback={<span>Beta version releasing on 2025.9.20</span>}>
+                  <ClientOnly fallback={<span>Beta version releasing on 2025.11.20</span>}>
                     <span>{tMarketing('betaBadge')}</span>
                   </ClientOnly>
                 </div>
@@ -42,7 +42,7 @@ export default function LandingPage() {
                 <ClientOnly fallback={
                   <h1 className="max-w-3xl text-5xl 
                     leading-13 font-semibold tracking-tight text-neutral-900">
-                    Learn all levels of math.
+                    Write math and science notes
                   </h1>
                 }>
                   <h1 className="max-w-3xl text-5xl 
@@ -52,7 +52,7 @@ export default function LandingPage() {
                 </ClientOnly>
                  <ClientOnly fallback={
                    <h2 className="mt-1 text-2xl font-medium text-neutral-500">
-                     with an addictive learning experience.
+                     with a simpler, smoother and addictive  experience.
                    </h2>
                  }>
                    <h2 className="mt-1 text-2xl font-medium text-neutral-500">

@@ -1,12 +1,42 @@
 'use client'
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useNamespaceTranslation } from '../../lib/i18n/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function SignInCard() {
   const { t: tAuth } = useNamespaceTranslation('auth');
+  const { signInWithGoogle, signInWithApple } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      await signInWithGoogle();
+    } catch (err) {
+      setError('Failed to sign in with Google. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      await signInWithApple();
+    } catch (err) {
+      setError('Failed to sign in with Apple. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -40,12 +70,22 @@ export default function SignInCard() {
           .
         </p>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Sign in Buttons Container */}
         <div className="flex items-center justify-center space-x-3">
           {/* Sign in with Apple Button */}
-          <button className="bg-black hover:bg-gray-800 cursor-pointer text-white 
-          font-medium py-3 px-4 rounded-full transition-colors duration-200 
-          flex items-center justify-center space-x-2">
+          <button 
+            onClick={handleAppleSignIn}
+            disabled={loading}
+            className="bg-black hover:bg-gray-800 cursor-pointer text-white 
+            font-medium py-3 px-4 rounded-full transition-colors duration-200 
+            flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
             {/* Apple Logo */}
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
@@ -54,9 +94,12 @@ export default function SignInCard() {
           </button>
 
           {/* Sign in with Google Button */}
-          <button className="bg-white hover:bg-gray-50 cursor-pointer text-gray-700 
-          font-medium py-3 px-4 rounded-full transition-colors duration-200 
-          flex items-center justify-center space-x-2 border border-gray-300 hover:border-gray-400">
+          <button 
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="bg-white hover:bg-gray-50 cursor-pointer text-gray-700 
+            font-medium py-3 px-4 rounded-full transition-colors duration-200 
+            flex items-center justify-center space-x-2 border border-gray-300 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
             {/* Google Logo */}
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
