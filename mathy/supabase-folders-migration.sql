@@ -144,13 +144,7 @@ BEGIN
     default_folder_id,
     '👋',
     0,
-    jsonb_build_object(
-      'blocks', 
-      jsonb_build_array(
-        jsonb_build_object('type', 'heading', 'content', 'Welcome to Mathy!'),
-        jsonb_build_object('type', 'paragraph', 'content', 'Start typing your math notes here...')
-      )
-    )
+    jsonb_build_object('blocks', jsonb_build_array()) -- Empty blocks - BlockNote will create default
   );
   
   RETURN new;

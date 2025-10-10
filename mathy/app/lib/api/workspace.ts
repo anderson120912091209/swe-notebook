@@ -118,12 +118,7 @@ export async function createPage(
       folder_id: folderId,
       icon: icon || '📝',
       content: { 
-        blocks: [
-          {
-            type: 'paragraph',
-            content: '',
-          }
-        ]
+        blocks: [] // Start with empty blocks - BlockNote will create default content
       },
     })
     .select()

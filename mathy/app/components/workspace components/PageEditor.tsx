@@ -1,20 +1,15 @@
 'use client';
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCreateBlockNote, SuggestionMenuController } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
-import dynamic from 'next/dynamic';
 import { customSchema, getMathMenuItems } from '@/app/lib/blocknote-schema';
 import { filterSuggestionItems } from '@blocknote/core';
 import { useTheme } from '@/app/contexts/ThemeContext';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import Sidebar from './Sidebar';
-
-const MathEditor = dynamic(() => import('@/app/components/product components/MathEditor'), {
-  ssr: false,
-});
 
 interface PageEditorProps {
   pageId: string;
@@ -23,12 +18,10 @@ interface PageEditorProps {
 export default function PageEditor({ pageId }: PageEditorProps) {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
-  const { pages, folders, currentPage, updatePage, deletePage } = useWorkspace();
+  const { pages, folders, updatePage, deletePage } = useWorkspace();
   const [page, setPage] = useState(pages.find(p => p.id === pageId));
   const [title, setTitle] = useState(page?.title || 'Untitled');
   const [isSaving, setIsSaving] = useState(false);
-  const [showMathEditor, setShowMathEditor] = useState(false);
-  const [mathLatex, setMathLatex] = useState('');
 
   // Debounce timers
   const contentSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -60,36 +53,71 @@ export default function PageEditor({ pageId }: PageEditorProps) {
     };
   }, []);
 
-  // Initialize BlockNote editor
+  // Initialize BlockNote editor with safe content parsing
+  const getInitialContent = () => {
+    if (!page?.content) return undefined;
+    
+    try {
+      // If content has blocks array, use it
+      if (page.content.blocks && Array.isArray(page.content.blocks)) {
+        // If blocks array is empty, return undefined to use BlockNote default
+        return page.content.blocks.length > 0 ? page.content.blocks : undefined;
+      }
+      
+      // If content is already an array, use it directly
+      if (Array.isArray(page.content)) {
+        return page.content.length > 0 ? page.content : undefined;
+      }
+      
+      // Otherwise return undefined to use default
+      return undefined;
+    } catch (error) {
+      console.error('Error parsing initial content:', error);
+      return undefined;
+    }
+  };
+
   const editor = useCreateBlockNote({
     schema: customSchema,
-    initialContent: page?.content?.blocks || page?.content || undefined,
+    initialContent: getInitialContent(),
   });
 
   // Auto-save content with debouncing
   const handleContentChange = useCallback(async () => {
     if (!page) return;
     
-    const blocks = editor.document;
-    const content = { blocks }; // Wrap blocks in object for database storage
-    
-    // Clear previous timer
-    if (contentSaveTimerRef.current) {
-      clearTimeout(contentSaveTimerRef.current);
-    }
-    
-    setIsSaving(true);
-    
-    // Set new timer to save after 1 second of no typing
-    contentSaveTimerRef.current = setTimeout(async () => {
-      try {
-        await updatePage(pageId, { content });
-      } catch (error) {
-        console.error('Failed to save content:', error);
-      } finally {
-        setTimeout(() => setIsSaving(false), 500);
+    try {
+      const blocks = editor.document;
+      
+      // Validate blocks before saving
+      if (!blocks || !Array.isArray(blocks)) {
+        console.warn('Invalid blocks structure, skipping save');
+        return;
       }
-    }, 1000);
+      
+      const content = { blocks }; // Wrap blocks in object for database storage
+      
+      // Clear previous timer
+      if (contentSaveTimerRef.current) {
+        clearTimeout(contentSaveTimerRef.current);
+      }
+      
+      setIsSaving(true);
+      
+      // Set new timer to save after 1 second of no typing
+      contentSaveTimerRef.current = setTimeout(async () => {
+        try {
+          await updatePage(pageId, { content });
+        } catch (error) {
+          console.error('Failed to save content:', error);
+        } finally {
+          setTimeout(() => setIsSaving(false), 500);
+        }
+      }, 1000);
+    } catch (error) {
+      console.error('Error in handleContentChange:', error);
+      setIsSaving(false);
+    }
   }, [editor, page, pageId, updatePage]);
 
   // Auto-save title with debouncing
@@ -258,10 +286,11 @@ export default function PageEditor({ pageId }: PageEditorProps) {
             onChange={handleContentChange}
             className="font-[family-name:var(--font-geist-sans)]"
             style={{ minHeight: 'calc(100vh - 200px)' }}
-            slashMenu={false}
           >
+            {/* $ menu for inline math */}
+            {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
             <SuggestionMenuController
-              triggerCharacter="/"
+              triggerCharacter="$"
               getItems={async (query) =>
                 filterSuggestionItems(getMathMenuItems(editor), query)
               }
@@ -269,19 +298,6 @@ export default function PageEditor({ pageId }: PageEditorProps) {
           </BlockNoteView>
         </div>
       </div>
-
-      {/* Math Editor Modal */}
-      {showMathEditor && (
-        <MathEditor
-          latex={mathLatex}
-          onSave={(newLatex) => {
-            // Handle math save
-            setMathLatex(newLatex);
-            setShowMathEditor(false);
-          }}
-          onCancel={() => setShowMathEditor(false)}
-        />
-      )}
     </div>
   );
 }
