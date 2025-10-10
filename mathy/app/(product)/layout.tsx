@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from '@/app/contexts/ThemeContext';
 import { AuthProvider } from '@/app/contexts/AuthContext';
+import { WorkspaceProvider } from '@/app/contexts/WorkspaceContext';
 import ProtectedRoute from '@/app/components/auth components/ProtectedRoute';
 
 export default function ProductLayout({
@@ -13,7 +14,9 @@ export default function ProductLayout({
     <AuthProvider>
       <ThemeProvider>
         <ProtectedRoute>
-          {children}
+          <WorkspaceProvider>
+            {children}
+          </WorkspaceProvider>
         </ProtectedRoute>
       </ThemeProvider>
     </AuthProvider>

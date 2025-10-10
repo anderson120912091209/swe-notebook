@@ -1,16 +1,14 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-
-const ScienceEditor = dynamic(() => import('@/app/components/product components/ScienceEditor'), {
-  ssr: false,
-});
+import Sidebar from '@/app/components/workspace components/Sidebar';
+import WorkspaceView from '@/app/components/workspace components/WorkspaceView';
 
 export default function NotebookPage() {
   return (
-    <main className="min-h-screen">
-      <ScienceEditor />
-    </main>
+    <div className="flex min-h-screen font-[family-name:var(--font-geist-sans)]" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+      <Sidebar />
+      <WorkspaceView />
+    </div>
   );
 }
 
