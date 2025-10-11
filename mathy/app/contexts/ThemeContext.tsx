@@ -33,12 +33,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const root = document.documentElement;
     
-    // Add transition to root element for smooth theme switching
-    root.style.transition = 'background-color 0.2s ease, color 0.2s ease';
+    // Simpler, faster transition for theme switching
+    root.style.transition = 'background-color 0.15s ease, color 0.15s ease';
     
     if (theme === 'dark') {
       root.style.setProperty('--background', '#0f0f0f');
       root.style.setProperty('--foreground', '#ffffff');
+      root.style.setProperty('--foreground-muted', '#999999');
       root.style.setProperty('--sidebar-bg', '#1a1a1a');
       root.style.setProperty('--card-bg', '#1f1f1f');
       root.style.setProperty('--border-color', '#333333');
@@ -53,6 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       root.style.setProperty('--background', '#ffffff');
       root.style.setProperty('--foreground', '#0f0f0f');
+      root.style.setProperty('--foreground-muted', '#666666');
       root.style.setProperty('--sidebar-bg', '#f9fafb');
       root.style.setProperty('--card-bg', '#ffffff');
       root.style.setProperty('--border-color', '#e5e7eb');
