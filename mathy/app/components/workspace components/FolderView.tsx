@@ -117,7 +117,9 @@ export default function FolderView({ folderId }: FolderViewProps) {
           <button
             onClick={handleCreatePage}
             disabled={creatingPage}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50 text-sm"
+            className="flex items-center gap-2 px-3 py-2 rounded-full 
+            hover:bg-[var(--hover-bg)] transition-all duration-200 active:scale-95
+             disabled:opacity-50 text-xs"
             style={{ color: 'var(--foreground)', border: '1px solid var(--border-color)' }}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,7 +223,7 @@ export default function FolderView({ folderId }: FolderViewProps) {
             <button
               onClick={handleCreatePage}
               disabled={creatingPage}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full hover:bg-[var(--hover-bg)] transition-all duration-200 active:scale-95 disabled:opacity-50"
               style={{ color: 'var(--foreground)', border: '1px solid var(--border-color)' }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -47,3 +47,17 @@ export interface BreadcrumbItem {
   path: string;
 }
 
+// Drag and Drop types
+export interface DragItem {
+  id: string;
+  type: 'folder' | 'page';
+  parentId?: string;
+  depth: number;
+}
+
+export interface DropResult {
+  draggedItem: DragItem;
+  targetItem: DragItem;
+  newParentId?: string;
+}
+

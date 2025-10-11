@@ -67,6 +67,21 @@ export async function deleteFolder(folderId: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function moveFolderToFolder(
+  folderId: string,
+  parentFolderId: string | null
+): Promise<Folder> {
+  const { data, error } = await supabase
+    .from('folders')
+    .update({ parent_folder_id: parentFolderId })
+    .eq('id', folderId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 // ============================================================================
 // PAGE (NOTEBOOK) OPERATIONS
 // ============================================================================
@@ -156,7 +171,15 @@ export async function movePageToFolder(
   pageId: string,
   folderId: string | null
 ): Promise<Page> {
-  return updatePage(pageId, { folder_id: folderId || undefined });
+  const { data, error } = await supabase
+    .from('notebooks')
+    .update({ folder_id: folderId })
+    .eq('id', pageId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
 // ============================================================================

@@ -121,7 +121,7 @@ export default function CreatePageModal({ onClose, defaultFolderId }: CreatePage
               type="button"
               onClick={onClose}
               disabled={creating}
-              className="px-4 py-2 rounded-lg hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50"
+              className="px-4 py-2 rounded-full hover:bg-[var(--hover-bg)] transition-all duration-200 active:scale-95 disabled:opacity-50"
               style={{ color: 'var(--foreground)', border: '1px solid var(--border-color)' }}
             >
               Cancel
@@ -129,7 +129,7 @@ export default function CreatePageModal({ onClose, defaultFolderId }: CreatePage
             <button
               type="submit"
               disabled={!title.trim() || creating}
-              className="px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+              className="px-4 py-2 rounded-full transition-all duration-200 active:scale-95 disabled:opacity-50"
               style={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 color: 'white',

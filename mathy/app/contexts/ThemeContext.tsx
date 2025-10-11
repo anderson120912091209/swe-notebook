@@ -52,20 +52,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--math-bg', '#2a2a2a');
       root.style.setProperty('--math-border', '#444444');
     } else {
-      root.style.setProperty('--background', '#ffffff');
-      root.style.setProperty('--foreground', '#0f0f0f');
-      root.style.setProperty('--foreground-muted', '#666666');
-      root.style.setProperty('--sidebar-bg', '#f9fafb');
-      root.style.setProperty('--card-bg', '#ffffff');
-      root.style.setProperty('--border-color', '#e5e7eb');
-      root.style.setProperty('--muted-text', '#6b7280');
-      root.style.setProperty('--hover-bg', '#f3f4f6');
-      root.style.setProperty('--active-bg', '#f3f4f6');
-      root.style.setProperty('--shadow', 'rgba(0, 0, 0, 0.1)');
-      root.style.setProperty('--input-bg', '#ffffff');
-      root.style.setProperty('--input-border', '#d1d5db');
-      root.style.setProperty('--math-bg', '#f3f4f6');
-      root.style.setProperty('--math-border', '#d1d5db');
+      // Warm, cream-based light theme inspired by the reference
+      root.style.setProperty('--background', '#f9f5f2'); // Very light warm cream
+      root.style.setProperty('--foreground', '#333333'); // Dark grey for primary text
+      root.style.setProperty('--foreground-muted', '#666666'); // Muted grey for secondary text
+      root.style.setProperty('--sidebar-bg', '#f3ede9'); // Slightly darker warm beige
+      root.style.setProperty('--card-bg', '#ffffff'); // Pure white for cards
+      root.style.setProperty('--border-color', '#e0d0c0'); // Subtle warm border
+      root.style.setProperty('--muted-text', '#6b7280'); // Standard muted text
+      root.style.setProperty('--hover-bg', '#f0e0e0'); // Light pinkish hover
+      root.style.setProperty('--active-bg', '#e0a0a0'); // Muted pink for active elements
+      root.style.setProperty('--shadow', 'rgba(0, 0, 0, 0.08)'); // Subtle shadow
+      root.style.setProperty('--input-bg', '#ffffff'); // White inputs
+      root.style.setProperty('--input-border', '#d1d5db'); // Standard input border
+      root.style.setProperty('--math-bg', '#f5f0f0'); // Very light pink for math blocks
+      root.style.setProperty('--math-border', '#e0d0c0'); // Warm math border
     }
 
     localStorage.setItem('theme', theme);

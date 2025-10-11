@@ -32,6 +32,11 @@ interface WorkspaceContextType {
   deletePage: (pageId: string) => Promise<void>;
   movePageToFolder: (pageId: string, folderId: string | null) => Promise<void>;
   
+  // Drag & Drop
+  moveFolderToFolder: (folderId: string, targetFolderId: string | null) => Promise<void>;
+  calculateFolderDepth: (folderId: string, targetParentId?: string | null) => number;
+  canDropItem: (dragType: 'folder' | 'page', dragId: string, targetType: 'folder' | 'page', targetId: string) => boolean;
+  
   // Navigation
   openFolder: (folderId: string) => void;
   openPage: (pageId: string) => void;
@@ -255,13 +260,139 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   };
 
   const movePageToFolder = async (pageId: string, folderId: string | null) => {
+    // OPTIMISTIC UPDATE: Update UI immediately for smooth UX
+    const previousPages = [...pages];
+    
     try {
-      await workspaceAPI.movePageToFolder(pageId, folderId);
-      await refreshWorkspace();
+      // Immediately update the local state
+      setPages(prevPages => 
+        prevPages.map(page => 
+          page.id === pageId 
+            ? { ...page, folder_id: folderId || undefined }
+            : page
+        )
+      );
+      
+      // Trigger database update in background (don't wait)
+      workspaceAPI.movePageToFolder(pageId, folderId)
+        .then(() => {
+          console.log('✅ Page moved in database');
+          // Refresh after 2 seconds to sync any other changes
+          setTimeout(() => refreshWorkspace(), 2000);
+        })
+        .catch((err) => {
+          console.error('❌ Database error, reverting:', err);
+          // Revert on error
+          setPages(previousPages);
+        });
+        
     } catch (err) {
       console.error('Error moving page:', err);
+      // Revert on error
+      setPages(previousPages);
       throw err;
     }
+  };
+
+  // ============================================================================
+  // DRAG & DROP
+  // ============================================================================
+
+  // Move folder to another folder (or to root if targetFolderId is null)
+  const moveFolderToFolder = async (folderId: string, targetFolderId: string | null) => {
+    // OPTIMISTIC UPDATE: Update UI immediately for smooth UX
+    const previousFolders = [...folders];
+    
+    try {
+      // Immediately update the local state
+      setFolders(prevFolders => 
+        prevFolders.map(folder => 
+          folder.id === folderId 
+            ? { ...folder, parent_folder_id: targetFolderId || undefined }
+            : folder
+        )
+      );
+      
+      // Trigger database update in background (don't wait)
+      workspaceAPI.moveFolderToFolder(folderId, targetFolderId)
+        .then(() => {
+          console.log('✅ Folder moved in database');
+          // Refresh after 2 seconds to sync any other changes
+          setTimeout(() => refreshWorkspace(), 2000);
+        })
+        .catch((err) => {
+          console.error('❌ Database error, reverting:', err);
+          // Revert on error
+          setFolders(previousFolders);
+        });
+        
+    } catch (err) {
+      console.error('Error moving folder:', err);
+      // Revert on error
+      setFolders(previousFolders);
+      throw err;
+    }
+  };
+
+  // Calculate the depth of a folder (how many levels deep it is)
+  const calculateFolderDepth = (folderId: string, targetParentId?: string | null): number => {
+    let depth = 0;
+    let currentId = targetParentId !== undefined ? targetParentId : null;
+    
+    // Traverse up the folder hierarchy
+    while (currentId) {
+      depth++;
+      const folder = folders.find(f => f.id === currentId);
+      if (!folder) break;
+      currentId = folder.parent_folder_id || null;
+      
+      // Prevent infinite loops (circular references)
+      if (depth > 10) break;
+    }
+    
+    // Also calculate the depth of any subfolders under the dragged folder
+    const getMaxChildDepth = (parentId: string): number => {
+      const childFolders = folders.filter(f => f.parent_folder_id === parentId);
+      if (childFolders.length === 0) return 0;
+      
+      return 1 + Math.max(...childFolders.map(f => getMaxChildDepth(f.id)));
+    };
+    
+    const childDepth = getMaxChildDepth(folderId);
+    return depth + childDepth;
+  };
+
+  // Validate if an item can be dropped on a target
+  const canDropItem = (
+    dragType: 'folder' | 'page',
+    dragId: string,
+    targetType: 'folder' | 'page',
+    targetId: string
+  ): boolean => {
+    // Rule 1: Can't drop on self
+    if (dragId === targetId) return false;
+    
+    // Rule 2: Pages cannot be dropped on pages
+    if (dragType === 'page' && targetType === 'page') return false;
+    
+    // Rule 3: Can only drop on folders
+    if (targetType === 'page') return false;
+    
+    // Rule 4: Check for circular dependency (folder can't be moved into its own child)
+    if (dragType === 'folder') {
+      let checkId: string | undefined = targetId;
+      while (checkId) {
+        if (checkId === dragId) return false;
+        const folder = folders.find(f => f.id === checkId);
+        checkId = folder?.parent_folder_id || undefined;
+      }
+      
+      // Rule 5: Check max depth (3 levels)
+      const newDepth = calculateFolderDepth(dragId, targetId);
+      if (newDepth >= 3) return false;
+    }
+    
+    return true;
   };
 
   // ============================================================================
@@ -332,6 +463,11 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     updatePage,
     deletePage,
     movePageToFolder,
+    
+    // Drag & Drop
+    moveFolderToFolder,
+    calculateFolderDepth,
+    canDropItem,
     
     // Navigation
     openFolder,
