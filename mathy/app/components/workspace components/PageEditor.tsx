@@ -11,6 +11,7 @@ import { useTheme } from '@/app/contexts/ThemeContext';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import Sidebar from './Sidebar';
 
 interface PageEditorProps {
@@ -284,14 +285,35 @@ export default function PageEditor({ pageId }: PageEditorProps) {
   }
 
   return (
-    <div className="flex min-h-screen font-[family-name:var(--font-geist-sans)]" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
-      <Sidebar />
-      
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* Header */}
-        <header className="flex h-16 items-center justify-between px-4 backdrop-blur sm:px-8" style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--sidebar-bg)' }}>
-          {/* Left side - Sidebar toggle + Breadcrumb */}
-          <div className="flex items-center gap-3 flex-1">
+    <div className="min-h-screen font-[family-name:var(--font-geist-sans)]" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+      <PanelGroup direction="horizontal" className="min-h-screen">
+        <Panel 
+          defaultSize={20} 
+          minSize={15} 
+          maxSize={40}
+          className="min-h-screen"
+        >
+          <Sidebar />
+        </Panel>
+                <PanelResizeHandle 
+                  className="bg-transparent transition-colors duration-200" 
+                  style={{
+                    backgroundColor: 'transparent',
+                    width: '1px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--border-color)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                />
+        <Panel className="min-h-screen">
+          <div className="flex min-w-0 flex-1 flex-col h-full">
+            {/* Header */}
+            <header className="flex h-16 items-center justify-between px-4 backdrop-blur sm:px-8" style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--sidebar-bg)' }}>
+              {/* Left side - Sidebar toggle + Breadcrumb */}
+              <div className="flex items-center gap-3 flex-1">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-[var(--hover-bg)]"
@@ -449,36 +471,38 @@ export default function PageEditor({ pageId }: PageEditorProps) {
               PRIORITY: HIGH
             </div>
           </div>
-        </div>
+            </div>
 
-        {/* Editor */}
-        <div className="flex-1 overflow-auto px-8 pb-16">
-          <div 
-            className="rounded-lg p-6"
-            style={{
-              background: 'var(--card-bg)',
-              border: '1px solid var(--border-color)',
-              minHeight: 'calc(100vh - 400px)',
-            }}
-          >
-            <BlockNoteView
-              editor={editor}
-              theme={theme}
-              onChange={handleContentChange}
-              className="font-[family-name:var(--font-geist-sans)]"
-            >
-            {/* $ menu for inline math */}
-            {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
-            <SuggestionMenuController
-              triggerCharacter="$"
-              getItems={async (query) =>
-                filterSuggestionItems(getMathMenuItems(editor), query)
-              }
-            />
-          </BlockNoteView>
+            {/* Editor */}
+            <div className="flex-1 overflow-auto px-8 pb-16">
+              <div 
+                className="rounded-lg p-6"
+                style={{
+                  background: 'var(--card-bg)',
+                  border: '1px solid var(--border-color)',
+                  minHeight: 'calc(100vh - 400px)',
+                }}
+              >
+                <BlockNoteView
+                  editor={editor}
+                  theme={theme}
+                  onChange={handleContentChange}
+                  className="font-[family-name:var(--font-geist-sans)]"
+                >
+                  {/* $ menu for inline math */}
+                  {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
+                  <SuggestionMenuController
+                    triggerCharacter="$"
+                    getItems={async (query) =>
+                      filterSuggestionItems(getMathMenuItems(editor), query)
+                    }
+                  />
+                </BlockNoteView>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </Panel>
+      </PanelGroup>
     </div>
   );
 }

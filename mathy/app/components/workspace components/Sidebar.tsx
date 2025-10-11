@@ -592,22 +592,22 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="relative shrink-0 overflow-hidden"
+      className="relative h-full overflow-hidden"
       style={{
         background: 'var(--sidebar-bg)',
         borderRight: sidebarOpen ? '1px solid var(--border-color)' : 'none',
-        width: sidebarOpen ? '288px' : '0px',
+        width: sidebarOpen ? '100%' : '0px',
         transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), border 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
       <div
-        className="w-[288px] h-full overflow-y-auto overflow-x-hidden"
+        className="w-full h-full overflow-y-auto overflow-x-hidden"
         style={{
           padding: '32px 16px',
           opacity: sidebarOpen ? 1 : 0,
           transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           transitionDelay: sidebarOpen ? '0.1s' : '0s',
-          maxWidth: '288px', // Ensure it never exceeds this width
+          minWidth: '200px', // Minimum usable width
         }}
       >
       {/* Header */}

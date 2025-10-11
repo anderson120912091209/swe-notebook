@@ -41,6 +41,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-mathquill": "^1.0.4",
+    "react-resizable-panels": "^3.0.6",
     "slate": "^0.102.0",
     "slate-react": "^0.102.0"
   },
