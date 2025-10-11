@@ -78,9 +78,7 @@ function DraggableFolder({
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     opacity: isBeingDragged ? 0.5 : 1,
-    background: isDropTarget && isOver ? 'var(--active-bg)' : isActive ? 'var(--hover-bg)' : 'transparent',
     border: isOver ? '2px solid #3b82f6' : undefined,
-    transition: 'background-color 0.2s, border 0.2s',
   };
 
   // Combine refs
@@ -97,7 +95,7 @@ function DraggableFolder({
           <button
             onClick={onToggle}
             className="flex items-center justify-center w-5 h-5
-             rounded hover:bg-[var(--hover-bg)] active:scale-90 transition-all duration-150"
+             rounded hover:bg-[var(--hover-bg)] active:scale-90"
             style={{ color: 'var(--foreground-muted)' }}
           >
             <svg
@@ -129,9 +127,11 @@ function DraggableFolder({
             e.stopPropagation();
             onClick();
           }}
-          className={`flex-1 flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-all duration-150 text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${
-            isActive ? 'font-medium' : ''
-          }`}
+          className={`flex-1 flex items-center gap-2 px-3 py-1.5 
+            rounded-md text-sm text-left 
+            hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${
+            isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
+          } ${isDropTarget && isOver ? 'bg-[var(--active-bg)]' : ''}`}
           style={{
             ...style,
             color: 'var(--foreground)',
@@ -177,7 +177,6 @@ function DraggablePage({ page, isActive, isBeingDragged, onClick, depth }: Dragg
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     opacity: isBeingDragged ? 0.5 : depthStyle.opacity, // Use depth opacity when not being dragged
     cursor: isBeingDragged ? 'grabbing' : 'grab',
-    background: isActive ? 'var(--hover-bg)' : 'transparent',
     marginLeft: `${indentAmount}px`,
     width: `calc(100% - ${indentAmount}px)`, // Constrain width to prevent overflow
     borderRadius: depthStyle.borderRadius,
@@ -193,8 +192,8 @@ function DraggablePage({ page, isActive, isBeingDragged, onClick, depth }: Dragg
         e.preventDefault();
         onClick();
       }}
-      className={`w-full flex items-center gap-2 px-3 py-1 rounded-md text-sm transition-all duration-150 text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${
-        isActive ? 'font-medium' : ''
+      className={`w-full flex items-center gap-2 px-3 py-1 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${
+        isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
       }`}
       style={{
         ...style,
@@ -615,7 +614,7 @@ export default function Sidebar() {
       <div className="mb-6 px-2">
         <button
           onClick={navigateToWorkspace}
-          className="w-full flex items-center gap-2 px-3  py-2 rounded-lg hover:bg-[var(--hover-bg)] transition-colors text-left"
+          className="w-full flex items-center gap-2 px-3  py-2 rounded-lg hover:bg-[var(--hover-bg)] text-left"
           style={{ color: 'var(--foreground)' }}
         >
           <span className="text-xl">📚</span>
@@ -627,7 +626,7 @@ export default function Sidebar() {
       <div className="mb-4 px-2 flex gap-2">
         <button
           onClick={() => setShowNewFolderModal(true)}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs hover:bg-[var(--hover-bg)] transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs hover:bg-[var(--hover-bg)]"
           style={{ color: 'var(--foreground)', border: '1px solid var(--border-color)' }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -637,7 +636,7 @@ export default function Sidebar() {
         </button>
         <button
           onClick={() => setShowNewPageModal(true)}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs hover:bg-[var(--hover-bg)] transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs hover:bg-[var(--hover-bg)]"
           style={{ color: 'var(--foreground)', border: '1px solid var(--border-color)' }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
