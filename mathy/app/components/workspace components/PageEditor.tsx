@@ -11,7 +11,6 @@ import { useTheme } from '@/app/contexts/ThemeContext';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
-import Sidebar from './Sidebar';
 
 interface PageEditorProps {
   pageId: string;
@@ -68,7 +67,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
-  const { pages, folders, updatePage, deletePage, sidebarOpen, setSidebarOpen } = useWorkspace();
+  const { pages, folders, updatePage, deletePage, sidebarOpen } = useWorkspace();
   
   // Debug sidebar state
   useEffect(() => {
@@ -289,67 +288,12 @@ export default function PageEditor({ pageId }: PageEditorProps) {
   }
 
   return (
-    <div className="min-h-screen font-[family-name:var(--font-geist-sans)]" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
-      <div 
-        className="min-h-screen"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: sidebarOpen ? '300px 1px 1fr' : '0px 0px 1fr',
-          transition: 'grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        }}
-      >
-        {/* Sidebar */}
-        <div
-          className="min-h-screen"
-          style={{
-            overflow: 'hidden',
-          }}
-          data-sidebar-open={sidebarOpen}
-        >
-          <Sidebar />
-        </div>
-        
-        {/* Resize Handle */}
-        <div
-          className="bg-transparent hover:bg-gray-300 transition-colors duration-200 cursor-col-resize"
-          style={{
-            minHeight: '100vh',
-          }}
-        />
-        
-        {/* Main Content */}
-        <div
-          className="min-h-screen"
-        >
+    <div className="min-h-screen">
           <div className="flex min-w-0 flex-1 flex-col h-full">
             {/* Header */}
             <header className="flex h-16 items-center justify-between px-4 backdrop-blur sm:px-8" style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--sidebar-bg)' }}>
-              {/* Left side - Sidebar toggle + Breadcrumb */}
+              {/* Left side - Breadcrumb */}
               <div className="flex items-center gap-3 flex-1">
-            <button
-              onClick={() => {
-                console.log('Toggle clicked, current state:', sidebarOpen);
-                setSidebarOpen(!sidebarOpen);
-              }}
-              className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-[var(--hover-bg)]"
-              style={{ color: 'var(--foreground)' }}
-              title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                {sidebarOpen ? (
-                  <>
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="9" y1="3" x2="9" y2="21"/>
-                  </>
-                ) : (
-                  <>
-                    <line x1="3" y1="12" x2="21" y2="12"/>
-                    <line x1="3" y1="6" x2="21" y2="6"/>
-                    <line x1="3" y1="18" x2="21" y2="18"/>
-                  </>
-                )}
-              </svg>
-            </button>
 
             <nav className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
               {getBreadcrumb()}
@@ -517,8 +461,6 @@ export default function PageEditor({ pageId }: PageEditorProps) {
               </div>
             </div>
           </div>
-        </div>
-      </div>
     </div>
   );
 }

@@ -49,7 +49,15 @@ interface WorkspaceContextType {
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
-export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
+export function WorkspaceProvider({ 
+  children, 
+  sidebarOpen, 
+  setSidebarOpen 
+}: { 
+  children: React.ReactNode;
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+}) {
   const { user } = useAuth();
   
   // Data state
@@ -61,7 +69,6 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   
   // View state
   const [viewMode, setViewMode] = useState<ViewMode>('workspace');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   // Debug sidebar state changes
   useEffect(() => {
