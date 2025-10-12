@@ -101,7 +101,6 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
   const cardBackground = lightenHex(baseColor, 0.42);
   const accentBackground = lightenHex(baseColor, 0.28);
   const chipBackground = lightenHex(baseColor, 0.58);
-  const spineColor = darkenHex(baseColor, 0.25);
   const borderColor = darkenHex(cardBackground, 0.2);
   const textColor = getReadableTextColor(cardBackground);
   const mutedTextColor = textColor === '#F9FAFB' ? 'rgba(255, 255, 255, 0.78)' : 'rgba(15, 23, 42, 0.68)';
@@ -126,7 +125,7 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
   return (
     <div
       onClick={handleClick}
-      className="group relative flex h-full w-55 cursor-pointer select-none
+      className="group relative flex w-60 cursor-pointer select-none
       overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1"
       style={{
         background: cardBackground,
@@ -134,6 +133,7 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
         border: `1px solid ${borderColor}`,
         boxShadow: `0 0px 0px ${shadowColor}`,
         color: textColor,
+        minHeight: '280px',
       }}
     >
 
@@ -147,14 +147,16 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
       />
 
       {/* Content */}
-      <div className="relative flex flex-1 flex-col p-3">
-        <div className="flex items-center gap-1 text-xs 
-        font-semibold uppercase tracking-wide">
+      <div
+        className="relative flex flex-1 flex-col p-6"
+        style={{ gap: '18px' }}
+      >
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
           <span
             className="rounded-md px-3 py-1"
             style={{
               background: chipBackground,
-              color: chipTextColor,
+              color: 'white',
               letterSpacing: '0.06em',
             }}
           >
@@ -164,11 +166,6 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
 
         {/* Title */}
         <div className="mt-4 flex items-start gap-3">
-          {folder.icon && (
-            <span className="text-3xl leading-none drop-shadow-sm" aria-hidden>
-              {folder.icon}
-            </span>
-          )}
           <h3
             className="flex-1 text-lg font-semibold leading-snug line-clamp-3"
             style={{ color: textColor }}
@@ -186,17 +183,8 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
         </p>
 
         {/* Footer */}
-        <div className="mt-auto flex items-center justify-between pt-6 text-xs font-medium">
+        <div className="mt-auto flex flex-col gap-4 pt-8 text-xs font-medium">
           <span className="flex items-center gap-2" style={{ color: mutedTextColor }}>
-            <span
-              className="flex h-6 w-6 items-center justify-center rounded-full text-sm"
-              style={{
-                background: accentBackground,
-                color: chipTextColor,
-              }}
-            >
-              📄
-            </span>
             {pageCount} {pageCount === 1 ? 'page' : 'pages'}
           </span>
           <span style={{ color: mutedTextColor }}>Created {createdLabel}</span>
@@ -204,7 +192,8 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
       </div>
 
       {/* Hover Actions */}
-      <div className="absolute top-3 right-3 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      <div className="absolute top-3 right-3 flex gap-2 opacity-0 
+      cursor-pointer transition-opacity duration-200 group-hover:opacity-100">
         <button
           onClick={handleEdit}
           className="rounded-full p-1.5 transition-colors"

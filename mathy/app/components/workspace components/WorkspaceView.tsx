@@ -430,7 +430,7 @@ export default function WorkspaceView() {
                   <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
               Folders
                   </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="flex flex-wrap gap-6 justify-start">
               {rootFolders.map(folder => (
                 <FolderCard
                   key={folder.id}
