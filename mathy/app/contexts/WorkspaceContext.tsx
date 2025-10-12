@@ -63,6 +63,11 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [viewMode, setViewMode] = useState<ViewMode>('workspace');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
+  // Debug sidebar state changes
+  useEffect(() => {
+    console.log('WorkspaceContext: sidebarOpen changed to', sidebarOpen);
+  }, [sidebarOpen]);
+  
   // Loading state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
