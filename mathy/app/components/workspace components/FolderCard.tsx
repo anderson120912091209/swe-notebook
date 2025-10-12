@@ -98,9 +98,10 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
   };
 
   const baseColor = parseHex(folder.color)?.hex ?? FALLBACK_COLOR;
-  const cardBackground = lightenHex(baseColor, 0.38);
-  const accentBackground = lightenHex(baseColor, 0.22);
-  const chipBackground = lightenHex(baseColor, 0.5);
+  const cardBackground = lightenHex(baseColor, 0.42);
+  const accentBackground = lightenHex(baseColor, 0.28);
+  const chipBackground = lightenHex(baseColor, 0.58);
+  const spineColor = darkenHex(baseColor, 0.25);
   const borderColor = darkenHex(cardBackground, 0.2);
   const textColor = getReadableTextColor(cardBackground);
   const mutedTextColor = textColor === '#F9FAFB' ? 'rgba(255, 255, 255, 0.78)' : 'rgba(15, 23, 42, 0.68)';
@@ -117,17 +118,22 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
       ? createdDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
       : 'Date unavailable';
 
+  const description =
+    folder.description && folder.description.trim().length > 0
+      ? folder.description.trim()
+      : 'Add a short description so collaborators know what lives here.';
+
   return (
     <div
       onClick={handleClick}
-      className="group relative flex h-full cursor-pointer select-none overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1"
+      className="group relative flex h-full w-55 cursor-pointer select-none
+      overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1"
       style={{
         background: cardBackground,
-        borderRadius: '14px 32px 28px 14px',
+        borderRadius: '10px 23px 23px 10px',
         border: `1px solid ${borderColor}`,
-        boxShadow: `0 18px 28px ${shadowColor}`,
+        boxShadow: `0 0px 0px ${shadowColor}`,
         color: textColor,
-        minHeight: '230px',
       }}
     >
 
@@ -141,49 +147,55 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
       />
 
       {/* Content */}
-      <div className="relative flex flex-1 flex-col p-5">
-        <span
-          className="inline-flex self-start rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-          style={{
-            background: chipBackground,
-            color: chipTextColor,
-            letterSpacing: '0.06em',
-          }}
-        >
-          {createdYear}
-        </span>
+      <div className="relative flex flex-1 flex-col p-3">
+        <div className="flex items-center gap-1 text-xs 
+        font-semibold uppercase tracking-wide">
+          <span
+            className="rounded-md px-3 py-1"
+            style={{
+              background: chipBackground,
+              color: chipTextColor,
+              letterSpacing: '0.06em',
+            }}
+          >
+            {createdYear}
+          </span>
+        </div>
 
         {/* Title */}
-        <h3
-          className="mt-5 text-lg font-semibold leading-snug line-clamp-4"
-          style={{ color: textColor }}
+        <div className="mt-4 flex items-start gap-3">
+          {folder.icon && (
+            <span className="text-3xl leading-none drop-shadow-sm" aria-hidden>
+              {folder.icon}
+            </span>
+          )}
+          <h3
+            className="flex-1 text-lg font-semibold leading-snug line-clamp-3"
+            style={{ color: textColor }}
+          >
+            {folder.name || 'Untitled Folder'}
+          </h3>
+        </div>
+
+        {/* Description */}
+        <p
+          className="mt-3 text-sm leading-relaxed line-clamp-3"
+          style={{ color: mutedTextColor }}
         >
-          {folder.name || 'Untitled Folder'}
-        </h3>
+          {description}
+        </p>
 
         {/* Footer */}
         <div className="mt-auto flex items-center justify-between pt-6 text-xs font-medium">
           <span className="flex items-center gap-2" style={{ color: mutedTextColor }}>
             <span
-              className="flex h-6 w-6 items-center justify-center rounded-full"
+              className="flex h-6 w-6 items-center justify-center rounded-full text-sm"
               style={{
                 background: accentBackground,
                 color: chipTextColor,
               }}
-              aria-hidden
             >
-              <svg
-                className="h-3.5 w-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 4.5h8a2.5 2.5 0 012.5 2.5v12h-8A2.5 2.5 0 014 16.5v-12z" />
-                <path d="M12 4.5h8a2.5 2.5 0 012.5 2.5v12h-8A2.5 2.5 0 0112 16.5v-12z" />
-              </svg>
+              📄
             </span>
             {pageCount} {pageCount === 1 ? 'page' : 'pages'}
           </span>
