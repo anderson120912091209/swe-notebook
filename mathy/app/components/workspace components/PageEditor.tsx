@@ -11,7 +11,7 @@ import { useTheme } from '@/app/contexts/ThemeContext';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import { Panel, PanelGroup, PanelResizeHandle, type ImperativePanelHandle } from 'react-resizable-panels';
 import Sidebar from './Sidebar';
 
 interface PageEditorProps {
@@ -66,6 +66,10 @@ const getUserDisplayName = (user: User | null): string => {
 };
 
 export default function PageEditor({ pageId }: PageEditorProps) {
+  const COLLAPSE_THRESHOLD = 1;
+  const HIDDEN_PANEL_SIZE = 0.0001;
+  const DEFAULT_SIDEBAR_SIZE = 20;
+
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
@@ -82,6 +86,8 @@ export default function PageEditor({ pageId }: PageEditorProps) {
   // Debounce timers
   const contentSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   const titleSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const sidebarPanelRef = React.useRef<ImperativePanelHandle | null>(null);
+  const lastSidebarSizeRef = React.useRef<number>(DEFAULT_SIDEBAR_SIZE);
 
   // Update page when data changes (but not while user is actively editing)
   useEffect(() => {
@@ -117,6 +123,33 @@ export default function PageEditor({ pageId }: PageEditorProps) {
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const panel = sidebarPanelRef.current;
+    if (!panel) {
+      return;
+    }
+
+    const currentSize = panel.getSize();
+
+    if (sidebarOpen) {
+      const targetSize =
+        lastSidebarSizeRef.current > COLLAPSE_THRESHOLD
+          ? lastSidebarSizeRef.current
+          : DEFAULT_SIDEBAR_SIZE;
+
+      if (Math.abs(currentSize - targetSize) > 0.5) {
+        requestAnimationFrame(() => panel.resize(targetSize));
+      } else {
+        panel.resize(targetSize);
+      }
+    } else {
+      if (currentSize > COLLAPSE_THRESHOLD) {
+        lastSidebarSizeRef.current = currentSize;
+      }
+      requestAnimationFrame(() => panel.resize(HIDDEN_PANEL_SIZE));
+    }
+  }, [sidebarOpen]);
 
   // Initialize BlockNote editor with safe content parsing
   const getInitialContent = () => {
@@ -287,28 +320,47 @@ export default function PageEditor({ pageId }: PageEditorProps) {
   return (
     <div className="min-h-screen font-[family-name:var(--font-geist-sans)]" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
       <PanelGroup direction="horizontal" className="min-h-screen">
-        <Panel 
-          defaultSize={20} 
-          minSize={15} 
+        <Panel
+          ref={sidebarPanelRef}
+          defaultSize={20}
+          minSize={sidebarOpen ? 15 : 0}
           maxSize={40}
+          onResize={(size) => {
+            if (size > COLLAPSE_THRESHOLD) {
+              lastSidebarSizeRef.current = size;
+            }
+            const shouldBeOpen = size > COLLAPSE_THRESHOLD;
+            if (shouldBeOpen !== sidebarOpen) {
+              setSidebarOpen(shouldBeOpen);
+            }
+          }}
           className="min-h-screen"
+          style={{
+            transition: 'flex-grow 0.3s ease, min-width 0.3s ease, width 0.3s ease',
+          }}
         >
           <Sidebar />
         </Panel>
-                <PanelResizeHandle 
-                  className="bg-transparent transition-colors duration-200" 
-                  style={{
-                    backgroundColor: 'transparent',
-                    width: '1px',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--border-color)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                />
-        <Panel className="min-h-screen">
+        <PanelResizeHandle
+          className="bg-transparent transition-colors duration-200"
+          style={{
+            backgroundColor: 'transparent',
+            width: sidebarOpen ? '1px' : '0px',
+            transition: 'width 0.3s ease, background-color 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--border-color)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        />
+        <Panel
+          className="min-h-screen"
+          style={{
+            transition: 'flex-grow 0.3s ease',
+          }}
+        >
           <div className="flex min-w-0 flex-1 flex-col h-full">
             {/* Header */}
             <header className="flex h-16 items-center justify-between px-4 backdrop-blur sm:px-8" style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--sidebar-bg)' }}>
@@ -506,4 +558,3 @@ export default function PageEditor({ pageId }: PageEditorProps) {
     </div>
   );
 }
-
