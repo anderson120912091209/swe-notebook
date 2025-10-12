@@ -189,4 +189,3 @@ export default function WorkspaceView() {
     </div>
   );
 }
-

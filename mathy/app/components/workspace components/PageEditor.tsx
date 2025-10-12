@@ -79,6 +79,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentTime, setCurrentTime] = useState(new Date()); // Used to trigger re-renders for relative time updates
+  const [shouldAnimateLayout, setShouldAnimateLayout] = useState(false);
 
   // Get current folder for display
   const currentFolder = page?.folder_id ? folders.find(f => f.id === page.folder_id) : null;
@@ -88,6 +89,8 @@ export default function PageEditor({ pageId }: PageEditorProps) {
   const titleSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   const sidebarPanelRef = React.useRef<ImperativePanelHandle | null>(null);
   const lastSidebarSizeRef = React.useRef<number>(DEFAULT_SIDEBAR_SIZE);
+  const animationTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const suppressAnimationResetRef = React.useRef(false);
 
   // Update page when data changes (but not while user is actively editing)
   useEffect(() => {
@@ -125,12 +128,27 @@ export default function PageEditor({ pageId }: PageEditorProps) {
   }, []);
 
   useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const panel = sidebarPanelRef.current;
     if (!panel) {
       return;
     }
 
     const currentSize = panel.getSize();
+    const releaseAfterResize = () => {
+      requestAnimationFrame(() => {
+        suppressAnimationResetRef.current = false;
+      });
+    };
+
+    suppressAnimationResetRef.current = true;
 
     if (sidebarOpen) {
       const targetSize =
@@ -139,16 +157,32 @@ export default function PageEditor({ pageId }: PageEditorProps) {
           : DEFAULT_SIDEBAR_SIZE;
 
       if (Math.abs(currentSize - targetSize) > 0.5) {
-        requestAnimationFrame(() => panel.resize(targetSize));
+        requestAnimationFrame(() => {
+          panel.resize(targetSize);
+          releaseAfterResize();
+        });
       } else {
         panel.resize(targetSize);
+        releaseAfterResize();
       }
     } else {
       if (currentSize > COLLAPSE_THRESHOLD) {
         lastSidebarSizeRef.current = currentSize;
       }
-      requestAnimationFrame(() => panel.resize(HIDDEN_PANEL_SIZE));
+      requestAnimationFrame(() => {
+        panel.resize(HIDDEN_PANEL_SIZE);
+        releaseAfterResize();
+      });
     }
+
+    setShouldAnimateLayout(true);
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
+    animationTimeoutRef.current = setTimeout(() => {
+      setShouldAnimateLayout(false);
+      animationTimeoutRef.current = null;
+    }, 350);
   }, [sidebarOpen]);
 
   // Initialize BlockNote editor with safe content parsing
@@ -326,6 +360,13 @@ export default function PageEditor({ pageId }: PageEditorProps) {
           minSize={sidebarOpen ? 15 : 0}
           maxSize={40}
           onResize={(size) => {
+            if (!suppressAnimationResetRef.current && shouldAnimateLayout) {
+              setShouldAnimateLayout(false);
+              if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
+                animationTimeoutRef.current = null;
+              }
+            }
             if (size > COLLAPSE_THRESHOLD) {
               lastSidebarSizeRef.current = size;
             }
@@ -336,7 +377,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
           }}
           className="min-h-screen"
           style={{
-            transition: 'flex-grow 0.3s ease, min-width 0.3s ease, width 0.3s ease',
+            transition: shouldAnimateLayout ? 'flex-grow 0.3s ease, min-width 0.3s ease, width 0.3s ease' : 'none',
           }}
         >
           <Sidebar />
@@ -346,7 +387,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
           style={{
             backgroundColor: 'transparent',
             width: sidebarOpen ? '1px' : '0px',
-            transition: 'width 0.3s ease, background-color 0.2s ease',
+            transition: shouldAnimateLayout ? 'width 0.3s ease, background-color 0.2s ease' : 'background-color 0.2s ease',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--border-color)';
@@ -358,7 +399,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
         <Panel
           className="min-h-screen"
           style={{
-            transition: 'flex-grow 0.3s ease',
+            transition: shouldAnimateLayout ? 'flex-grow 0.3s ease' : 'none',
           }}
         >
           <div className="flex min-w-0 flex-1 flex-col h-full">

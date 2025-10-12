@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useRef } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle, type ImperativePanelHandle } from 'react-resizable-panels';
 import Sidebar from '@/app/components/workspace components/Sidebar';
 import FolderView from '@/app/components/workspace components/FolderView';
@@ -19,12 +19,30 @@ export default function FolderPage({ params }: PageProps) {
   const { sidebarOpen, setSidebarOpen } = useWorkspace();
   const sidebarPanelRef = useRef<ImperativePanelHandle>(null);
   const lastSidebarSizeRef = useRef<number>(DEFAULT_SIDEBAR_SIZE);
+  const [shouldAnimateLayout, setShouldAnimateLayout] = useState(false);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const suppressAnimationResetRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const panel = sidebarPanelRef.current;
     if (!panel) return;
 
     const currentSize = panel.getSize();
+    const releaseAfterResize = () => {
+      requestAnimationFrame(() => {
+        suppressAnimationResetRef.current = false;
+      });
+    };
+
+    suppressAnimationResetRef.current = true;
 
     if (sidebarOpen) {
       const targetSize =
@@ -33,16 +51,32 @@ export default function FolderPage({ params }: PageProps) {
           : DEFAULT_SIDEBAR_SIZE;
 
       if (Math.abs(currentSize - targetSize) > 0.5) {
-        requestAnimationFrame(() => panel.resize(targetSize));
+        requestAnimationFrame(() => {
+          panel.resize(targetSize);
+          releaseAfterResize();
+        });
       } else {
         panel.resize(targetSize);
+        releaseAfterResize();
       }
     } else {
       if (currentSize > COLLAPSE_THRESHOLD) {
         lastSidebarSizeRef.current = currentSize;
       }
-      requestAnimationFrame(() => panel.resize(HIDDEN_PANEL_SIZE));
+      requestAnimationFrame(() => {
+        panel.resize(HIDDEN_PANEL_SIZE);
+        releaseAfterResize();
+      });
     }
+
+    setShouldAnimateLayout(true);
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
+    animationTimeoutRef.current = setTimeout(() => {
+      setShouldAnimateLayout(false);
+      animationTimeoutRef.current = null;
+    }, 350);
   }, [sidebarOpen]);
 
   return (
@@ -54,6 +88,13 @@ export default function FolderPage({ params }: PageProps) {
           minSize={sidebarOpen ? 15 : 0}
           maxSize={40}
           onResize={(size) => {
+            if (!suppressAnimationResetRef.current && shouldAnimateLayout) {
+              setShouldAnimateLayout(false);
+              if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
+                animationTimeoutRef.current = null;
+              }
+            }
             if (size > COLLAPSE_THRESHOLD) {
               lastSidebarSizeRef.current = size;
             }
@@ -64,7 +105,7 @@ export default function FolderPage({ params }: PageProps) {
           }}
           className="min-h-screen"
           style={{
-            transition: 'flex-grow 0.3s ease, min-width 0.3s ease, width 0.3s ease',
+            transition: shouldAnimateLayout ? 'flex-grow 0.3s ease, min-width 0.3s ease, width 0.3s ease' : 'none',
           }}
         >
           <Sidebar />
@@ -74,7 +115,7 @@ export default function FolderPage({ params }: PageProps) {
           style={{
             backgroundColor: 'transparent',
             width: sidebarOpen ? '1px' : '0px',
-            transition: 'width 0.3s ease, background-color 0.2s ease',
+            transition: shouldAnimateLayout ? 'width 0.3s ease, background-color 0.2s ease' : 'background-color 0.2s ease',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--border-color)';
@@ -86,7 +127,7 @@ export default function FolderPage({ params }: PageProps) {
         <Panel
           className="min-h-screen"
           style={{
-            transition: 'flex-grow 0.3s ease',
+            transition: shouldAnimateLayout ? 'flex-grow 0.3s ease' : 'none',
           }}
         >
           <FolderView folderId={folderId} />

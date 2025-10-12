@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor, closestCorners, DragStartEvent, DragOverEvent, DragEndEvent } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
+import { useAuth } from '@/app/contexts/AuthContext';
+import { useTheme } from '@/app/contexts/ThemeContext';
+import { getWorkspaceTitle } from '@/app/lib/workspaceTitle';
 import CreateFolderModal from './CreateFolderModal';
 import CreatePageModal from './CreatePageModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
@@ -279,6 +282,11 @@ export default function Sidebar() {
     deletePage,
     canDropItem
   } = useWorkspace();
+  const { user } = useAuth();
+  const { theme } = useTheme();
+
+  const workspaceTitle = useMemo(() => getWorkspaceTitle(user), [user]);
+  const accentBackground = '#5d6fa3';
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [showNewPageModal, setShowNewPageModal] = useState(false);
   
@@ -614,11 +622,15 @@ export default function Sidebar() {
       <div className="mb-6 px-2">
         <button
           onClick={navigateToWorkspace}
-          className="w-full flex items-center gap-2 px-3  py-2 rounded-lg hover:bg-[var(--hover-bg)] text-left"
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] text-left"
           style={{ color: 'var(--foreground)' }}
         >
-          <span className="text-xl">📚</span>
-          <span className="font-semibold">Workspace</span>
+          <span
+            className="inline-flex h-2.5 w-2.5 rounded-full shadow-sm"
+            aria-hidden="true"
+            style={{ background: accentBackground }}
+          />
+          <span className="font-semibold truncate">{workspaceTitle}</span>
         </button>
       </div>
 
