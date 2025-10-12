@@ -289,6 +289,7 @@ export default function Sidebar() {
   const accentBackground = '#68AAEC';
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [showNewPageModal, setShowNewPageModal] = useState(false);
+  const [isCompressed, setIsCompressed] = useState(false);
   
   // Drag & Drop state
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -348,6 +349,34 @@ export default function Sidebar() {
       });
     }
   }, [currentPage]);
+
+  // Monitor sidebar width to detect compression
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleResize = () => {
+      const sidebar = document.querySelector('aside');
+      if (sidebar) {
+        const width = sidebar.offsetWidth;
+        // Consider compressed if width is less than 280px (enough for icons + "Folder"/"Page" but not "New")
+        setIsCompressed(width < 280);
+      }
+    };
+
+    // Initial check
+    handleResize();
+
+    // Use ResizeObserver for efficient width monitoring
+    const resizeObserver = new ResizeObserver(handleResize);
+    const sidebar = document.querySelector('aside');
+    if (sidebar) {
+      resizeObserver.observe(sidebar);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [sidebarOpen]);
 
   // Toggle folder expanded state
   const toggleFolder = (folderId: string, e: React.MouseEvent) => {
@@ -646,7 +675,7 @@ export default function Sidebar() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          <span> New Folder</span>
+          <span>{isCompressed ? 'Folder' : 'New Folder'}</span>
         </button>
         <button
           onClick={() => setShowNewPageModal(true)}
@@ -656,7 +685,7 @@ export default function Sidebar() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          <span> New Page</span>
+          <span>{isCompressed ? 'Page' : 'New Page'}</span>
         </button>
       </div>
 
