@@ -286,7 +286,7 @@ export default function Sidebar() {
   const { theme } = useTheme();
 
   const workspaceTitle = useMemo(() => getWorkspaceTitle(user), [user]);
-  const accentBackground = '#5d6fa3';
+  const accentBackground = '#68AAEC';
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [showNewPageModal, setShowNewPageModal] = useState(false);
   
@@ -625,11 +625,13 @@ export default function Sidebar() {
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] text-left"
           style={{ color: 'var(--foreground)' }}
         >
-          <span
-            className="inline-flex h-2.5 w-2.5 rounded-full shadow-sm"
-            aria-hidden="true"
-            style={{ background: accentBackground }}
-          />
+          {sidebarOpen && (
+            <span
+              className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+              aria-hidden="true"
+              style={{ background: accentBackground }}
+            />
+          )}
           <span className="font-semibold truncate">{workspaceTitle}</span>
         </button>
       </div>

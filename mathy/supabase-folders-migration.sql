@@ -13,11 +13,18 @@ CREATE TABLE IF NOT EXISTS public.folders (
   name TEXT NOT NULL DEFAULT 'Untitled Folder',
   icon TEXT, -- emoji or icon identifier (e.g., "📁", "🚀", "📊")
   color TEXT DEFAULT '#6B7280', -- hex color for folder customization
+  description TEXT, -- optional folder description shown in UI
   parent_folder_id UUID REFERENCES public.folders(id) ON DELETE CASCADE, -- for nested folders
   "position" INTEGER DEFAULT 0, -- for custom ordering in UI
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  last_edited_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
+
+-- Ensure new columns exist when upgrading from previous versions
+ALTER TABLE public.folders
+  ADD COLUMN IF NOT EXISTS description TEXT,
+  ADD COLUMN IF NOT EXISTS last_edited_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL;
 
 -- 2. Enable RLS on folders
 ALTER TABLE public.folders ENABLE ROW LEVEL SECURITY;
@@ -68,6 +75,7 @@ ALTER TABLE public.notebooks
 CREATE INDEX IF NOT EXISTS folders_user_id_idx ON public.folders(user_id);
 CREATE INDEX IF NOT EXISTS folders_parent_folder_id_idx ON public.folders(parent_folder_id);
 CREATE INDEX IF NOT EXISTS folders_position_idx ON public.folders("position");
+CREATE INDEX IF NOT EXISTS folders_last_edited_at_idx ON public.folders(last_edited_at DESC);
 
 CREATE INDEX IF NOT EXISTS notebooks_folder_id_idx ON public.notebooks(folder_id);
 CREATE INDEX IF NOT EXISTS notebooks_position_idx ON public.notebooks("position");
@@ -78,11 +86,20 @@ CREATE INDEX IF NOT EXISTS notebooks_last_edited_at_idx ON public.notebooks(last
 -- PART 4: TRIGGERS FOR AUTOMATIC UPDATES
 -- ============================================================================
 
--- 7. Add trigger for folders updated_at
-DROP TRIGGER IF EXISTS set_updated_at_folders ON public.folders;
-CREATE TRIGGER set_updated_at_folders
+-- 7. Add trigger for folders updated_at and last_edited_at
+CREATE OR REPLACE FUNCTION public.handle_folder_last_edited()
+RETURNS TRIGGER AS $$
+BEGIN
+  new.updated_at = NOW();
+  new.last_edited_at = NOW();
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS set_folder_last_edited ON public.folders;
+CREATE TRIGGER set_folder_last_edited
   BEFORE UPDATE ON public.folders
-  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+  FOR EACH ROW EXECUTE FUNCTION public.handle_folder_last_edited();
 
 -- 8. Add trigger to update last_edited_at when notebook content changes
 CREATE OR REPLACE FUNCTION public.handle_notebook_edit()
@@ -204,7 +221,7 @@ BEGIN
     f.icon,
     f.color,
     f."position",
-    f.updated_at as last_edited_at
+    COALESCE(f.last_edited_at, f.updated_at) as last_edited_at
   FROM public.folders f
   WHERE f.user_id = user_uuid
     AND f.parent_folder_id IS NULL
@@ -244,4 +261,3 @@ BEGIN
   RAISE NOTICE 'Terminology: folders = folders, notebooks = pages';
   RAISE NOTICE 'New users will get: 1 default folder + 1 quick capture page + 1 welcome page';
 END $$;
-

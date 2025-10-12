@@ -6,10 +6,12 @@ export interface Folder {
   name: string;
   icon?: string;
   color?: string;
+  description?: string;
   parent_folder_id?: string;
   position: number;
   created_at: string;
   updated_at: string;
+  last_edited_at: string;
 }
 
 export interface Page {
@@ -60,4 +62,3 @@ export interface DropResult {
   targetItem: DragItem;
   newParentId?: string;
 }
-

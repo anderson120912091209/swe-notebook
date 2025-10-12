@@ -33,7 +33,11 @@ export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderMo
 
     setCreating(true);
     try {
-      const newFolder = await createFolder(name.trim(), icon, color);
+      const newFolder = await createFolder(
+        name.trim(),
+        icon,
+        color
+      );
       if (onSuccess) {
         onSuccess(newFolder.id);
       }
@@ -147,4 +151,3 @@ export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderMo
     </div>
   );
 }
-

@@ -25,6 +25,7 @@ export async function createFolder(
   name: string,
   icon?: string,
   color?: string,
+  description?: string,
   parentFolderId?: string
 ): Promise<Folder> {
   const { data, error } = await supabase
@@ -34,6 +35,7 @@ export async function createFolder(
       name,
       icon: icon || '📁',
       color: color || '#6B7280',
+      description,
       parent_folder_id: parentFolderId,
     })
     .select()
@@ -45,7 +47,7 @@ export async function createFolder(
 
 export async function updateFolder(
   folderId: string,
-  updates: Partial<Omit<Folder, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+  updates: Partial<Omit<Folder, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'last_edited_at'>>
 ): Promise<Folder> {
   const { data, error } = await supabase
     .from('folders')
@@ -206,7 +208,7 @@ export async function getWorkspaceItems(userId: string): Promise<WorkspaceItem[]
         icon: f.icon,
         color: f.color,
         position: f.position,
-        last_edited_at: f.updated_at,
+        last_edited_at: f.last_edited_at ?? f.updated_at,
       }));
 
     const rootPages = pages
@@ -268,4 +270,3 @@ export function subscribePages(
     )
     .subscribe();
 }
-

@@ -22,7 +22,7 @@ interface WorkspaceContextType {
   error: string | null;
   
   // Actions - Folders
-  createFolder: (name: string, icon?: string, color?: string, parentId?: string) => Promise<Folder>;
+  createFolder: (name: string, icon?: string, color?: string, description?: string, parentId?: string) => Promise<Folder>;
   updateFolder: (folderId: string, updates: Partial<Folder>) => Promise<void>;
   deleteFolder: (folderId: string) => Promise<void>;
   
@@ -145,12 +145,13 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     name: string,
     icon?: string,
     color?: string,
+    description?: string,
     parentId?: string
   ): Promise<Folder> => {
     if (!user) throw new Error('User not authenticated');
     
     try {
-      const newFolder = await workspaceAPI.createFolder(user.id, name, icon, color, parentId);
+      const newFolder = await workspaceAPI.createFolder(user.id, name, icon, color, description, parentId);
       await refreshWorkspace();
       return newFolder;
     } catch (err) {
@@ -161,15 +162,12 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
   const updateFolder = async (folderId: string, updates: Partial<Folder>) => {
     try {
-      await workspaceAPI.updateFolder(folderId, updates);
+      const updatedFolderFromAPI = await workspaceAPI.updateFolder(folderId, updates);
       await refreshWorkspace();
       
       // Update current folder if it's the one being updated
       if (currentFolder?.id === folderId) {
-        const updatedFolder = folders.find(f => f.id === folderId);
-        if (updatedFolder) {
-          setCurrentFolder({ ...updatedFolder, ...updates } as Folder);
-        }
+        setCurrentFolder(updatedFolderFromAPI);
       }
     } catch (err) {
       console.error('Error updating folder:', err);
@@ -498,4 +496,3 @@ export function useWorkspace() {
   }
   return context;
 }
-

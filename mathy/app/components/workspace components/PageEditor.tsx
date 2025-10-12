@@ -377,17 +377,18 @@ export default function PageEditor({ pageId }: PageEditorProps) {
               onClick={toggleTheme}
               className="relative h-7 w-12 rounded-full hover:opacity-90 active:scale-95"
               style={{ 
-                background: theme === 'light' ? '#e0e0e0' : '#4a4a4a',
-                transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, transform 0.1s ease',
+                background: `var(--${theme === 'light' ? 'border-color' : 'hover-bg'})`,
+                border: '1px solid var(--border-color)',
+                transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, transform 0.1s ease',
               }}
               title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
             >
               <div 
                 className="absolute top-0.5 left-0.5 h-6 w-6 rounded-full flex items-center justify-center"
                 style={{
-                  background: theme === 'light' ? '#fbbf24' : '#1e293b',
+                  background: theme === 'light' ? 'var(--active-bg)' : 'var(--foreground)',
                   transform: theme === 'light' ? 'translateX(0) scale(1)' : 'translateX(20px) scale(1)',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1)',
+                  boxShadow: `0 2px 8px var(--shadow), 0 1px 3px var(--shadow)`,
                   transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease',
                 }}
               >
@@ -397,7 +398,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
                   transform: theme === 'light' ? 'scale(1) rotate(0deg)' : 'scale(0.8) rotate(180deg)',
                   position: 'absolute',
                 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="5"/>
                     <line x1="12" y1="1" x2="12" y2="3"/>
                     <line x1="12" y1="21" x2="12" y2="23"/>
@@ -415,7 +416,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
                   transform: theme === 'dark' ? 'scale(1) rotate(0deg)' : 'scale(0.8) rotate(-180deg)',
                   position: 'absolute',
                 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#94a3b8" stroke="none">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--foreground-muted)" stroke="none">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                   </svg>
                 </div>
