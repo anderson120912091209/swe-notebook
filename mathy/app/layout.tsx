@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mathy - Math Learning Platform",
-  description: "Learn mathematics with our interactive platform",
+  title: "{clarity}",
+  description: "take science & math notes easier than ever.",
 };
 
 export default function RootLayout({

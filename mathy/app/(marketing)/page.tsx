@@ -41,21 +41,21 @@ export default function LandingPage() {
               <div className="text-left">
                 <ClientOnly fallback={
                   <h1 className="max-w-3xl text-5xl 
-                    leading-13 font-semibold tracking-tight text-neutral-900">
+                    leading-13 font-semibold tracking-tighter text-neutral-900">
                     Write math and science notes
                   </h1>
                 }>
                   <h1 className="max-w-3xl text-5xl 
-                    leading-13 font-semibold tracking-tight text-neutral-900">
+                    leading-13 font-semibold tracking-tighter text-neutral-900">
                     {tMarketing('heroTitle')}
                   </h1>
                 </ClientOnly>
                  <ClientOnly fallback={
-                   <h2 className="mt-1 text-2xl font-medium text-neutral-500">
+                   <h2 className="mt-1 text-2xl font-medium tracking-tight text-neutral-500">
                      with a simpler, smoother and addictive  experience.
                    </h2>
                  }>
-                   <h2 className="mt-1 text-2xl font-medium text-neutral-500">
+                   <h2 className="mt-1 text-2xl font-medium tracking-tight text-neutral-500">
                      {tMarketing('heroSubtitle')}
                    </h2>
                  </ClientOnly>

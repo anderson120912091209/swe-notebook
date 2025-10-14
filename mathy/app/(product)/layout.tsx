@@ -79,7 +79,7 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <WorkspaceProvider sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-      <div className="min-h-screen font-[family-name:var(--font-geist-sans)]" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+      <div className="min-h-screen" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
         <PanelGroup direction="horizontal" className="min-h-screen">
           <Panel
             ref={sidebarPanelRef}
