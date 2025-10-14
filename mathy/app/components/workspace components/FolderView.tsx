@@ -130,10 +130,10 @@ export default function FolderView({ folderId }: FolderViewProps) {
 
           <button 
             onClick={toggleTheme}
-            className="relative h-7 w-12 rounded-full hover:opacity-90 active:scale-95"
+            className="theme-toggle relative h-7 w-12 rounded-full hover:opacity-90 active:scale-95"
             style={{ 
               background: theme === 'light' ? '#e0e0e0' : '#4a4a4a',
-              transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, transform 0.1s ease',
+              transition: 'background-color 0.25s ease, opacity 0.2s ease, transform 0.1s ease',
             }}
             title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
           >
@@ -143,7 +143,7 @@ export default function FolderView({ folderId }: FolderViewProps) {
                 background: theme === 'light' ? '#fbbf24' : '#1e293b',
                 transform: theme === 'light' ? 'translateX(0) scale(1)' : 'translateX(20px) scale(1)',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1)',
-                transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease',
+                transition: 'transform 0.25s ease, background-color 0.25s ease, box-shadow 0.2s ease',
               }}
             >
               <div style={{

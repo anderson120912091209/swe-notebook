@@ -29,9 +29,9 @@ body {
 /* Simple and fast theme color transitions */
 /* Only transition colors, keep it minimal for smooth UX */
 * {
-  transition: background-color 0.15s ease, 
-              color 0.15s ease, 
-              border-color 0.15s ease;
+  transition: background-color 0.2s ease, 
+              color 0.2s ease, 
+              border-color 0.2s ease;
 }
 
 /* Exclude elements with their own transitions */
@@ -40,7 +40,8 @@ body {
 .katex,
 .katex *,
 .inline-math-content,
-.inline-math-content * {
+.inline-math-content *,
+[class*="theme-toggle"] {
   transition: none;
 }
 
