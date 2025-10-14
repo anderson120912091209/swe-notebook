@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/app/contexts/ThemeContext';
 import { AuthProvider } from '@/app/contexts/AuthContext';
 import { WorkspaceProvider } from '@/app/contexts/WorkspaceContext';
 import ProtectedRoute from '@/app/components/auth components/ProtectedRoute';
+import QueryProvider from '@/app/lib/react-query/QueryProvider';
 import Sidebar from '@/app/components/workspace components/Sidebar';
 
 function ProductLayoutContent({ children }: { children: React.ReactNode }) {
@@ -142,13 +143,15 @@ export default function ProductLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <ProtectedRoute>
-          <ProductLayoutContent>{children}</ProductLayoutContent>
-        </ProtectedRoute>
-      </ThemeProvider>
-    </AuthProvider>
+    <QueryProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <ProtectedRoute>
+            <ProductLayoutContent>{children}</ProductLayoutContent>
+          </ProtectedRoute>
+        </ThemeProvider>
+      </AuthProvider>
+    </QueryProvider>
   );
 }
 

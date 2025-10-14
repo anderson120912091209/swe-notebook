@@ -10,14 +10,14 @@ interface CreateFolderModalProps {
 
 const FOLDER_ICONS = ['📁', '📂', '🚀', '📊', '💡', '⚡', '🎨', '🔬', '📚', '🌟', '🎯', '💼'];
 const FOLDER_COLORS = [
-  '#3B82F6', // Blue
-  '#10B981', // Green
-  '#F59E0B', // Amber
-  '#EF4444', // Red
-  '#8B5CF6', // Purple
-  '#EC4899', // Pink
-  '#6B7280', // Gray
-  '#14B8A6', // Teal
+  '#5A7FA3', // Soft Blue
+  '#6B9B7A', // Soft Green
+  '#D4A574', // Soft Amber/Yellow
+  '#C47A7A', // Soft Red
+  '#9A7BB3', // Soft Purple
+  '#D47BB3', // Soft Pink
+  '#7A7A7A', // Soft Gray
+  '#6B9B9B', // Soft Teal
 ];
 
 export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderModalProps) {

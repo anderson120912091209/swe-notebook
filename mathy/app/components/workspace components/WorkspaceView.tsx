@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useTheme } from '@/app/contexts/ThemeContext';
 import FolderCard from './FolderCard';
@@ -8,44 +8,20 @@ import PageCard from './PageCard';
 
 type TabType = 'items' | 'notebooks' | 'canvases';
 
-interface AuthorTag {
-  name: string;
-  count: number;
-  selected: boolean;
-}
 
 export default function WorkspaceView() {
-  const { folders, pages, workspaceItems, deleteFolder, deletePage, loading, sidebarOpen, setSidebarOpen } = useWorkspace();
+  const { folders, pages, deleteFolder, deletePage, loading, sidebarOpen, setSidebarOpen } = useWorkspace();
   const { theme, toggleTheme } = useTheme();
-  const [editingItem, setEditingItem] = useState<{ id: string; type: 'folder' | 'page' } | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('items');
-  const [selectedAuthors, setSelectedAuthors] = useState<Set<string>>(new Set());
 
-  // Extract authors from pages (for demo purposes, we'll generate some mock authors)
-  const authors = useMemo(() => {
-    const mockAuthors: AuthorTag[] = [
-      { name: 'Frank Arute', count: 2, selected: false },
-      { name: 'Kunal Arya', count: 2, selected: false },
-      { name: 'Shekoofeh Azizi', count: 2, selected: false },
-      { name: 'Ryan Babbush', count: 2, selected: false },
-      { name: 'Dave Bacon', count: 2, selected: false },
-      { name: 'Joseph C. Bardin', count: 2, selected: false },
-      { name: 'Rami Barends', count: 2, selected: false },
-      { name: 'Joelle Barral', count: 2, selected: false },
-      { name: 'Rupak Biswas', count: 2, selected: false },
-      { name: 'Sergio Boixo', count: 2, selected: false },
-    ];
-    return mockAuthors;
-  }, []);
+  // Get root-level folders and pages (memoized)
+  const rootFolders = useMemo(() => folders.filter(f => !f.parent_folder_id), [folders]);
+  const rootPages = useMemo(() => pages.filter(p => !p.folder_id), [pages]);
 
-  // Get root-level folders and pages
-  const rootFolders = folders.filter(f => !f.parent_folder_id);
-  const rootPages = pages.filter(p => !p.folder_id);
-
-  // Get page count for each folder
-  const getFolderPageCount = (folderId: string) => {
+  // Get page count for each folder (memoized)
+  const getFolderPageCount = useCallback((folderId: string) => {
     return pages.filter(p => p.folder_id === folderId).length;
-  };
+  }, [pages]);
 
   // Mock research papers data (in a real app, this would come from your backend)
   const researchPapers = useMemo(() => [
@@ -131,22 +107,6 @@ export default function WorkspaceView() {
     }
   ], []);
 
-  const toggleAuthor = (authorName: string) => {
-    const newSelected = new Set(selectedAuthors);
-    if (newSelected.has(authorName)) {
-      newSelected.delete(authorName);
-    } else {
-      newSelected.add(authorName);
-    }
-    setSelectedAuthors(newSelected);
-  };
-
-  const filteredPapers = useMemo(() => {
-    if (selectedAuthors.size === 0) return researchPapers;
-    return researchPapers.filter(paper =>
-      paper.authors.some(author => selectedAuthors.has(author))
-    );
-  }, [researchPapers, selectedAuthors]);
 
   if (loading) {
     return (
@@ -309,39 +269,13 @@ export default function WorkspaceView() {
             ))}
           </div>
 
-          {/* Authors Section */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium mb-3" style={{ color: 'var(--foreground-muted)' }}>
-              Authors
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {authors.map((author) => (
-                <button
-                  key={author.name}
-                  onClick={() => toggleAuthor(author.name)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    selectedAuthors.has(author.name)
-                      ? 'text-white'
-                      : ''
-                  }`}
-                  style={{
-                    background: selectedAuthors.has(author.name) ? 'var(--active-bg)' : 'var(--card-bg)',
-                    color: selectedAuthors.has(author.name) ? 'var(--foreground)' : 'var(--foreground-muted)',
-                    border: `1px solid ${selectedAuthors.has(author.name) ? 'var(--active-bg)' : 'var(--border-color)'}`,
-                  }}
-                >
-                  {author.name} {author.count}
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* Items Section */}
           {activeTab === 'items' && (
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
-                  Items ({filteredPapers.length})
+                  Items ({researchPapers.length})
                 </h2>
                 <div className="flex items-center gap-4 text-sm" style={{ color: 'var(--foreground-muted)' }}>
                   <button className="flex items-center gap-2 hover:text-[var(--foreground)] transition-colors">
@@ -361,7 +295,7 @@ export default function WorkspaceView() {
 
               {/* Research Papers Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredPapers.map((paper) => (
+                {researchPapers.map((paper) => (
                   <div
                     key={paper.id}
                     className="rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer"
@@ -437,7 +371,7 @@ export default function WorkspaceView() {
                   folder={folder}
                   pageCount={getFolderPageCount(folder.id)}
                   onDelete={deleteFolder}
-                  onEdit={(id) => setEditingItem({ id, type: 'folder' })}
+                  onEdit={() => {/* TODO: Implement edit modal */}}
                 />
               ))}
             </div>
@@ -456,7 +390,7 @@ export default function WorkspaceView() {
                   key={page.id}
                   page={page}
                   onDelete={deletePage}
-                  onEdit={(id) => setEditingItem({ id, type: 'page' })}
+                  onEdit={() => {/* TODO: Implement edit modal */}}
                 />
               ))}
             </div>

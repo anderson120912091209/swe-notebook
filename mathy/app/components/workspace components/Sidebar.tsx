@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor, closestCorners, DragStartEvent, DragOverEvent, DragEndEvent } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { useTheme } from '@/app/contexts/ThemeContext';
 import { getWorkspaceTitle } from '@/app/lib/workspaceTitle';
 import CreateFolderModal from './CreateFolderModal';
 import CreatePageModal from './CreatePageModal';
@@ -56,7 +55,7 @@ interface DraggableFolderProps {
   depth: number;
 }
 
-function DraggableFolder({
+const DraggableFolder = React.memo(function DraggableFolder({
   folder,
   isActive,
   isExpanded,
@@ -138,7 +137,7 @@ function DraggableFolder({
           style={{
             ...style,
             color: 'var(--foreground)',
-            cursor: isBeingDragged ? 'grabbing' : 'grab',
+            cursor: isBeingDragged ? 'grabbing' : 'pointer',
             ...getDepthStyle(depth),
             width: `calc(100% - ${depth * INDENT_SIZE}px)`, // Constrain width to prevent overflow
           }}
@@ -155,7 +154,7 @@ function DraggableFolder({
       {children}
     </div>
   );
-}
+});
 
 // ============================================================================
 // DRAGGABLE PAGE ITEM
@@ -168,7 +167,7 @@ interface DraggablePageProps {
   depth: number;
 }
 
-function DraggablePage({ page, isActive, isBeingDragged, onClick, depth }: DraggablePageProps) {
+const DraggablePage = React.memo(function DraggablePage({ page, isActive, isBeingDragged, onClick, depth }: DraggablePageProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: `page-${page.id}`,
     data: { type: 'page', id: page.id },
@@ -179,7 +178,7 @@ function DraggablePage({ page, isActive, isBeingDragged, onClick, depth }: Dragg
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     opacity: isBeingDragged ? 0.5 : depthStyle.opacity, // Use depth opacity when not being dragged
-    cursor: isBeingDragged ? 'grabbing' : 'grab',
+    cursor: isBeingDragged ? 'grabbing' : 'pointer',
     marginLeft: `${indentAmount}px`,
     width: `calc(100% - ${indentAmount}px)`, // Constrain width to prevent overflow
     borderRadius: depthStyle.borderRadius,
@@ -207,7 +206,7 @@ function DraggablePage({ page, isActive, isBeingDragged, onClick, depth }: Dragg
       <span className="flex-1 truncate min-w-0" title={page.title}>{page.title}</span>
     </button>
   );
-}
+});
 
 // ============================================================================
 // TRASH ZONE COMPONENT
@@ -217,7 +216,7 @@ interface TrashZoneProps {
   isDragging: boolean;
 }
 
-function TrashZone({ isHovered, isDragging }: TrashZoneProps) {
+const TrashZone = React.memo(function TrashZone({ isHovered, isDragging }: TrashZoneProps) {
   const { setNodeRef } = useDroppable({
     id: 'trash-zone',
   });
@@ -261,7 +260,7 @@ function TrashZone({ isHovered, isDragging }: TrashZoneProps) {
       </div>
     </div>
   );
-}
+});
 
 // ============================================================================
 // MAIN SIDEBAR COMPONENT
@@ -283,7 +282,6 @@ export default function Sidebar() {
     canDropItem
   } = useWorkspace();
   const { user } = useAuth();
-  const { theme } = useTheme();
 
   const workspaceTitle = useMemo(() => getWorkspaceTitle(user), [user]);
   const accentBackground = '#68AAEC';
@@ -323,16 +321,9 @@ export default function Sidebar() {
     return new Set();
   });
 
-  // Get root-level folders and pages
-  const rootFolders = folders.filter(f => !f.parent_folder_id);
-  const rootPages = pages.filter(p => !p.folder_id);
-  
-  // Debug: Log the data structure
-  console.log('=== WORKSPACE DATA DEBUG ===');
-  console.log('All folders:', folders.map(f => ({ id: f.id, name: f.name, parent_folder_id: f.parent_folder_id })));
-  console.log('All pages:', pages.map(p => ({ id: p.id, title: p.title, folder_id: p.folder_id })));
-  console.log('Root folders:', rootFolders.map(f => f.name));
-  console.log('Root pages:', rootPages.map(p => p.title));
+  // Get root-level folders and pages (memoized to prevent recalculation)
+  const rootFolders = useMemo(() => folders.filter(f => !f.parent_folder_id), [folders]);
+  const rootPages = useMemo(() => pages.filter(p => !p.folder_id), [pages]);
 
   // Auto-expand folder when viewing a page inside it
   useEffect(() => {
@@ -395,37 +386,36 @@ export default function Sidebar() {
     });
   };
 
-  // Get pages for each folder
-  const getFolderPages = (folderId: string) => {
-    const result = pages.filter(p => p.folder_id === folderId);
-    console.log(`getFolderPages(${folderId}):`, result.map(p => p.title));
-    return result;
-  };
+  // Get pages for each folder (memoized)
+  const getFolderPages = useCallback((folderId: string) => {
+    return pages.filter(p => p.folder_id === folderId);
+  }, [pages]);
 
-  const getChildFolders = (parentFolderId: string) => {
-    const result = folders.filter(f => f.parent_folder_id === parentFolderId);
-    console.log(`getChildFolders(${parentFolderId}):`, result.map(f => f.name));
-    return result;
-  };
+  // Get child folders (memoized)
+  const getChildFolders = useCallback((parentFolderId: string) => {
+    return folders.filter(f => f.parent_folder_id === parentFolderId);
+  }, [folders]);
 
-  const isActive = (id: string, type: 'folder' | 'page') => {
+  // Check if item is active (memoized)
+  const isActive = useCallback((id: string, type: 'folder' | 'page') => {
     if (type === 'folder') {
       return currentFolder?.id === id || pathname.includes(`/folder/${id}`);
     }
     return currentPage?.id === id || pathname.includes(`/page/${id}`);
-  };
+  }, [currentFolder, currentPage, pathname]);
 
-  const navigateToWorkspace = () => {
+  // Navigation handlers (memoized)
+  const navigateToWorkspace = useCallback(() => {
     router.push('/notebook');
-  };
+  }, [router]);
 
-  const navigateToFolder = (folderId: string) => {
+  const navigateToFolder = useCallback((folderId: string) => {
     router.push(`/notebook/folder/${folderId}`);
-  };
+  }, [router]);
 
-  const navigateToPage = (pageId: string) => {
+  const navigateToPage = useCallback((pageId: string) => {
     router.push(`/notebook/page/${pageId}`);
-  };
+  }, [router]);
 
   // ============================================================================
   // DELETE/TRASH HANDLERS

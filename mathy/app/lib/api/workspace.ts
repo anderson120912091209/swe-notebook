@@ -235,7 +235,7 @@ export async function getWorkspaceItems(userId: string): Promise<WorkspaceItem[]
 
 export function subscribeFolders(
   userId: string,
-  callback: (payload: any) => void
+  callback: () => void
 ) {
   return supabase
     .channel('folders-changes')
@@ -254,7 +254,7 @@ export function subscribeFolders(
 
 export function subscribePages(
   userId: string,
-  callback: (payload: any) => void
+  callback: () => void
 ) {
   return supabase
     .channel('pages-changes')

@@ -73,10 +73,11 @@ function getReadableTextColor(backgroundHex: string) {
   const parsed = parseHex(backgroundHex);
   if (!parsed) return '#0F172A';
   const luminance = (0.299 * parsed.r + 0.587 * parsed.g + 0.114 * parsed.b) / 255;
-  return luminance > 0.75 ? '#1F2933' : '#F9FAFB';
+  // Lowered threshold to 0.85 to ensure more colors use white text for better readability
+  return luminance > 0.85 ? '#1F2933' : '#F9FAFB';
 }
 
-export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: FolderCardProps) {
+const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: FolderCardProps) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -99,12 +100,10 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
 
   const baseColor = parseHex(folder.color)?.hex ?? FALLBACK_COLOR;
   const cardBackground = lightenHex(baseColor, 0.42);
-  const accentBackground = lightenHex(baseColor, 0.28);
   const chipBackground = lightenHex(baseColor, 0.58);
   const borderColor = darkenHex(cardBackground, 0.2);
   const textColor = getReadableTextColor(cardBackground);
   const mutedTextColor = textColor === '#F9FAFB' ? 'rgba(255, 255, 255, 0.78)' : 'rgba(15, 23, 42, 0.68)';
-  const chipTextColor = textColor === '#F9FAFB' ? '#1F2933' : darkenHex(baseColor, 0.55);
   const controlBackground = textColor === '#F9FAFB' ? 'rgba(15, 23, 42, 0.25)' : 'rgba(255, 255, 255, 0.7)';
   const controlHoverBackground = textColor === '#F9FAFB' ? 'rgba(15, 23, 42, 0.45)' : 'rgba(255, 255, 255, 0.9)';
   const controlIconColor = textColor === '#F9FAFB' ? '#F8FAFC' : '#0F172A';
@@ -235,4 +234,6 @@ export default function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: 
       </div>
     </div>
   );
-}
+});
+
+export default FolderCard;

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/app/contexts/AuthContext';
 import type { Folder, Page, WorkspaceItem, ViewMode } from '@/app/types/workspace';
 import * as workspaceAPI from '@/app/lib/api/workspace';
@@ -49,6 +50,13 @@ interface WorkspaceContextType {
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
+// Query keys for React Query
+const QUERY_KEYS = {
+  folders: (userId: string) => ['folders', userId],
+  pages: (userId: string) => ['pages', userId],
+  workspaceItems: (userId: string) => ['workspaceItems', userId],
+} as const;
+
 export function WorkspaceProvider({ 
   children, 
   sidebarOpen, 
@@ -59,64 +67,72 @@ export function WorkspaceProvider({
   setSidebarOpen: (open: boolean) => void;
 }) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
-  // Data state
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [pages, setPages] = useState<Page[]>([]);
-  const [workspaceItems, setWorkspaceItems] = useState<WorkspaceItem[]>([]);
+  // Navigation state
   const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
   const [currentPage, setCurrentPage] = useState<Page | null>(null);
-  
-  // View state
   const [viewMode, setViewMode] = useState<ViewMode>('workspace');
-  
-  // Debug sidebar state changes
-  useEffect(() => {
-    console.log('WorkspaceContext: sidebarOpen changed to', sidebarOpen);
-  }, [sidebarOpen]);
-  
-  // Loading state
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   // Track if user is actively editing (to pause real-time updates)
   const [isEditing, setIsEditing] = useState(false);
   const editingTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  // Load all workspace data
+  // ============================================================================
+  // REACT QUERY HOOKS - Smart caching and automatic deduplication
+  // ============================================================================
+
+  // Fetch folders with React Query
+  const { 
+    data: folders = [], 
+    isLoading: foldersLoading,
+    error: foldersError 
+  } = useQuery({
+    queryKey: QUERY_KEYS.folders(user?.id || ''),
+    queryFn: () => workspaceAPI.getFolders(user!.id),
+    enabled: !!user,
+  });
+
+  // Fetch pages with React Query
+  const { 
+    data: pages = [], 
+    isLoading: pagesLoading,
+    error: pagesError 
+  } = useQuery({
+    queryKey: QUERY_KEYS.pages(user?.id || ''),
+    queryFn: () => workspaceAPI.getPages(user!.id),
+    enabled: !!user,
+  });
+
+  // Fetch workspace items with React Query
+  const { 
+    data: workspaceItems = [], 
+    isLoading: workspaceItemsLoading,
+    error: workspaceItemsError 
+  } = useQuery({
+    queryKey: QUERY_KEYS.workspaceItems(user?.id || ''),
+    queryFn: () => workspaceAPI.getWorkspaceItems(user!.id),
+    enabled: !!user,
+  });
+
+  // Combined loading and error states
+  const loading = foldersLoading || pagesLoading || workspaceItemsLoading;
+  const error = foldersError || pagesError || workspaceItemsError 
+    ? 'Failed to load workspace data' 
+    : null;
+
+  // Refresh workspace data by invalidating queries
   const refreshWorkspace = useCallback(async () => {
     if (!user) return;
     
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const [foldersData, pagesData, workspaceItemsData] = await Promise.all([
-        workspaceAPI.getFolders(user.id),
-        workspaceAPI.getPages(user.id),
-        workspaceAPI.getWorkspaceItems(user.id),
-      ]);
-      
-      // Only update state if data actually changed to prevent unnecessary re-renders
-      setFolders(prev => JSON.stringify(prev) !== JSON.stringify(foldersData) ? foldersData : prev);
-      setPages(prev => JSON.stringify(prev) !== JSON.stringify(pagesData) ? pagesData : prev);
-      setWorkspaceItems(prev => JSON.stringify(prev) !== JSON.stringify(workspaceItemsData) ? workspaceItemsData : prev);
-    } catch (err) {
-      console.error('Error loading workspace:', err);
-      setError('Failed to load workspace data');
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.folders(user.id) }),
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.pages(user.id) }),
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user.id) }),
+    ]);
+  }, [user, queryClient]);
 
-  // Initial load
-  useEffect(() => {
-    if (user) {
-      refreshWorkspace();
-    }
-  }, [user, refreshWorkspace]);
-
-  // Subscribe to real-time updates with debouncing (paused while editing)
+  // Subscribe to real-time updates with optimized debouncing
   useEffect(() => {
     if (!user) return;
 
@@ -130,8 +146,11 @@ export function WorkspaceProvider({
       
       if (refreshTimer) clearTimeout(refreshTimer);
       refreshTimer = setTimeout(() => {
-        refreshWorkspace();
-      }, 300); // Wait 300ms before refreshing to batch multiple updates
+        // Invalidate queries instead of manual refresh - React Query handles the rest
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.folders(user.id) });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.pages(user.id) });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user.id) });
+      }, 2000); // Increased from 300ms to 2 seconds - batch multiple updates
     };
 
     const foldersSubscription = workspaceAPI.subscribeFolders(user.id, debouncedRefresh);
@@ -142,113 +161,230 @@ export function WorkspaceProvider({
       foldersSubscription.unsubscribe();
       pagesSubscription.unsubscribe();
     };
-  }, [user, refreshWorkspace, isEditing]);
+  }, [user, queryClient, isEditing]);
 
-  // ============================================================================
-  // FOLDER ACTIONS
-  // ============================================================================
+  // Pause real-time updates when tab is hidden (save bandwidth and battery)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
 
-  const createFolder = async (
-    name: string,
-    icon?: string,
-    color?: string,
-    description?: string,
-    parentId?: string
-  ): Promise<Folder> => {
-    if (!user) throw new Error('User not authenticated');
-    
-    try {
-      const newFolder = await workspaceAPI.createFolder(user.id, name, icon, color, description, parentId);
-      await refreshWorkspace();
-      return newFolder;
-    } catch (err) {
-      console.error('Error creating folder:', err);
-      throw err;
-    }
-  };
-
-  const updateFolder = async (folderId: string, updates: Partial<Folder>) => {
-    try {
-      const updatedFolderFromAPI = await workspaceAPI.updateFolder(folderId, updates);
-      await refreshWorkspace();
-      
-      // Update current folder if it's the one being updated
-      if (currentFolder?.id === folderId) {
-        setCurrentFolder(updatedFolderFromAPI);
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Tab is hidden, pause updates
+        setIsEditing(true);
+      } else {
+        // Tab is visible again, resume updates and refresh
+        setIsEditing(false);
+        refreshWorkspace();
       }
-    } catch (err) {
-      console.error('Error updating folder:', err);
-      throw err;
-    }
-  };
+    };
 
-  const deleteFolder = async (folderId: string) => {
-    try {
-      await workspaceAPI.deleteFolder(folderId);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [refreshWorkspace]);
+
+  // ============================================================================
+  // FOLDER MUTATIONS - Optimistic updates with automatic rollback on error
+  // ============================================================================
+
+  const createFolderMutation = useMutation({
+    mutationFn: ({ 
+      userId, 
+      name, 
+      icon, 
+      color, 
+      description, 
+      parentId 
+    }: { 
+      userId: string; 
+      name: string; 
+      icon?: string; 
+      color?: string; 
+      description?: string; 
+      parentId?: string; 
+    }) => workspaceAPI.createFolder(userId, name, icon, color, description, parentId),
+    onSuccess: (newFolder) => {
+      // Optimistically update cache
+      queryClient.setQueryData<Folder[]>(
+        QUERY_KEYS.folders(user!.id),
+        (old = []) => [...old, newFolder]
+      );
+      // Invalidate to ensure consistency
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user!.id) });
+    },
+  });
+
+  const updateFolderMutation = useMutation({
+    mutationFn: ({ folderId, updates }: { folderId: string; updates: Partial<Folder> }) =>
+      workspaceAPI.updateFolder(folderId, updates),
+    onMutate: async ({ folderId, updates }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.folders(user!.id) });
       
-      // If we're viewing this folder, go back to workspace
+      // Snapshot previous value
+      const previousFolders = queryClient.getQueryData<Folder[]>(QUERY_KEYS.folders(user!.id));
+      
+      // Optimistically update
+      queryClient.setQueryData<Folder[]>(
+        QUERY_KEYS.folders(user!.id),
+        (old = []) => old.map(f => f.id === folderId ? { ...f, ...updates } : f)
+      );
+      
+      return { previousFolders };
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousFolders) {
+        queryClient.setQueryData(QUERY_KEYS.folders(user!.id), context.previousFolders);
+      }
+    },
+    onSuccess: (updatedFolder) => {
+      // Update current folder if it's the one being updated
+      if (currentFolder?.id === updatedFolder.id) {
+        setCurrentFolder(updatedFolder);
+      }
+    },
+  });
+
+  const deleteFolderMutation = useMutation({
+    mutationFn: (folderId: string) => workspaceAPI.deleteFolder(folderId),
+    onMutate: async (folderId) => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.folders(user!.id) });
+      
+      const previousFolders = queryClient.getQueryData<Folder[]>(QUERY_KEYS.folders(user!.id));
+      
+      // Optimistically remove
+      queryClient.setQueryData<Folder[]>(
+        QUERY_KEYS.folders(user!.id),
+        (old = []) => old.filter(f => f.id !== folderId)
+      );
+      
+      return { previousFolders };
+    },
+    onError: (err, folderId, context) => {
+      if (context?.previousFolders) {
+        queryClient.setQueryData(QUERY_KEYS.folders(user!.id), context.previousFolders);
+      }
+    },
+    onSuccess: (_, folderId) => {
+      // If viewing this folder, go back to workspace
       if (currentFolder?.id === folderId) {
         goToWorkspace();
       }
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user!.id) });
+    },
+  });
+
+  const moveFolderMutation = useMutation({
+    mutationFn: ({ folderId, targetFolderId }: { folderId: string; targetFolderId: string | null }) =>
+      workspaceAPI.moveFolderToFolder(folderId, targetFolderId),
+    onMutate: async ({ folderId, targetFolderId }) => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.folders(user!.id) });
       
-      await refreshWorkspace();
-    } catch (err) {
-      console.error('Error deleting folder:', err);
-      throw err;
-    }
-  };
+      const previousFolders = queryClient.getQueryData<Folder[]>(QUERY_KEYS.folders(user!.id));
+      
+      // Optimistically update
+      queryClient.setQueryData<Folder[]>(
+        QUERY_KEYS.folders(user!.id),
+        (old = []) => old.map(f => 
+          f.id === folderId ? { ...f, parent_folder_id: targetFolderId || undefined } : f
+        )
+      );
+      
+      return { previousFolders };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousFolders) {
+        queryClient.setQueryData(QUERY_KEYS.folders(user!.id), context.previousFolders);
+      }
+    },
+  });
 
   // ============================================================================
-  // PAGE ACTIONS
+  // PAGE MUTATIONS - Optimistic updates with automatic rollback on error
   // ============================================================================
 
-  const createPage = async (
-    title: string,
-    folderId?: string,
-    icon?: string
-  ): Promise<Page> => {
-    if (!user) throw new Error('User not authenticated');
-    
-    try {
-      const newPage = await workspaceAPI.createPage(user.id, title, folderId, icon);
-      await refreshWorkspace();
-      return newPage;
-    } catch (err) {
-      console.error('Error creating page:', err);
-      throw err;
-    }
-  };
+  const createPageMutation = useMutation({
+    mutationFn: ({ 
+      userId, 
+      title, 
+      folderId, 
+      icon 
+    }: { 
+      userId: string; 
+      title: string; 
+      folderId?: string; 
+      icon?: string; 
+    }) => workspaceAPI.createPage(userId, title, folderId, icon),
+    onSuccess: (newPage) => {
+      queryClient.setQueryData<Page[]>(
+        QUERY_KEYS.pages(user!.id),
+        (old = []) => [...old, newPage]
+      );
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user!.id) });
+    },
+  });
 
-  const updatePage = async (pageId: string, updates: Partial<Page>) => {
-    try {
+  const updatePageMutation = useMutation({
+    mutationFn: ({ pageId, updates }: { pageId: string; updates: Partial<Page> }) =>
+      workspaceAPI.updatePage(pageId, updates),
+    onMutate: async ({ pageId, updates }) => {
       // Mark as editing to pause real-time updates
       setIsEditing(true);
       if (editingTimerRef.current) clearTimeout(editingTimerRef.current);
       
-      await workspaceAPI.updatePage(pageId, updates);
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.pages(user!.id) });
+      
+      const previousPages = queryClient.getQueryData<Page[]>(QUERY_KEYS.pages(user!.id));
+      
+      // Optimistically update
+      queryClient.setQueryData<Page[]>(
+        QUERY_KEYS.pages(user!.id),
+        (old = []) => old.map(p => p.id === pageId ? { ...p, ...updates } : p)
+      );
       
       // Update current page if it's the one being updated
       if (currentPage?.id === pageId) {
         setCurrentPage({ ...currentPage, ...updates } as Page);
       }
       
-      // Mark as not editing after 2 seconds of no updates
+      return { previousPages };
+    },
+    onError: (err, variables, context) => {
+      setIsEditing(false);
+      if (context?.previousPages) {
+        queryClient.setQueryData(QUERY_KEYS.pages(user!.id), context.previousPages);
+      }
+    },
+    onSettled: () => {
+      // Resume updates after 2 seconds of no editing
       editingTimerRef.current = setTimeout(() => {
         setIsEditing(false);
-        refreshWorkspace(); // Refresh after editing stops
       }, 2000);
-    } catch (err) {
-      console.error('Error updating page:', err);
-      setIsEditing(false);
-      throw err;
-    }
-  };
+    },
+  });
 
-  const deletePage = async (pageId: string) => {
-    try {
-      await workspaceAPI.deletePage(pageId);
+  const deletePageMutation = useMutation({
+    mutationFn: (pageId: string) => workspaceAPI.deletePage(pageId),
+    onMutate: async (pageId) => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.pages(user!.id) });
       
-      // If we're viewing this page, go back to previous view
+      const previousPages = queryClient.getQueryData<Page[]>(QUERY_KEYS.pages(user!.id));
+      
+      // Optimistically remove
+      queryClient.setQueryData<Page[]>(
+        QUERY_KEYS.pages(user!.id),
+        (old = []) => old.filter(p => p.id !== pageId)
+      );
+      
+      return { previousPages };
+    },
+    onError: (err, pageId, context) => {
+      if (context?.previousPages) {
+        queryClient.setQueryData(QUERY_KEYS.pages(user!.id), context.previousPages);
+      }
+    },
+    onSuccess: (_, pageId) => {
+      // If viewing this page, go back
       if (currentPage?.id === pageId) {
         if (currentPage.folder_id) {
           const folder = folders.find(f => f.id === currentPage.folder_id);
@@ -261,106 +397,100 @@ export function WorkspaceProvider({
           goToWorkspace();
         }
       }
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user!.id) });
+    },
+  });
+
+  const movePageMutation = useMutation({
+    mutationFn: ({ pageId, folderId }: { pageId: string; folderId: string | null }) =>
+      workspaceAPI.movePageToFolder(pageId, folderId),
+    onMutate: async ({ pageId, folderId }) => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.pages(user!.id) });
       
-      await refreshWorkspace();
-    } catch (err) {
-      console.error('Error deleting page:', err);
-      throw err;
-    }
+      const previousPages = queryClient.getQueryData<Page[]>(QUERY_KEYS.pages(user!.id));
+      
+      // Optimistically update
+      queryClient.setQueryData<Page[]>(
+        QUERY_KEYS.pages(user!.id),
+        (old = []) => old.map(p => 
+          p.id === pageId ? { ...p, folder_id: folderId || undefined } : p
+        )
+      );
+      
+      return { previousPages };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousPages) {
+        queryClient.setQueryData(QUERY_KEYS.pages(user!.id), context.previousPages);
+      }
+    },
+  });
+
+  // ============================================================================
+  // PUBLIC API - Wrapper functions for mutations
+  // ============================================================================
+
+  const createFolder = async (
+    name: string,
+    icon?: string,
+    color?: string,
+    description?: string,
+    parentId?: string
+  ): Promise<Folder> => {
+    if (!user) throw new Error('User not authenticated');
+    return createFolderMutation.mutateAsync({ userId: user.id, name, icon, color, description, parentId });
+  };
+
+  const updateFolder = async (folderId: string, updates: Partial<Folder>) => {
+    await updateFolderMutation.mutateAsync({ folderId, updates });
+  };
+
+  const deleteFolder = async (folderId: string) => {
+    await deleteFolderMutation.mutateAsync(folderId);
+  };
+
+  const createPage = async (
+    title: string,
+    folderId?: string,
+    icon?: string
+  ): Promise<Page> => {
+    if (!user) throw new Error('User not authenticated');
+    return createPageMutation.mutateAsync({ userId: user.id, title, folderId, icon });
+  };
+
+  const updatePage = async (pageId: string, updates: Partial<Page>) => {
+    await updatePageMutation.mutateAsync({ pageId, updates });
+  };
+
+  const deletePage = async (pageId: string) => {
+    await deletePageMutation.mutateAsync(pageId);
   };
 
   const movePageToFolder = async (pageId: string, folderId: string | null) => {
-    // OPTIMISTIC UPDATE: Update UI immediately for smooth UX
-    const previousPages = [...pages];
-    
-    try {
-      // Immediately update the local state
-      setPages(prevPages => 
-        prevPages.map(page => 
-          page.id === pageId 
-            ? { ...page, folder_id: folderId || undefined }
-            : page
-        )
-      );
-      
-      // Trigger database update in background (don't wait)
-      workspaceAPI.movePageToFolder(pageId, folderId)
-        .then(() => {
-          console.log('✅ Page moved in database');
-          // Refresh after 2 seconds to sync any other changes
-          setTimeout(() => refreshWorkspace(), 2000);
-        })
-        .catch((err) => {
-          console.error('❌ Database error, reverting:', err);
-          // Revert on error
-          setPages(previousPages);
-        });
-        
-    } catch (err) {
-      console.error('Error moving page:', err);
-      // Revert on error
-      setPages(previousPages);
-      throw err;
-    }
+    await movePageMutation.mutateAsync({ pageId, folderId });
   };
 
-  // ============================================================================
-  // DRAG & DROP
-  // ============================================================================
-
-  // Move folder to another folder (or to root if targetFolderId is null)
   const moveFolderToFolder = async (folderId: string, targetFolderId: string | null) => {
-    // OPTIMISTIC UPDATE: Update UI immediately for smooth UX
-    const previousFolders = [...folders];
-    
-    try {
-      // Immediately update the local state
-      setFolders(prevFolders => 
-        prevFolders.map(folder => 
-          folder.id === folderId 
-            ? { ...folder, parent_folder_id: targetFolderId || undefined }
-            : folder
-        )
-      );
-      
-      // Trigger database update in background (don't wait)
-      workspaceAPI.moveFolderToFolder(folderId, targetFolderId)
-        .then(() => {
-          console.log('✅ Folder moved in database');
-          // Refresh after 2 seconds to sync any other changes
-          setTimeout(() => refreshWorkspace(), 2000);
-        })
-        .catch((err) => {
-          console.error('❌ Database error, reverting:', err);
-          // Revert on error
-          setFolders(previousFolders);
-        });
-        
-    } catch (err) {
-      console.error('Error moving folder:', err);
-      // Revert on error
-      setFolders(previousFolders);
-      throw err;
-    }
+    await moveFolderMutation.mutateAsync({ folderId, targetFolderId });
   };
 
-  // Calculate the depth of a folder (how many levels deep it is)
+  // ============================================================================
+  // DRAG & DROP UTILITIES
+  // ============================================================================
+
   const calculateFolderDepth = (folderId: string, targetParentId?: string | null): number => {
     let depth = 0;
     let currentId = targetParentId !== undefined ? targetParentId : null;
     
-    // Traverse up the folder hierarchy
     while (currentId) {
       depth++;
       const folder = folders.find(f => f.id === currentId);
       if (!folder) break;
       currentId = folder.parent_folder_id || null;
       
-      // Prevent infinite loops (circular references)
       if (depth > 10) break;
     }
     
-    // Also calculate the depth of any subfolders under the dragged folder
     const getMaxChildDepth = (parentId: string): number => {
       const childFolders = folders.filter(f => f.parent_folder_id === parentId);
       if (childFolders.length === 0) return 0;
@@ -372,23 +502,16 @@ export function WorkspaceProvider({
     return depth + childDepth;
   };
 
-  // Validate if an item can be dropped on a target
   const canDropItem = (
     dragType: 'folder' | 'page',
     dragId: string,
     targetType: 'folder' | 'page',
     targetId: string
   ): boolean => {
-    // Rule 1: Can't drop on self
     if (dragId === targetId) return false;
-    
-    // Rule 2: Pages cannot be dropped on pages
     if (dragType === 'page' && targetType === 'page') return false;
-    
-    // Rule 3: Can only drop on folders
     if (targetType === 'page') return false;
     
-    // Rule 4: Check for circular dependency (folder can't be moved into its own child)
     if (dragType === 'folder') {
       let checkId: string | undefined = targetId;
       while (checkId) {
@@ -397,7 +520,6 @@ export function WorkspaceProvider({
         checkId = folder?.parent_folder_id || undefined;
       }
       
-      // Rule 5: Check max depth (3 levels)
       const newDepth = calculateFolderDepth(dragId, targetId);
       if (newDepth >= 3) return false;
     }
@@ -423,7 +545,6 @@ export function WorkspaceProvider({
     if (page) {
       setCurrentPage(page);
       
-      // Also set current folder if page is in a folder
       if (page.folder_id) {
         const folder = folders.find(f => f.id === page.folder_id);
         if (folder) {
@@ -448,7 +569,7 @@ export function WorkspaceProvider({
   // ============================================================================
 
   const value: WorkspaceContextType = {
-    // Data
+    // Data from React Query
     folders,
     pages,
     workspaceItems,

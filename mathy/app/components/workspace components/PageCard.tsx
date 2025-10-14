@@ -10,7 +10,7 @@ interface PageCardProps {
   onEdit?: (pageId: string) => void;
 }
 
-export default function PageCard({ page, onDelete, onEdit }: PageCardProps) {
+const PageCard = React.memo(function PageCard({ page, onDelete, onEdit }: PageCardProps) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -112,5 +112,7 @@ export default function PageCard({ page, onDelete, onEdit }: PageCardProps) {
       </div>
     </div>
   );
-}
+});
+
+export default PageCard;
 
