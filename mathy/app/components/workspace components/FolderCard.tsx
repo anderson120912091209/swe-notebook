@@ -102,12 +102,12 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
   const cardBackground = lightenHex(baseColor, 0.42);
   const chipBackground = lightenHex(baseColor, 0.58);
   const borderColor = darkenHex(cardBackground, 0.2);
-  const textColor = getReadableTextColor(cardBackground);
-  const mutedTextColor = textColor === '#F9FAFB' ? 'rgba(255, 255, 255, 0.78)' : 'rgba(15, 23, 42, 0.68)';
-  const controlBackground = textColor === '#F9FAFB' ? 'rgba(15, 23, 42, 0.25)' : 'rgba(255, 255, 255, 0.7)';
-  const controlHoverBackground = textColor === '#F9FAFB' ? 'rgba(15, 23, 42, 0.45)' : 'rgba(255, 255, 255, 0.9)';
-  const controlIconColor = textColor === '#F9FAFB' ? '#F8FAFC' : '#0F172A';
-  const shadowColor = textColor === '#F9FAFB' ? 'rgba(15, 23, 42, 0.22)' : 'rgba(15, 23, 42, 0.12)';
+  const textColor = '#ffffff'; // White text for better readability on light backgrounds
+  const mutedTextColor = 'rgba(255, 255, 255, 0.8)'; // Semi-transparent white for secondary text
+  const controlBackground = 'rgba(255, 255, 255, 0.7)';
+  const controlHoverBackground = 'rgba(255, 255, 255, 0.9)';
+  const controlIconColor = '#0F172A';
+  const shadowColor = 'rgba(15, 23, 42, 0.12)';
 
   const createdDate = folder.created_at ? new Date(folder.created_at) : null;
   const createdYear = createdDate && !Number.isNaN(createdDate.valueOf()) ? createdDate.getFullYear() : '—';
@@ -125,7 +125,7 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
     <div
       onClick={handleClick}
       className="group relative flex w-60 cursor-pointer select-none
-      overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1"
+      overflow-hidden transition-all duration-500 ease-in-out hover:scale-101"
       style={{
         background: cardBackground,
         borderRadius: '10px 23px 23px 10px',
@@ -139,7 +139,8 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
 
       {/* Subtle ambient highlight */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 opacity-0
+        transition-opacity duration-300 group-hover:opacity-100"
         style={{
           background: `radial-gradient(80% 60% at 80% 0%, rgba(255,255,255,0.22) 0%, transparent 70%)`,
         }}

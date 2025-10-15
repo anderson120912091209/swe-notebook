@@ -12,7 +12,7 @@ type TabType = 'items' | 'notebooks' | 'canvases';
 export default function WorkspaceView() {
   const { folders, pages, deleteFolder, deletePage, loading, sidebarOpen, setSidebarOpen } = useWorkspace();
   const { theme, toggleTheme } = useTheme();
-  const [activeTab, setActiveTab] = useState<TabType>('items');
+  const [activeTab, setActiveTab] = useState<TabType>('notebooks');
 
   // Get root-level folders and pages (memoized)
   const rootFolders = useMemo(() => folders.filter(f => !f.parent_folder_id), [folders]);

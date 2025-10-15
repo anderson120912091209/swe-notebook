@@ -12,6 +12,44 @@ import CreatePageModal from './CreatePageModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import type { Folder, Page } from '@/app/types/workspace';
 
+const FALLBACK_COLOR = '#9CC5FF';
+
+function normalizeHex(color?: string | null): string | null {
+  if (!color) return null;
+  const trimmed = color.trim();
+  if (!/^#?[0-9a-f]{3,6}$/i.test(trimmed)) return null;
+  return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
+}
+
+function expandToSixDigit(hex: string): string {
+  if (hex.length === 7) return hex.toUpperCase();
+  const expanded = hex.slice(1).split('').map(c => c + c).join('');
+  return `#${expanded.toUpperCase()}`;
+}
+
+function parseHex(color?: string | null) {
+  const normalized = normalizeHex(color);
+  if (!normalized) return null;
+  const full = expandToSixDigit(normalized);
+  const intValue = parseInt(full.slice(1), 16);
+  return {
+    hex: full,
+    r: (intValue >> 16) & 255,
+    g: (intValue >> 8) & 255,
+    b: intValue & 255,
+  };
+}
+
+function lightenHex(hex: string, amount: number): string {
+  const parsed = parseHex(hex);
+  if (!parsed) return hex;
+  
+  const { r, g, b } = parsed;
+  const lighten = (channel: number) => Math.min(255, Math.round(channel + (255 - channel) * amount));
+  
+  return `rgb(${lighten(r)}, ${lighten(g)}, ${lighten(b)})`;
+}
+
 // ============================================================================
 // INDENTATION SYSTEM - Single source of truth for all objects
 // ============================================================================
@@ -142,8 +180,8 @@ const DraggableFolder = React.memo(function DraggableFolder({
             width: `calc(100% - ${depth * INDENT_SIZE}px)`, // Constrain width to prevent overflow
           }}
         >
-          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+          <svg className="w-4 h-4 flex-shrink-0" fill={folder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
+            <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
           </svg>
           <span className="flex-1 truncate min-w-0" title={folder.name}>{folder.name}</span>
           <span className="text-xs" style={{ color: 'var(--foreground-muted)' }}>
@@ -208,6 +246,76 @@ const DraggablePage = React.memo(function DraggablePage({ page, isActive, isBein
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
       <span className="flex-1 truncate min-w-0" title={page.title}>{page.title}</span>
+    </button>
+  );
+});
+
+// ============================================================================
+// RECENT PAGE ITEM WITH FOLDER TAG
+// ============================================================================
+interface RecentPageProps {
+  page: Page;
+  folder?: Folder | null;
+  isActive: boolean;
+  isBeingDragged: boolean;
+  onClick: () => void;
+}
+
+const RecentPage = React.memo(function RecentPage({ page, folder, isActive, isBeingDragged, onClick }: RecentPageProps) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: `page-${page.id}`,
+    data: { type: 'page', id: page.id },
+  });
+
+  const style = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    opacity: isBeingDragged ? 0.5 : 1,
+    cursor: isBeingDragged ? 'grabbing' : 'pointer',
+  };
+
+  // Create muted folder color for the tag
+  const baseColor = parseHex(folder?.color)?.hex ?? FALLBACK_COLOR;
+  const mutedFolderColor = lightenHex(baseColor, 0.7);
+
+  return (
+    <button
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        onClick();
+      }}
+      className={`w-full flex items-center gap-2 px-3 py-1 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${
+        isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
+      }`}
+      style={{
+        ...style,
+        color: 'var(--foreground)',
+      }}
+    >
+      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <span className="flex-1 truncate min-w-0" title={page.title}>{page.title}</span>
+      {folder && (
+        <span 
+          className="inline-flex items-center px-1.5 py-0.5 
+          rounded-md text-xs font-medium flex-shrink-0 w-16
+           hover:w-auto hover:max-w-none transition-all 
+           duration-200 ease-out group" 
+          style={{ 
+            background: mutedFolderColor,
+            color: '#374151'
+          }}
+        >
+          <svg className="w-3 h-3 mr-1 flex-shrink-0" fill={folder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
+            <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+          </svg>
+          <span className="truncate group-hover:whitespace-nowrap transition-all duration-200 ease-out" title={folder.name}>{folder.name}</span>
+        </span>
+      )}
     </button>
   );
 });
@@ -651,15 +759,25 @@ export default function Sidebar() {
       <div className="mb-6 px-2">
         <button
           onClick={navigateToWorkspace}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] text-left"
+          className="w-full flex items-center gap-2 px-3 py-2 
+          rounded-lg hover:bg-[var(--hover-bg)] text-left"
           style={{ color: 'var(--foreground)' }}
         >
           {sidebarOpen && (
-            <span
-              className="h-2.5 w-2.5 rounded-full flex-shrink-0"
-              aria-hidden="true"
-              style={{ background: accentBackground }}
-            />
+            user?.user_metadata?.avatar_url ? (
+              <img
+                src={user.user_metadata.avatar_url}
+                alt="Profile"
+                className="h-6 w-6 rounded-md flex-shrink-0 
+                border-1 border-white/50 object-cover"
+              />
+            ) : (
+              <span
+                className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                aria-hidden="true"
+                style={{ background: accentBackground }}
+              />
+            )
           )}
           <span className="font-semibold truncate">{workspaceTitle}</span>
         </button>
@@ -717,16 +835,21 @@ export default function Sidebar() {
                 Recents
               </div>
             )}
-            {recentPages.map(page => (
-              <DraggablePage
-                key={page.id}
-                page={page}
-                isActive={isActive(page.id, 'page')}
-                isBeingDragged={activeId === `page-${page.id}`}
-                onClick={() => navigateToPage(page.id)}
-                depth={0}
-              />
-            ))}
+            <div className="space-y-0.5">
+              {recentPages.map(page => {
+                const folder = page.folder_id ? folders.find(f => f.id === page.folder_id) : null;
+                return (
+                  <RecentPage
+                    key={page.id}
+                    page={page}
+                    folder={folder}
+                    isActive={isActive(page.id, 'page')}
+                    isBeingDragged={activeId === `page-${page.id}`}
+                    onClick={() => navigateToPage(page.id)}
+                  />
+                );
+              })}
+            </div>
           </div>
         )}
         </nav>
