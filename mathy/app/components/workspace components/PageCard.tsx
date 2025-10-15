@@ -167,12 +167,15 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, o
 
           {/* Content Snippet */}
           <div className="flex-1 mb-4">
-            <p 
-              className="text-sm leading-relaxed line-clamp-3"
-              style={{ color: 'var(--foreground-muted)' }}
+            <div 
+              className="p-3 rounded-lg text-sm leading-relaxed line-clamp-3"
+              style={{ 
+                color: 'var(--foreground-muted)',
+                background: 'var(--math-bg)'
+              }}
             >
               {snippet}
-            </p>
+            </div>
           </div>
 
           {/* Meta Footer */}

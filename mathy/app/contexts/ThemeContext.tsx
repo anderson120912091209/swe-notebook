@@ -65,7 +65,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--shadow', 'rgba(0, 0, 0, 0.08)'); // Subtle shadow
       root.style.setProperty('--input-bg', '#ffffff'); // White inputs
       root.style.setProperty('--input-border', '#d1d5db'); // Standard input border
-      root.style.setProperty('--math-bg', '#f5f0f0'); // Very light pink for math blocks
+      root.style.setProperty('--math-bg', '#f5f5f5'); // Light grey for content snippets
       root.style.setProperty('--math-border', '#e0d0c0'); // Warm math border
     }
 
