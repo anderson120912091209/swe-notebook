@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import type { Folder } from '@/app/types/workspace';
+import { useTheme } from '@/app/contexts/ThemeContext';
 
 interface FolderCardProps {
   folder: Folder;
@@ -79,6 +80,7 @@ function getReadableTextColor(backgroundHex: string) {
 
 const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: FolderCardProps) {
   const router = useRouter();
+  const { theme } = useTheme();
 
   const handleClick = () => {
     router.push(`/notebook/folder/${folder.id}`);
@@ -99,8 +101,10 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
   };
 
   const baseColor = parseHex(folder.color)?.hex ?? FALLBACK_COLOR;
-  const cardBackground = lightenHex(baseColor, 0.42);
-  const chipBackground = lightenHex(baseColor, 0.58);
+  // Make background darker/vintage in dark mode for better white text visibility
+  const lightenAmount = theme === 'dark' ? 0.25 : 0.42;
+  const cardBackground = lightenHex(baseColor, lightenAmount);
+  const chipBackground = lightenHex(baseColor, theme === 'dark' ? 0.35 : 0.58);
   const borderColor = darkenHex(cardBackground, 0.2);
   const textColor = '#ffffff'; // White text for better readability on light backgrounds
   const mutedTextColor = 'rgba(255, 255, 255, 0.8)'; // Semi-transparent white for secondary text
