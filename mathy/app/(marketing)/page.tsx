@@ -30,7 +30,7 @@ export default function LandingPage() {
                   text-sm text-neutral-950/60">
                   <span className="flex items-center justify-center">
                     <Image src="/logos/roundedlogo-gray-no-text.png" 
-                    alt="mathy Logo" width={20} height={20} />
+                    alt="Clarity Logo" width={20} height={20} />
                   </span>
                   <ClientOnly fallback={<span>Beta version releasing on 2025.11.20</span>}>
                     <span>{tMarketing('betaBadge')}</span>

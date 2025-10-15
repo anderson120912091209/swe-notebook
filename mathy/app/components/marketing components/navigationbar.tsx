@@ -28,8 +28,8 @@ export default function NavigationBar() {
                   <div className="relative flex items-center justify-center">
                     <div className="relative h-full w-full">
                       <Image
-                        src="/logos/roundedlogo-text-logo.png"
-                        alt="Mathy Logo"
+                        src="/logos/claritylogo-italics.png"
+                        alt="Clarity Logo"
                         width={120}
                         height={80}
                         priority

@@ -408,7 +408,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
                 border: '1px solid var(--border-color)',
               }}
             >
-              STATUS: DRAFT
+              Status: Draft
             </div>
             <div 
               className="px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide"
@@ -428,7 +428,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
                 border: '1px solid var(--border-color)',
               }}
             >
-              PRIORITY: HIGH
+              Priority: High
             </div>
           </div>
             </div>

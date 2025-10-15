@@ -391,6 +391,7 @@ export default function WorkspaceView() {
                   page={page}
                   onDelete={deletePage}
                   onEdit={() => {/* TODO: Implement edit modal */}}
+                  onMove={(_pageId, _folderId) => {/* TODO: Implement move functionality */}}
                 />
               ))}
             </div>

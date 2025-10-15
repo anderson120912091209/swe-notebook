@@ -207,7 +207,10 @@ export default function FolderView({ folderId }: FolderViewProps) {
               <PageCard
                 key={page.id}
                 page={page}
+                folderName={folder?.name}
                 onDelete={deletePage}
+                onEdit={() => {/* TODO: Implement edit modal */}}
+                onMove={(_pageId, _folderId) => {/* TODO: Implement move functionality */}}
               />
             ))}
           </div>
