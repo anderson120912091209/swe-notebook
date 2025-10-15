@@ -12,6 +12,44 @@ import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 
+const FALLBACK_COLOR = '#9CC5FF';
+
+function normalizeHex(color?: string | null): string | null {
+  if (!color) return null;
+  const trimmed = color.trim();
+  if (!/^#?[0-9a-f]{3,6}$/i.test(trimmed)) return null;
+  return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
+}
+
+function expandToSixDigit(hex: string): string {
+  if (hex.length === 7) return hex.toUpperCase();
+  const expanded = hex.slice(1).split('').map(c => c + c).join('');
+  return `#${expanded.toUpperCase()}`;
+}
+
+function parseHex(color?: string | null) {
+  const normalized = normalizeHex(color);
+  if (!normalized) return null;
+  const full = expandToSixDigit(normalized);
+  const intValue = parseInt(full.slice(1), 16);
+  return {
+    hex: full,
+    r: (intValue >> 16) & 255,
+    g: (intValue >> 8) & 255,
+    b: intValue & 255,
+  };
+}
+
+function lightenHex(hex: string, amount: number): string {
+  const parsed = parseHex(hex);
+  if (!parsed) return hex;
+  
+  const { r, g, b } = parsed;
+  const lighten = (channel: number) => Math.min(255, Math.round(channel + (255 - channel) * amount));
+  
+  return `rgb(${lighten(r)}, ${lighten(g)}, ${lighten(b)})`;
+}
+
 interface PageEditorProps {
   pageId: string;
 }
@@ -371,6 +409,26 @@ export default function PageEditor({ pageId }: PageEditorProps) {
 
         {/* Page Header with Title and Metadata */}
         <div className="px-8 pt-8 pb-4">
+          {/* Folder Tag */}
+          {currentFolder && (
+            <div className="mb-4">
+              <span 
+                className="inline-flex items-center px-1 py-0.5 rounded-md text-sm font-medium"
+                style={{ 
+                  background: currentFolder.color ? lightenHex(parseHex(currentFolder.color)?.hex ?? FALLBACK_COLOR, 0.7) : 'var(--hover-bg)',
+                  color: '#374151',
+                  border: '1px solid var(--border-color)'
+                }}
+              >
+                {/*Folder Icon in the Tag*/}
+                <svg className="w-4 h-4 mr-2" fill={currentFolder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
+                  <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+                {currentFolder.name}
+              </span>
+            </div>
+          )}
+
           {/* Title */}
           <input
             type="text"
