@@ -471,12 +471,11 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                     {/* Folder Tag */}
                     {currentFolder && (
                       <span 
-                        className="inline-flex items-center px-2 py-1 rounded-lg
-                         text-xs font-medium uppercase tracking-wide"
+                        className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium uppercase tracking-wide"
                         style={{ 
                           background: currentFolder.color ? lightenHex(parseHex(currentFolder.color)?.hex ?? FALLBACK_COLOR, 0.7) : 'var(--hover-bg)',
                           color: '#374151',
-                          border: theme === 'dark' ? '1px solid var(--border-color)' : 'none'
+                          border: '1px solid var(--border-color)'
                         }}
                       >
                         {/*Folder Icon in the Tag*/}
@@ -491,7 +490,7 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                       style={{
                         background: 'var(--hover-bg)',
                         color: 'var(--foreground-muted)',
-                        border: theme === 'dark' ? '1px solid var(--border-color)' : 'none',
+                        border: '1px solid var(--border-color)',
                       }}
                     >
                       Status: Draft
@@ -501,7 +500,7 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                       style={{
                         background: 'var(--hover-bg)',
                         color: 'var(--foreground-muted)',
-                        border: theme === 'dark' ? '1px solid var(--border-color)' : 'none',
+                        border: '1px solid var(--border-color)',
                       }}
                     >
                       {currentFolder ? `AREA: ${currentFolder.name.toUpperCase()}` : 'AREA: PERSONAL'}
@@ -511,7 +510,7 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                       style={{
                         background: 'var(--hover-bg)',
                         color: 'var(--foreground-muted)',
-                        border: theme === 'dark' ? '1px solid var(--border-color)' : 'none',
+                        border: '1px solid var(--border-color)',
                       }}
                     >
                       Priority: High
