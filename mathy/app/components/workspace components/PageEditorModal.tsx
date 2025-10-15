@@ -66,13 +66,14 @@ const getUserDisplayName = (user: User | null): string => {
 };
 
 export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorModalProps) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const { user } = useAuth();
   const { pages, folders, updatePage, deletePage } = useWorkspace();
   
   const [page, setPage] = useState(pages.find(p => p.id === pageId));
   const [title, setTitle] = useState(page?.title || 'Untitled');
   const [isSaving, setIsSaving] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentTime, setCurrentTime] = useState(new Date()); // Used to trigger re-renders for relative time updates
 
@@ -117,6 +118,20 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
 
     return () => clearInterval(timer);
   }, []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (showMenu) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMenu]);
 
   // Initialize BlockNote editor with safe content parsing
   const getInitialContent = () => {
@@ -218,6 +233,25 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
     }
   };
 
+  // Menu handlers
+  const handleShare = () => {
+    // TODO: Implement share functionality
+    console.log('Share page');
+    setShowMenu(false);
+  };
+
+  const handleCopy = () => {
+    // TODO: Implement copy functionality
+    console.log('Copy page');
+    setShowMenu(false);
+  };
+
+  const handleDuplicate = () => {
+    // TODO: Implement duplicate functionality
+    console.log('Duplicate page');
+    setShowMenu(false);
+  };
+
   if (!page) {
     return null;
   }
@@ -228,8 +262,8 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
       onClose={onClose}
       size="full"
       classNames={{
-        base: "w-full h-full max-w-full lg:max-w-[66vw] lg:w-[66vw] lg:h-auto",
-        wrapper: "items-center justify-center",
+        base: "w-full h-[95vh] max-w-full mt-[5vh] sm:max-w-[95vw] sm:w-[95vw] sm:h-[95vh] sm:mt-0 md:max-w-[85vw] md:w-[85vw] md:h-[90vh] lg:max-w-[70vw] lg:w-[68vw] lg:h-[85vh]",
+        wrapper: "items-start sm:items-center justify-center",
         backdrop: "bg-black/50"
       }}
       motionProps={{
@@ -254,94 +288,111 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
         initial: { opacity: 0, scale: 0.95 },
       }}
     >
-      <ModalContent className="h-full lg:h-[80vh] lg:max-h-[80vh] rounded-none lg:rounded-2xl overflow-hidden" style={{ background: 'var(--background)' }}>
+      <ModalContent className="h-full sm:h-[95vh] md:h-[90vh] lg:h-[85vh] rounded-none sm:rounded-lg md:rounded-xl lg:rounded-2xl overflow-hidden" style={{ background: 'var(--card-bg)' }}>
         {() => (
           <>
             {/* Header */}
-            <ModalHeader className="flex h-16 items-center justify-between px-4 backdrop-blur sm:px-8 border-b" style={{ borderColor: 'var(--border-color)', background: 'var(--sidebar-bg)' }}>
+            <ModalHeader className="flex h-12 items-center justify-between px-4 backdrop-blur sm:px-6 border-b" style={{ borderColor: 'var(--border-color)', background: 'var(--sidebar-bg)' }}>
               {/* Left side - Title display */}
-              <div className="flex items-center gap-3 flex-1">
-                <h2 className="text-lg font-semibold truncate" style={{ color: 'var(--foreground)' }}>
+              <div className="flex items-center gap-2 flex-1">
+                <span className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
                   {title || 'Untitled'}
-                </h2>
+                </span>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 {isSaving && (
-                  <span className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
+                  <span className="text-xs px-2" style={{ color: 'var(--foreground-muted)' }}>
                     Saving...
                   </span>
                 )}
+                
+                {/* Open as Page Button */}
                 <button
-                  onClick={handleDelete}
-                  className="flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors hover:bg-red-500/10 text-red-500"
-                  title="Delete page"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-                {/* Theme Toggle Switch */}
-                <button 
-                  onClick={toggleTheme}
-                  className="theme-toggle relative h-7 w-12 rounded-full hover:opacity-90 active:scale-95"
-                  style={{ 
-                    background: `var(--${theme === 'light' ? 'border-color' : 'hover-bg'})`,
-                    border: '1px solid var(--border-color)',
-                    transition: 'background-color 0.25s ease, border-color 0.25s ease, opacity 0.2s ease, transform 0.1s ease',
+                  onClick={() => {
+                    // Navigate to the page editor route
+                    window.open(`/notebook/page/${pageId}`, '_blank');
                   }}
-                  title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+                  className="p-2 rounded hover:bg-[var(--hover-bg)] transition-colors"
+                  style={{ color: 'var(--foreground-muted)' }}
+                  title="Open as page"
                 >
-                  <div 
-                    className="absolute top-0.5 left-0.5 h-6 w-6 rounded-full flex items-center justify-center"
-                    style={{
-                      background: theme === 'light' ? 'var(--active-bg)' : 'var(--foreground)',
-                      transform: theme === 'light' ? 'translateX(0) scale(1)' : 'translateX(20px) scale(1)',
-                      boxShadow: `0 2px 8px var(--shadow), 0 1px 3px var(--shadow)`,
-                      transition: 'transform 0.25s ease, background-color 0.25s ease, box-shadow 0.2s ease',
-                    }}
-                  >
-                    <div style={{
-                      transition: 'opacity 0.2s ease, transform 0.2s ease',
-                      opacity: theme === 'light' ? 1 : 0,
-                      transform: theme === 'light' ? 'scale(1) rotate(0deg)' : 'scale(0.8) rotate(180deg)',
-                      position: 'absolute',
-                    }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="5"/>
-                        <line x1="12" y1="1" x2="12" y2="3"/>
-                        <line x1="12" y1="21" x2="12" y2="23"/>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                        <line x1="1" y1="12" x2="3" y2="12"/>
-                        <line x1="21" y1="12" x2="23" y2="12"/>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                      </svg>
-                    </div>
-                    <div style={{
-                      transition: 'opacity 0.2s ease, transform 0.2s ease',
-                      opacity: theme === 'dark' ? 1 : 0,
-                      transform: theme === 'dark' ? 'scale(1) rotate(0deg)' : 'scale(0.8) rotate(-180deg)',
-                      position: 'absolute',
-                    }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--foreground-muted)" stroke="none">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                      </svg>
-                    </div>
-                  </div>
-                </button>
-                <button
-                  onClick={onClose}
-                  className="flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors hover:bg-[var(--hover-bg)]"
-                  style={{ color: 'var(--foreground)' }}
-                  title="Close"
-                >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </button>
+
+                {/* Three Dots Menu */}
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(!showMenu);
+                    }}
+                    className="p-2 rounded hover:bg-[var(--hover-bg)] transition-colors"
+                    style={{ color: 'var(--foreground-muted)' }}
+                    title="More options"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {showMenu && (
+                    <div 
+                      className="absolute right-0 top-full mt-1 w-48 rounded-lg shadow-lg border z-20"
+                      style={{ 
+                        background: 'var(--card-bg)',
+                        borderColor: 'var(--border-color)'
+                      }}
+                    >
+                      <div className="py-1">
+                        <button
+                          onClick={handleShare}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-2"
+                          style={{ color: 'var(--foreground)' }}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                          </svg>
+                          Share
+                        </button>
+                        <button
+                          onClick={handleCopy}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-2"
+                          style={{ color: 'var(--foreground)' }}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          Copy
+                        </button>
+                        <button
+                          onClick={handleDuplicate}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-2"
+                          style={{ color: 'var(--foreground)' }}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          Duplicate
+                        </button>
+                        <hr className="my-1" style={{ borderColor: 'var(--border-color)' }} />
+                        <button
+                          onClick={handleDelete}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-red-500/10 transition-colors flex items-center gap-2 text-red-500"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </ModalHeader>
 
