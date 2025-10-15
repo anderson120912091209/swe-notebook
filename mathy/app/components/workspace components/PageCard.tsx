@@ -6,15 +6,54 @@ import { extractSnippet } from '@/app/lib/contentSnippet';
 import MovePageModal from './MovePageModal';
 import PageEditorModal from './PageEditorModal';
 
+const FALLBACK_COLOR = '#9CC5FF';
+
+function normalizeHex(color?: string | null): string | null {
+  if (!color) return null;
+  const trimmed = color.trim();
+  if (!/^#?[0-9a-f]{3,6}$/i.test(trimmed)) return null;
+  return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
+}
+
+function expandToSixDigit(hex: string): string {
+  if (hex.length === 7) return hex.toUpperCase();
+  const expanded = hex.slice(1).split('').map(c => c + c).join('');
+  return `#${expanded.toUpperCase()}`;
+}
+
+function parseHex(color?: string | null) {
+  const normalized = normalizeHex(color);
+  if (!normalized) return null;
+  const full = expandToSixDigit(normalized);
+  const intValue = parseInt(full.slice(1), 16);
+  return {
+    hex: full,
+    r: (intValue >> 16) & 255,
+    g: (intValue >> 8) & 255,
+    b: intValue & 255,
+  };
+}
+
+function lightenHex(hex: string, amount: number): string {
+  const parsed = parseHex(hex);
+  if (!parsed) return hex;
+  
+  const { r, g, b } = parsed;
+  const lighten = (channel: number) => Math.min(255, Math.round(channel + (255 - channel) * amount));
+  
+  return `rgb(${lighten(r)}, ${lighten(g)}, ${lighten(b)})`;
+}
+
 interface PageCardProps {
   page: Page;
   folderName?: string;
+  folderColor?: string;
   onDelete?: (pageId: string) => void;
   onEdit?: (pageId: string) => void;
   onMove?: (pageId: string, folderId: string | null) => void;
 }
 
-const PageCard = React.memo(function PageCard({ page, folderName, onDelete, onEdit, onMove }: PageCardProps) {
+const PageCard = React.memo(function PageCard({ page, folderName, folderColor, onDelete, onEdit, onMove }: PageCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [showEditorModal, setShowEditorModal] = useState(false);
@@ -22,6 +61,10 @@ const PageCard = React.memo(function PageCard({ page, folderName, onDelete, onEd
 
   // Extract content snippet
   const snippet = useMemo(() => extractSnippet(page.content), [page.content]);
+
+  // Create muted folder color for the tag
+  const baseColor = parseHex(folderColor)?.hex ?? FALLBACK_COLOR;
+  const mutedFolderColor = lightenHex(baseColor, 0.7);
 
   const handleClick = () => {
     setShowEditorModal(true);
@@ -95,13 +138,16 @@ const PageCard = React.memo(function PageCard({ page, folderName, onDelete, onEd
         {folderName && (
           <div className="px-4 pt-3 pb-2">
             <span 
-              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+              className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium"
               style={{ 
-                background: 'var(--hover-bg)',
-                color: 'var(--foreground-muted)'
+                background: mutedFolderColor,
+                color: 'var(--foreground)'
               }}
             >
-              <span className="mr-1">📁</span>
+              {/*Folder Icon in the Tag*/}
+              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+              </svg>
               {folderName}
             </span>
           </div>
@@ -137,7 +183,9 @@ const PageCard = React.memo(function PageCard({ page, folderName, onDelete, onEd
             
             <div className="flex items-center gap-2">
               {page.is_favorited && (
-                <span className="text-yellow-500">⭐</span>
+                <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
               )}
               
               {/* Overflow Menu */}

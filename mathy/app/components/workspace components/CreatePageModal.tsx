@@ -9,13 +9,10 @@ interface CreatePageModalProps {
   defaultFolderId?: string;
 }
 
-const PAGE_ICONS = ['📝', '📄', '📊', '📈', '🎨', '💡', '⚡', '🔬', '📚', '✨', '🎯', '💻'];
-
 export default function CreatePageModal({ onClose, defaultFolderId }: CreatePageModalProps) {
   const router = useRouter();
   const { folders, createPage } = useWorkspace();
   const [title, setTitle] = useState('');
-  const [icon, setIcon] = useState('📝');
   const [folderId, setFolderId] = useState(defaultFolderId || '');
   const [creating, setCreating] = useState(false);
 
@@ -25,7 +22,7 @@ export default function CreatePageModal({ onClose, defaultFolderId }: CreatePage
 
     setCreating(true);
     try {
-      const newPage = await createPage(title.trim(), folderId || undefined, icon);
+      const newPage = await createPage(title.trim(), folderId || undefined, undefined);
       router.push(`/notebook/page/${newPage.id}`);
       onClose();
     } catch (error) {
@@ -88,32 +85,12 @@ export default function CreatePageModal({ onClose, defaultFolderId }: CreatePage
                 .filter(f => !f.parent_folder_id)
                 .map(folder => (
                   <option key={folder.id} value={folder.id}>
-                    {folder.icon} {folder.name}
+                    {folder.name}
                   </option>
                 ))}
             </select>
           </div>
 
-          {/* Icon Selector */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>
-              Icon
-            </label>
-            <div className="grid grid-cols-6 gap-2">
-              {PAGE_ICONS.map((pageIcon) => (
-                <button
-                  key={pageIcon}
-                  type="button"
-                  onClick={() => setIcon(pageIcon)}
-                  className={`p-3 rounded-lg text-2xl transition-all ${
-                    icon === pageIcon ? 'ring-2 ring-blue-500 scale-110' : 'hover:bg-[var(--hover-bg)]'
-                  }`}
-                >
-                  {pageIcon}
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* Actions */}
           <div className="flex gap-3 justify-end">

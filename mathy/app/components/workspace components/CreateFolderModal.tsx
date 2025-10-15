@@ -8,7 +8,6 @@ interface CreateFolderModalProps {
   onSuccess?: (folderId: string) => void;
 }
 
-const FOLDER_ICONS = ['📁', '📂', '🚀', '📊', '💡', '⚡', '🎨', '🔬', '📚', '🌟', '🎯', '💼'];
 const FOLDER_COLORS = [
   '#5A7FA3', // Soft Blue
   '#6B9B7A', // Soft Green
@@ -23,7 +22,6 @@ const FOLDER_COLORS = [
 export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderModalProps) {
   const { createFolder } = useWorkspace();
   const [name, setName] = useState('');
-  const [icon, setIcon] = useState('📁');
   const [color, setColor] = useState('#3B82F6');
   const [creating, setCreating] = useState(false);
 
@@ -35,7 +33,7 @@ export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderMo
     try {
       const newFolder = await createFolder(
         name.trim(),
-        icon,
+        undefined, // No icon
         color
       );
       if (onSuccess) {
@@ -82,26 +80,6 @@ export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderMo
             />
           </div>
 
-          {/* Icon Selector */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>
-              Icon
-            </label>
-            <div className="grid grid-cols-6 gap-2">
-              {FOLDER_ICONS.map((folderIcon) => (
-                <button
-                  key={folderIcon}
-                  type="button"
-                  onClick={() => setIcon(folderIcon)}
-                  className={`p-3 rounded-lg text-2xl transition-all ${
-                    icon === folderIcon ? 'ring-2 ring-blue-500 scale-110' : 'hover:bg-[var(--hover-bg)]'
-                  }`}
-                >
-                  {folderIcon}
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* Color Selector */}
           <div className="mb-6">

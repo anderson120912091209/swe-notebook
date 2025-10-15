@@ -208,6 +208,7 @@ export default function FolderView({ folderId }: FolderViewProps) {
                 key={page.id}
                 page={page}
                 folderName={folder?.name}
+                folderColor={folder?.color}
                 onDelete={deletePage}
                 onEdit={() => {/* TODO: Implement edit modal */}}
                 onMove={(_pageId, _folderId) => {/* TODO: Implement move functionality */}}

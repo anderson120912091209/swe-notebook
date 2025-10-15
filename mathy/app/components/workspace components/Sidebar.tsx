@@ -142,7 +142,9 @@ const DraggableFolder = React.memo(function DraggableFolder({
             width: `calc(100% - ${depth * INDENT_SIZE}px)`, // Constrain width to prevent overflow
           }}
         >
-          <span>{folder.icon || '📁'}</span>
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+          </svg>
           <span className="flex-1 truncate min-w-0" title={folder.name}>{folder.name}</span>
           <span className="text-xs" style={{ color: 'var(--foreground-muted)' }}>
             {pageCount}
@@ -202,7 +204,9 @@ const DraggablePage = React.memo(function DraggablePage({ page, isActive, isBein
         color: 'var(--foreground)',
       }}
     >
-      <span className="text-xs">{page.icon || '📄'}</span>
+      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
       <span className="flex-1 truncate min-w-0" title={page.title}>{page.title}</span>
     </button>
   );
@@ -321,9 +325,15 @@ export default function Sidebar() {
     return new Set();
   });
 
-  // Get root-level folders and pages (memoized to prevent recalculation)
+  // Get root-level folders (memoized to prevent recalculation)
   const rootFolders = useMemo(() => folders.filter(f => !f.parent_folder_id), [folders]);
-  const rootPages = useMemo(() => pages.filter(p => !p.folder_id), [pages]);
+  
+  // Get recent pages (5 most recently edited pages across all folders)
+  const recentPages = useMemo(() => {
+    return [...pages]
+      .sort((a, b) => new Date(b.last_edited_at).getTime() - new Date(a.last_edited_at).getTime())
+      .slice(0, 5);
+  }, [pages]);
 
   // Auto-expand folder when viewing a page inside it
   useEffect(() => {
@@ -692,22 +702,22 @@ export default function Sidebar() {
           {/* Spaces Section Header */}
           {rootFolders.length > 0 && (
             <div className="px-3 py-1 text-xs font-medium" style={{ color: 'var(--foreground-muted)' }}>
-              Spaces
+              Folders
             </div>
           )}
           
           {/* Root Folders - Rendered recursively with nested folders */}
           {rootFolders.map(folder => renderFolder(folder, 0))}
 
-        {/* Root Pages (not in any folder) - Now Draggable */}
-        {rootPages.length > 0 && (
+        {/* Recent Pages - 5 most recently edited pages */}
+        {recentPages.length > 0 && (
           <div className="pt-2">
             {rootFolders.length > 0 && (
               <div className="px-3 py-1 text-xs font-medium" style={{ color: 'var(--foreground-muted)' }}>
-                Pages
+                Recents
               </div>
             )}
-            {rootPages.map(page => (
+            {recentPages.map(page => (
               <DraggablePage
                 key={page.id}
                 page={page}
