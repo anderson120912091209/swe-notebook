@@ -6,6 +6,7 @@ import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor, closestC
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
+import { useTheme } from '@/app/contexts/ThemeContext';
 import { getWorkspaceTitle } from '@/app/lib/workspaceTitle';
 import CreateFolderModal from './CreateFolderModal';
 import CreatePageModal from './CreatePageModal';
@@ -385,6 +386,7 @@ export default function Sidebar() {
     folders, 
     pages, 
     sidebarOpen, 
+    setSidebarOpen,
     currentFolder, 
     currentPage,
     moveFolderToFolder,
@@ -394,6 +396,7 @@ export default function Sidebar() {
     canDropItem
   } = useWorkspace();
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const workspaceTitle = useMemo(() => getWorkspaceTitle(user), [user]);
   const accentBackground = '#68AAEC';
@@ -746,42 +749,69 @@ export default function Sidebar() {
       }}
     >
       <div
-        className="w-full h-full overflow-y-auto overflow-x-hidden"
+        className="w-full h-full overflow-y-auto overflow-x-hidden flex flex-col"
         style={{
-          padding: '32px 16px',
+          padding: '0px 16px 16px 16px',
           opacity: sidebarOpen ? 1 : 0,
           transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           transitionDelay: sidebarOpen ? '0.1s' : '0s',
           minWidth: '200px', // Minimum usable width
         }}
       >
-      {/* Header */}
-      <div className="mb-6 px-2">
-        <button
-          onClick={navigateToWorkspace}
-          className="w-full flex items-center gap-2 px-3 py-2 
-          rounded-lg hover:bg-[var(--hover-bg)] text-left"
-          style={{ color: 'var(--foreground)' }}
-        >
-          {sidebarOpen && (
-            user?.user_metadata?.avatar_url ? (
-              <img
-                src={user.user_metadata.avatar_url}
-                alt="Profile"
-                className="h-6 w-6 rounded-md flex-shrink-0 
-                border-1 border-white/50 object-cover"
-              />
-            ) : (
-              <span
-                className="h-2.5 w-2.5 rounded-full flex-shrink-0"
-                aria-hidden="true"
-                style={{ background: accentBackground }}
-              />
-            )
-          )}
-          <span className="font-semibold truncate">{workspaceTitle}</span>
-        </button>
+      {/* Header - Fixed height to match top header */}
+      <div className="h-16 flex items-center px-2" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '18px', paddingRight: '18px' }}>
+        <div className="flex items-center gap-2 w-full">
+          <button
+            onClick={navigateToWorkspace}
+            className="flex-1 flex items-center gap-2 px-3 py-2 
+            rounded-lg hover:bg-[var(--hover-bg)] text-left"
+            style={{ color: 'var(--foreground)' }}
+          >
+            {sidebarOpen && (
+              user?.user_metadata?.avatar_url ? (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt="Profile"
+                  className="h-6 w-6 rounded-md flex-shrink-0 
+                  border-1 border-white/50 object-cover"
+                />
+              ) : (
+                <span
+                  className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                  aria-hidden="true"
+                  style={{ background: accentBackground }}
+                />
+              )
+            )}
+            <span className="font-semibold truncate">{workspaceTitle}</span>
+          </button>
+          
+          {/* Sidebar Toggle Button - Small */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0"
+            style={{ color: 'var(--foreground-muted)' }}
+            title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {sidebarOpen ? (
+                <>
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="9" y1="3" x2="9" y2="21"/>
+                </>
+              ) : (
+                <>
+                  <line x1="3" y1="12" x2="21" y2="12"/>
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <line x1="3" y1="18" x2="21" y2="18"/>
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
+
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '16px', paddingRight: '16px' }}>
 
       {/* Actions */}
       <div className="mb-4 px-2 flex gap-2">
@@ -911,6 +941,75 @@ export default function Sidebar() {
         itemName={getItemName()}
         hasChildren={hasChildren()}
       />
+      </div>
+
+      {/* Theme Toggle - Bottom Right Corner */}
+      <div className="flex justify-end items-center pt-3 mt-auto" style={{ borderTop: '1px solid var(--border-color)' }}>
+        <button
+          onClick={toggleTheme}
+          className="relative w-10 h-5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95"
+          style={{
+            background: theme === 'light' ? 'var(--border-color)' : 'var(--hover-bg)',
+            border: '1px solid var(--border-color)',
+          }}
+          title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+          aria-label="Toggle theme"
+        >
+          {/* Sliding circle with icon */}
+          <div
+            className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full flex items-center justify-center transition-all duration-300"
+            style={{
+              background: theme === 'light' ? 'var(--foreground)' : '#ffffff',
+              transform: theme === 'light' ? 'translateX(0)' : 'translateX(20px)',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+            }}
+          >
+            {/* Sun icon for light mode */}
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={theme === 'light' ? '#ffffff' : 'transparent'}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                position: 'absolute',
+                opacity: theme === 'light' ? 1 : 0,
+                transform: theme === 'light' ? 'scale(1) rotate(0deg)' : 'scale(0.5) rotate(90deg)',
+                transition: 'opacity 0.2s ease, transform 0.3s ease',
+              }}
+            >
+              <circle cx="12" cy="12" r="4"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            {/* Moon icon for dark mode */}
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill={theme === 'dark' ? '#1a1a1a' : 'transparent'}
+              stroke="none"
+              style={{
+                position: 'absolute',
+                opacity: theme === 'dark' ? 1 : 0,
+                transform: theme === 'dark' ? 'scale(1) rotate(0deg)' : 'scale(0.5) rotate(-90deg)',
+                transition: 'opacity 0.2s ease, transform 0.3s ease',
+              }}
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </div>
+        </button>
+      </div>
       </div>
     </aside>
   );

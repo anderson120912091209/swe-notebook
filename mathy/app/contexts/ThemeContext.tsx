@@ -51,6 +51,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--input-border', '#4a4a4a');
       root.style.setProperty('--math-bg', '#2a2a2a');
       root.style.setProperty('--math-border', '#444444');
+      root.style.setProperty('--outer-bg', '#050505');
     } else {
       // Warm, cream-based light theme inspired by the reference
       root.style.setProperty('--background', '#f9f5f2'); // Very light warm cream
@@ -67,6 +68,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--input-border', '#d1d5db'); // Standard input border
       root.style.setProperty('--math-bg', '#f5f5f5'); // Light grey for content snippets
       root.style.setProperty('--math-border', '#e0d0c0'); // Warm math border
+      root.style.setProperty('--outer-bg', '#f0ebe7'); // Slightly darker warm background
     }
 
     localStorage.setItem('theme', theme);

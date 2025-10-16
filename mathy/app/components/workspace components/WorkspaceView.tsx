@@ -2,16 +2,15 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
-import { useTheme } from '@/app/contexts/ThemeContext';
 import FolderCard from './FolderCard';
 import PageCard from './PageCard';
+import WorkspaceLayout from './WorkspaceLayout';
 
 type TabType = 'items' | 'notebooks' | 'canvases';
 
 
 export default function WorkspaceView() {
-  const { folders, pages, deleteFolder, deletePage, loading, sidebarOpen, setSidebarOpen } = useWorkspace();
-  const { theme, toggleTheme } = useTheme();
+  const { folders, pages, deleteFolder, deletePage, loading } = useWorkspace();
   const [activeTab, setActiveTab] = useState<TabType>('notebooks');
 
   // Get root-level folders and pages (memoized)
@@ -135,96 +134,18 @@ export default function WorkspaceView() {
     );
   }
 
+
+  const headerContent = (
+    <>
+      <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+        Workspace
+      </span>
+    </>
+  );
+
   return (
-    <div className="flex-1 flex flex-col">
-      {/* Header */}
-      <header className="flex h-16 items-center justify-between px-4 backdrop-blur sm:px-8" style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--sidebar-bg)' }}>
-        {/* Left side - Sidebar toggle + Title */}
-        <div className="flex items-center gap-3 flex-1">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-[var(--hover-bg)]"
-            style={{ color: 'var(--foreground)' }}
-            title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              {sidebarOpen ? (
-                <>
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="9" y1="3" x2="9" y2="21"/>
-                </>
-              ) : (
-                <>
-                  <line x1="3" y1="12" x2="21" y2="12"/>
-                  <line x1="3" y1="6" x2="21" y2="6"/>
-                  <line x1="3" y1="18" x2="21" y2="18"/>
-                </>
-              )}
-            </svg>
-          </button>
-
-          <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-            Workspace
-          </span>
-        </div>
-
-        {/* Right side - Theme toggle */}
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={toggleTheme}
-            className="theme-toggle relative h-7 w-12 rounded-full hover:opacity-90 active:scale-95"
-            style={{ 
-              background: `var(--${theme === 'light' ? 'border-color' : 'hover-bg'})`,
-              border: '1px solid var(--border-color)',
-              transition: 'background-color 0.25s ease, border-color 0.25s ease, opacity 0.2s ease, transform 0.1s ease',
-            }}
-            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-          >
-            <div 
-              className="absolute top-0.5 left-0.5 h-6 w-6 rounded-full flex items-center justify-center"
-              style={{
-                background: theme === 'light' ? 'var(--active-bg)' : 'var(--foreground)',
-                transform: theme === 'light' ? 'translateX(0) scale(1)' : 'translateX(20px) scale(1)',
-                boxShadow: `0 2px 8px var(--shadow), 0 1px 3px var(--shadow)`,
-                transition: 'transform 0.25s ease, background-color 0.25s ease, box-shadow 0.2s ease',
-              }}
-            >
-              <div style={{
-                transition: 'opacity 0.2s ease, transform 0.2s ease',
-                opacity: theme === 'light' ? 1 : 0,
-                transform: theme === 'light' ? 'scale(1) rotate(0deg)' : 'scale(0.8) rotate(180deg)',
-                position: 'absolute',
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="5"/>
-                  <line x1="12" y1="1" x2="12" y2="3"/>
-                  <line x1="12" y1="21" x2="12" y2="23"/>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                  <line x1="1" y1="12" x2="3" y2="12"/>
-                  <line x1="21" y1="12" x2="23" y2="12"/>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-              </div>
-              <div style={{
-                transition: 'opacity 0.2s ease, transform 0.2s ease',
-                opacity: theme === 'dark' ? 1 : 0,
-                transform: theme === 'dark' ? 'scale(1) rotate(0deg)' : 'scale(0.8) rotate(-180deg)',
-                position: 'absolute',
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--foreground-muted)" stroke="none">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-              </div>
-            </div>
-          </button>
-        </div>
-      </header>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6">
+    <WorkspaceLayout header={headerContent}>
+      <div className="max-w-7xl mx-auto p-6">
           {/* Tabs */}
           <div className="flex items-center gap-1 mb-8 p-1 rounded-lg" style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)' }}>
             {(['items', 'notebooks', 'canvases'] as TabType[]).map((tab) => (
@@ -412,8 +333,7 @@ export default function WorkspaceView() {
               </p>
             </div>
         )}
-        </div>
       </div>
-    </div>
+    </WorkspaceLayout>
   );
 }

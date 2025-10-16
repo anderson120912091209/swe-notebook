@@ -11,6 +11,7 @@ import { useTheme } from '@/app/contexts/ThemeContext';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
+import WorkspaceLayout from './WorkspaceLayout';
 
 const FALLBACK_COLOR = '#9CC5FF';
 
@@ -103,7 +104,7 @@ const getUserDisplayName = (user: User | null): string => {
 
 export default function PageEditor({ pageId }: PageEditorProps) {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const { user } = useAuth();
   const { pages, folders, updatePage, deletePage, sidebarOpen } = useWorkspace();
   
@@ -308,6 +309,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
     );
   };
 
+
   if (!page) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -325,168 +327,113 @@ export default function PageEditor({ pageId }: PageEditorProps) {
     );
   }
 
+  const headerContent = (
+    <>
+      <nav className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
+        {getBreadcrumb()}
+      </nav>
+    </>
+  );
+
+  const rightHeaderContent = (
+    <>
+      {isSaving && (
+        <span className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
+          Saving...
+        </span>
+      )}
+      <button
+        onClick={handleDelete}
+        className="flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors hover:bg-red-500/10 text-red-500"
+        title="Delete page"
+      >
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </button>
+    </>
+  );
+
   return (
-    <div className="min-h-screen">
-          <div className="flex min-w-0 flex-1 flex-col h-full">
-            {/* Header */}
-            <header className="flex h-16 items-center justify-between px-4 backdrop-blur sm:px-8" style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--sidebar-bg)' }}>
-              {/* Left side - Breadcrumb */}
-              <div className="flex items-center gap-3 flex-1">
+    <WorkspaceLayout header={headerContent} rightHeader={rightHeaderContent}>
 
-            <nav className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
-              {getBreadcrumb()}
-            </nav>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            {isSaving && (
-              <span className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                Saving...
-              </span>
-            )}
-            <button
-              onClick={handleDelete}
-              className="flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors hover:bg-red-500/10 text-red-500"
-              title="Delete page"
-            >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
-            {/* Theme Toggle Switch */}
-            <button 
-              onClick={toggleTheme}
-              className="theme-toggle relative h-7 w-12 rounded-full hover:opacity-90 active:scale-95"
-              style={{ 
-                background: `var(--${theme === 'light' ? 'border-color' : 'hover-bg'})`,
-                border: '1px solid var(--border-color)',
-                transition: 'background-color 0.25s ease, border-color 0.25s ease, opacity 0.2s ease, transform 0.1s ease',
-              }}
-              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-            >
-              <div 
-                className="absolute top-0.5 left-0.5 h-6 w-6 rounded-full flex items-center justify-center"
-                style={{
-                  background: theme === 'light' ? 'var(--active-bg)' : 'var(--foreground)',
-                  transform: theme === 'light' ? 'translateX(0) scale(1)' : 'translateX(20px) scale(1)',
-                  boxShadow: `0 2px 8px var(--shadow), 0 1px 3px var(--shadow)`,
-                  transition: 'transform 0.25s ease, background-color 0.25s ease, box-shadow 0.2s ease',
-                }}
-              >
-                <div style={{
-                  transition: 'opacity 0.2s ease, transform 0.2s ease',
-                  opacity: theme === 'light' ? 1 : 0,
-                  transform: theme === 'light' ? 'scale(1) rotate(0deg)' : 'scale(0.8) rotate(180deg)',
-                  position: 'absolute',
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/>
-                    <line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/>
-                    <line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                  </svg>
-                </div>
-                <div style={{
-                  transition: 'opacity 0.2s ease, transform 0.2s ease',
-                  opacity: theme === 'dark' ? 1 : 0,
-                  transform: theme === 'dark' ? 'scale(1) rotate(0deg)' : 'scale(0.8) rotate(-180deg)',
-                  position: 'absolute',
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--foreground-muted)" stroke="none">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                  </svg>
-                </div>
-              </div>
-            </button>
-          </div>
-        </header>
-
-        {/* Page Header with Title and Metadata */}
-        <div className="px-8 pt-8 pb-4">
-          {/* Folder Tag */}
-          {currentFolder && (
-            <div className="mb-4">
-              <span 
-                className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium"
-                style={{ 
-                  background: currentFolder.color ? lightenHex(parseHex(currentFolder.color)?.hex ?? FALLBACK_COLOR, 0.7) : 'var(--hover-bg)',
-                  color: '#374151',
-                  border: '1px solid var(--border-color)'
-                }}
-              >
-                {/*Folder Icon in the Tag*/}
-                <svg className="w-3 h-3 mr-1" fill={currentFolder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
-                  <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                </svg>
-                {currentFolder.name}
-              </span>
-            </div>
-          )}
-
-          {/* Title */}
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => handleTitleChange(e.target.value)}
-            className="w-full text-4xl font-bold bg-transparent border-none outline-none mb-2"
-            style={{ color: 'var(--foreground)' }}
-            placeholder="Untitled"
-          />
-
-          {/* Metadata */}
-          <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
-            <span 
-              title={page?.last_edited_at ? new Date(page.last_edited_at).toLocaleString() : ''}
-              className="cursor-help"
-            >
-              Last edited {page?.last_edited_at ? formatRelativeTime(page.last_edited_at) : 'just now'}
-            </span>
-            <span>•</span>
-            <span
-              title={page?.created_at ? new Date(page.created_at).toLocaleString() : ''}
-              className="cursor-help"
-            >
-              Created by {getUserDisplayName(user)}
-            </span>
-          </div>
-
-            </div>
-
-            {/* Editor */}
-            <div className="flex-1 overflow-auto px-8 pb-16">
-              <div 
-                className="rounded-lg p-6"
-                style={{
-                  background: 'var(--card-bg)',
-                  border: '1px solid var(--border-color)',
-                  minHeight: 'calc(100vh - 400px)',
-                }}
-              >
-                <BlockNoteView
-                  editor={editor}
-                  theme={theme}
-                  onChange={handleContentChange}
-                  className="font-[family-name:var(--font-geist-sans)]"
+          {/* Page Header with Title and Metadata */}
+          <div className="px-8 pt-8 pb-4">
+            {/* Folder Tag */}
+            {currentFolder && (
+              <div className="mb-4">
+                <span 
+                  className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium"
+                  style={{ 
+                    background: currentFolder.color ? lightenHex(parseHex(currentFolder.color)?.hex ?? FALLBACK_COLOR, 0.7) : 'var(--hover-bg)',
+                    color: '#374151',
+                    border: '1px solid var(--border-color)'
+                  }}
                 >
-                  {/* $ menu for inline math */}
-                  {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
-                  <SuggestionMenuController
-                    triggerCharacter="$"
-                    getItems={async (query) =>
-                      filterSuggestionItems(getMathMenuItems(editor), query)
-                    }
-                  />
-                </BlockNoteView>
+                  {/*Folder Icon in the Tag*/}
+                  <svg className="w-3 h-3 mr-1" fill={currentFolder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
+                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                  </svg>
+                  {currentFolder.name}
+                </span>
               </div>
+            )}
+
+            {/* Title */}
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              className="w-full text-4xl font-bold bg-transparent border-none outline-none mb-2"
+              style={{ color: 'var(--foreground)' }}
+              placeholder="Untitled"
+            />
+
+            {/* Metadata */}
+            <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
+              <span 
+                title={page?.last_edited_at ? new Date(page.last_edited_at).toLocaleString() : ''}
+                className="cursor-help"
+              >
+                Last edited {page?.last_edited_at ? formatRelativeTime(page.last_edited_at) : 'just now'}
+              </span>
+              <span>•</span>
+              <span
+                title={page?.created_at ? new Date(page.created_at).toLocaleString() : ''}
+                className="cursor-help"
+              >
+                Created by {getUserDisplayName(user)}
+              </span>
             </div>
           </div>
-    </div>
+
+          {/* Editor - scrollable content within container */}
+          <div className="flex-1 overflow-y-auto px-8 pb-16">
+            <div 
+              className="rounded-lg p-6"
+              style={{
+                background: 'var(--card-bg)',
+                border: '1px solid var(--border-color)',
+                minHeight: 'calc(100vh - 400px)',
+              }}
+            >
+              <BlockNoteView
+                editor={editor}
+                theme={theme}
+                onChange={handleContentChange}
+                className="font-[family-name:var(--font-geist-sans)]"
+              >
+                {/* $ menu for inline math */}
+                {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
+                <SuggestionMenuController
+                  triggerCharacter="$"
+                  getItems={async (query) =>
+                    filterSuggestionItems(getMathMenuItems(editor), query)
+                  }
+                />
+              </BlockNoteView>
+            </div>
+          </div>
+    </WorkspaceLayout>
   );
 }
-
