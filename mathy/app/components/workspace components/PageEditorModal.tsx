@@ -106,7 +106,7 @@ const getUserDisplayName = (user: User | null): string => {
 export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorModalProps) {
   const { theme } = useTheme();
   const { user } = useAuth();
-  const { pages, folders, updatePage, deletePage } = useWorkspace();
+  const { pages, folders, updatePage } = useWorkspace();
   
   const [page, setPage] = useState(pages.find(p => p.id === pageId));
   const [title, setTitle] = useState(page?.title || 'Untitled');
@@ -260,35 +260,6 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
   }, [page, pageId, updatePage]);
 
   // Delete page handler
-  const handleDelete = async () => {
-    if (!confirm(`Delete "${page?.title}"?`)) return;
-    
-    try {
-      await deletePage(pageId);
-      onClose(); // Close modal after deletion
-    } catch (error) {
-      console.error('Failed to delete page:', error);
-    }
-  };
-
-  // Menu handlers
-  const handleShare = () => {
-    // TODO: Implement share functionality
-    console.log('Share page');
-    setShowMenu(false);
-  };
-
-  const handleCopy = () => {
-    // TODO: Implement copy functionality
-    console.log('Copy page');
-    setShowMenu(false);
-  };
-
-  const handleDuplicate = () => {
-    // TODO: Implement duplicate functionality
-    console.log('Duplicate page');
-    setShowMenu(false);
-  };
 
   if (!page) {
     return null;
@@ -330,7 +301,7 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
         {() => (
           <>
             {/* Header */}
-            <ModalHeader className="flex h-12 items-center justify-between px-4 backdrop-blur sm:px-6 border-b" style={{ borderColor: 'var(--border-color)', background: 'var(--sidebar-bg)' }}>
+            <ModalHeader className="flex h-8 items-center justify-between px-4 backdrop-blur sm:px-6 border-b" style={{ borderColor: 'var(--border-color)', background: 'var(--sidebar-bg)' }}>
               {/* Left side - Title display */}
               <div className="flex items-center gap-2 flex-1">
                 <span className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
@@ -345,92 +316,6 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                     Saving...
                   </span>
                 )}
-                
-                {/* Open as Page Button */}
-                <button
-                  onClick={() => {
-                    // Navigate to the page editor route
-                    window.open(`/notebook/page/${pageId}`, '_blank');
-                  }}
-                  className="p-2 rounded hover:bg-[var(--hover-bg)] transition-colors"
-                  style={{ color: 'var(--foreground-muted)' }}
-                  title="Open as page"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </button>
-
-                {/* Three Dots Menu */}
-                <div className="relative">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowMenu(!showMenu);
-                    }}
-                    className="p-2 rounded hover:bg-[var(--hover-bg)] transition-colors"
-                    style={{ color: 'var(--foreground-muted)' }}
-                    title="More options"
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-                    </svg>
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {showMenu && (
-                    <div 
-                      className="absolute right-0 top-full mt-1 w-48 rounded-lg shadow-lg border z-20"
-                      style={{ 
-                        background: 'var(--card-bg)',
-                        borderColor: 'var(--border-color)'
-                      }}
-                    >
-                      <div className="py-1">
-                        <button
-                          onClick={handleShare}
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-2"
-                          style={{ color: 'var(--foreground)' }}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                          </svg>
-                          Share
-                        </button>
-                        <button
-                          onClick={handleCopy}
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-2"
-                          style={{ color: 'var(--foreground)' }}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                          Copy
-                        </button>
-                        <button
-                          onClick={handleDuplicate}
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-2"
-                          style={{ color: 'var(--foreground)' }}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                          Duplicate
-                        </button>
-                        <hr className="my-1" style={{ borderColor: 'var(--border-color)' }} />
-                        <button
-                          onClick={handleDelete}
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-red-500/10 transition-colors flex items-center gap-2 text-red-500"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
             </ModalHeader>
 

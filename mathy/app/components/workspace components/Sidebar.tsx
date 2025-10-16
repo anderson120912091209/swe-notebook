@@ -755,16 +755,16 @@ export default function Sidebar() {
           opacity: sidebarOpen ? 1 : 0,
           transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           transitionDelay: sidebarOpen ? '0.1s' : '0s',
-          minWidth: '200px', // Minimum usable width
+          minWidth: '180px', // Minimum usable width
         }}
       >
       {/* Header - Fixed height to match top header */}
       <div className="h-16 flex items-center px-2" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '18px', paddingRight: '18px' }}>
-        <div className="flex items-center gap-2 w-full">
+        <div className="flex items-center gap-1 w-full min-w-0">
           <button
             onClick={navigateToWorkspace}
-            className="flex-1 flex items-center gap-2 px-3 py-2 
-            rounded-lg hover:bg-[var(--hover-bg)] text-left"
+            className="flex-1 flex items-center gap-2 px-2 py-2 
+            rounded-lg hover:bg-[var(--hover-bg)] text-left min-w-0"
             style={{ color: 'var(--foreground)' }}
           >
             {sidebarOpen && (
@@ -772,40 +772,31 @@ export default function Sidebar() {
                 <img
                   src={user.user_metadata.avatar_url}
                   alt="Profile"
-                  className="h-6 w-6 rounded-md flex-shrink-0 
+                  className="h-5 w-5 rounded-md flex-shrink-0 
                   border-1 border-white/50 object-cover"
                 />
               ) : (
                 <span
-                  className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                  className="h-2 w-2 rounded-full flex-shrink-0"
                   aria-hidden="true"
                   style={{ background: accentBackground }}
                 />
               )
             )}
-            <span className="font-semibold truncate">{workspaceTitle}</span>
+            <span className="font-semibold text-sm truncate min-w-0" title={workspaceTitle}>
+              {workspaceTitle}
+            </span>
           </button>
           
           {/* Sidebar Toggle Button - Small */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0"
+            className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0"
             style={{ color: 'var(--foreground-muted)' }}
-            title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+            title="Hide sidebar"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              {sidebarOpen ? (
-                <>
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="9" y1="3" x2="9" y2="21"/>
-                </>
-              ) : (
-                <>
-                  <line x1="3" y1="12" x2="21" y2="12"/>
-                  <line x1="3" y1="6" x2="21" y2="6"/>
-                  <line x1="3" y1="18" x2="21" y2="18"/>
-                </>
-              )}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
             </svg>
           </button>
         </div>

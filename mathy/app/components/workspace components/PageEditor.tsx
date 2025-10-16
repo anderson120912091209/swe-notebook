@@ -106,7 +106,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
   const router = useRouter();
   const { theme } = useTheme();
   const { user } = useAuth();
-  const { pages, folders, updatePage, deletePage, sidebarOpen } = useWorkspace();
+  const { pages, folders, updatePage, sidebarOpen } = useWorkspace();
   
   // Debug sidebar state
   useEffect(() => {
@@ -248,23 +248,6 @@ export default function PageEditor({ pageId }: PageEditorProps) {
     }, 500);
   }, [page, pageId, updatePage]);
 
-  // Delete page handler
-  const handleDelete = async () => {
-    if (!confirm(`Delete "${page?.title}"?`)) return;
-    
-    try {
-      await deletePage(pageId);
-      
-      // Navigate back
-      if (page?.folder_id) {
-        router.push(`/notebook/folder/${page.folder_id}`);
-      } else {
-        router.push('/notebook');
-      }
-    } catch (error) {
-      console.error('Failed to delete page:', error);
-    }
-  };
 
   // Get breadcrumb
   const getBreadcrumb = () => {
@@ -329,10 +312,14 @@ export default function PageEditor({ pageId }: PageEditorProps) {
 
   const headerContent = (
     <>
-      <nav className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
-        {getBreadcrumb()}
-      </nav>
+      {/* Empty - breadcrumb moved to top header */}
     </>
+  );
+
+  const breadcrumb = (
+    <nav className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
+      {getBreadcrumb()}
+    </nav>
   );
 
   const rightHeaderContent = (
@@ -342,26 +329,17 @@ export default function PageEditor({ pageId }: PageEditorProps) {
           Saving...
         </span>
       )}
-      <button
-        onClick={handleDelete}
-        className="flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors hover:bg-red-500/10 text-red-500"
-        title="Delete page"
-      >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-      </button>
     </>
   );
 
   return (
-    <WorkspaceLayout header={headerContent} rightHeader={rightHeaderContent}>
+    <WorkspaceLayout header={headerContent} rightHeader={rightHeaderContent} breadcrumb={breadcrumb}>
 
           {/* Page Header with Title and Metadata */}
-          <div className="px-8 pt-8 pb-4">
+          <div className="px-8 pt-4 pb-2">
             {/* Folder Tag */}
             {currentFolder && (
-              <div className="mb-4">
+              <div className="mb-2">
                 <span 
                   className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium"
                   style={{ 
@@ -384,7 +362,8 @@ export default function PageEditor({ pageId }: PageEditorProps) {
               type="text"
               value={title}
               onChange={(e) => handleTitleChange(e.target.value)}
-              className="w-full text-4xl font-bold bg-transparent border-none outline-none mb-2"
+              className="w-full text-4xl font-bold bg-transparent
+               border-none outline-none mb-1"
               style={{ color: 'var(--foreground)' }}
               placeholder="Untitled"
             />
@@ -408,13 +387,13 @@ export default function PageEditor({ pageId }: PageEditorProps) {
           </div>
 
           {/* Editor - scrollable content within container */}
-          <div className="flex-1 overflow-y-auto px-8 pb-16">
+          <div className="flex-1 overflow-y-auto px-8 pb-8">
             <div 
-              className="rounded-lg p-6"
+              className="rounded-lg p-4"
               style={{
                 background: 'var(--card-bg)',
                 border: '1px solid var(--border-color)',
-                minHeight: 'calc(100vh - 400px)',
+                minHeight: 'calc(100vh - 350px)',
               }}
             >
               <BlockNoteView

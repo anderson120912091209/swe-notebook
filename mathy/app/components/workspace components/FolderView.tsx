@@ -73,18 +73,22 @@ export default function FolderView({ folderId }: FolderViewProps) {
 
   const headerContent = (
     <>
-      <nav className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
-        <button
-          onClick={handleGoBack}
-          className="hover:underline transition-colors"
-          style={{ color: 'var(--foreground)' }}
-        >
-          Workspace
-        </button>
-        <span>/</span>
-        <span>{folder.name}</span>
-      </nav>
+      {/* Empty - breadcrumb moved to top header */}
     </>
+  );
+
+  const breadcrumb = (
+    <nav className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
+      <button
+        onClick={handleGoBack}
+        className="hover:underline transition-colors"
+        style={{ color: 'var(--foreground)' }}
+      >
+        Workspace
+      </button>
+      <span>/</span>
+      <span>{folder.name}</span>
+    </nav>
   );
 
   const rightHeaderContent = (
@@ -106,7 +110,7 @@ export default function FolderView({ folderId }: FolderViewProps) {
   );
 
   return (
-    <WorkspaceLayout header={headerContent} rightHeader={rightHeaderContent}>
+    <WorkspaceLayout header={headerContent} rightHeader={rightHeaderContent} breadcrumb={breadcrumb}>
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           {/* Folder info */}
