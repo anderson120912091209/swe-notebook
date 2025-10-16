@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react';
+import Image from 'next/image';
 import YooptaDemoEditor from './yoopta-demo-editor';
 
 export default function ProductDemoWindow() {
@@ -34,13 +35,14 @@ export default function ProductDemoWindow() {
             
             {/* Browser Content Area */}
             <div className="bg-white p-6 min-h-[460px]">
-              <div className="mb-4 text-left">
-                <h3 className="text-xl font-semibold text-neutral-900">Plan your next release</h3>
-                <p className="mt-1 text-sm text-neutral-500">
-                  Capture ideas, draft specs, and collaborate with your teammates in a familiar Notion-style editor.
-                </p>
-              </div>
-              <YooptaDemoEditor />
+              <Image
+                src="/herodemo.png"
+                alt="Mathy Demo"
+                width={800}
+                height={400}
+                className="w-full h-auto rounded-lg"
+                priority
+              />
             </div>
           </div>
         </div>

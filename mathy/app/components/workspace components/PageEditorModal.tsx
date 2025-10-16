@@ -466,12 +466,11 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                     </span>
                   </div>
 
-                  {/* Property Tags */}
-                  <div className="flex flex-wrap items-center gap-2 mt-4">
-                    {/* Folder Tag */}
-                    {currentFolder && (
+                  {/* Folder Tag */}
+                  {currentFolder && (
+                    <div className="mt-4">
                       <span 
-                        className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium uppercase tracking-wide"
+                        className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium"
                         style={{ 
                           background: currentFolder.color ? lightenHex(parseHex(currentFolder.color)?.hex ?? FALLBACK_COLOR, 0.7) : 'var(--hover-bg)',
                           color: '#374151',
@@ -479,43 +478,13 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                         }}
                       >
                         {/*Folder Icon in the Tag*/}
-                        <svg className="w-3 h-3 mr-1.5" fill={currentFolder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 mr-1" fill={currentFolder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
                           <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                         </svg>
-                        {currentFolder.name.toUpperCase()}
+                        {currentFolder.name}
                       </span>
-                    )}
-                    <div 
-                      className="px-3 py-1 rounded-md text-xs font-medium uppercase tracking-wide"
-                      style={{
-                        background: 'var(--hover-bg)',
-                        color: 'var(--foreground-muted)',
-                        border: '1px solid var(--border-color)',
-                      }}
-                    >
-                      Status: Draft
                     </div>
-                    <div 
-                      className="px-3 py-1 rounded-md text-xs font-medium uppercase tracking-wide"
-                      style={{
-                        background: 'var(--hover-bg)',
-                        color: 'var(--foreground-muted)',
-                        border: '1px solid var(--border-color)',
-                      }}
-                    >
-                      {currentFolder ? `AREA: ${currentFolder.name.toUpperCase()}` : 'AREA: PERSONAL'}
-                    </div>
-                    <div 
-                      className="px-3 py-1 rounded-md text-xs font-medium uppercase tracking-wide"
-                      style={{
-                        background: 'var(--hover-bg)',
-                        color: 'var(--foreground-muted)',
-                        border: '1px solid var(--border-color)',
-                      }}
-                    >
-                      Priority: High
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Editor */}
