@@ -11,6 +11,7 @@ import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/react";
+import { useRouter } from 'next/navigation';
 
 const FALLBACK_COLOR = '#9CC5FF';
 
@@ -107,11 +108,13 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
   const { theme } = useTheme();
   const { user } = useAuth();
   const { pages, folders, updatePage } = useWorkspace();
+  const router = useRouter();
   
   const [page, setPage] = useState(pages.find(p => p.id === pageId));
   const [title, setTitle] = useState(page?.title || 'Untitled');
   const [isSaving, setIsSaving] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [isExpanding, setIsExpanding] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentTime, setCurrentTime] = useState(new Date()); // Used to trigger re-renders for relative time updates
 
@@ -259,7 +262,13 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
     }, 500);
   }, [page, pageId, updatePage]);
 
-  // Delete page handler
+  // Handle expand to full page with seamless animation
+  const handleExpandToFullPage = useCallback(() => {
+    setIsExpanding(true);
+    
+    // Navigate immediately for seamless transition
+    router.push(`/notebook/page/${pageId}`);
+  }, [router, pageId]);
 
   if (!page) {
     return null;
@@ -271,7 +280,9 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
       onClose={onClose}
       size="full"
       classNames={{
-        base: "w-full h-[95vh] max-w-full mt-[5vh] sm:max-w-[95vw] sm:w-[95vw] sm:h-[95vh] sm:mt-0 md:max-w-[85vw] md:w-[85vw] md:h-[90vh] lg:max-w-[70vw] lg:w-[68vw] lg:h-[85vh]",
+        base: `w-full h-[95vh] max-w-full mt-[5vh] sm:max-w-[95vw] sm:w-[95vw] sm:h-[95vh] sm:mt-0 md:max-w-[85vw] md:w-[85vw] md:h-[90vh] lg:max-w-[70vw] lg:w-[68vw] lg:h-[85vh] transition-all duration-300 ease-out ${
+          isExpanding ? 'opacity-0 scale-95' : ''
+        }`,
         wrapper: "items-start sm:items-center justify-center",
         backdrop: "bg-black/50"
       }}
@@ -297,11 +308,15 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
         initial: { opacity: 0, scale: 0.95 },
       }}
     >
-      <ModalContent className="h-full sm:h-[95vh] md:h-[90vh] lg:h-[85vh] rounded-none sm:rounded-lg md:rounded-xl lg:rounded-2xl overflow-hidden" style={{ background: 'var(--card-bg)' }}>
+      <ModalContent className="h-full sm:h-[95vh] 
+      md:h-[90vh] lg:h-[85vh] rounded-lg sm:rounded-md 
+      md:rounded-md lg:rounded-lg 
+      border-1 border-white/10 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
         {() => (
           <>
             {/* Header */}
-            <ModalHeader className="flex h-8 items-center justify-between px-4 backdrop-blur sm:px-6 border-b" style={{ borderColor: 'var(--border-color)', background: 'var(--sidebar-bg)' }}>
+            <ModalHeader className="flex h-16 items-center justify-between px-4 backdrop-blur 
+            sm:px-6 border-b border-gray-200" style={{ borderColor: 'var(--border-color)', background: 'var(--card-bg)' }}>
               {/* Left side - Title display */}
               <div className="flex items-center gap-2 flex-1">
                 <span className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
@@ -310,12 +325,38 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 {isSaving && (
                   <span className="text-xs px-2" style={{ color: 'var(--foreground-muted)' }}>
                     Saving...
                   </span>
                 )}
+                
+                {/* Expand to full page button */}
+                <button
+                  onClick={handleExpandToFullPage}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium hover:bg-[var(--hover-bg)] transition-all duration-200"
+                  style={{ color: 'var(--foreground-muted)' }}
+                  title="Expand to full page"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                  </svg>
+                  <span>Expand</span>
+                </button>
+                
+                {/* Close page button */}
+                <button
+                  onClick={onClose}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium hover:bg-[var(--hover-bg)] transition-all duration-200"
+                  style={{ color: 'var(--foreground-muted)' }}
+                  title="Close page"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span></span>
+                </button>
               </div>
             </ModalHeader>
 
@@ -375,10 +416,8 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                 {/* Editor */}
                 <div className="px-8 pb-16">
                   <div 
-                    className="rounded-lg p-6"
+                    className="p-6"
                     style={{
-                      background: 'var(--card-bg)',
-                      border: '1px solid var(--border-color)',
                       minHeight: '500px',
                     }}
                   >
@@ -386,7 +425,7 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                       editor={editor}
                       theme={theme}
                       onChange={handleContentChange}
-                      className="font-[family-name:var(--font-geist-sans)]"
+                      className="font-[family-name:var(--font-geist-sans)] [&_.bn-editor]:!bg-transparent [&_.bn-container]:!bg-transparent"
                     >
                       {/* $ menu for inline math */}
                       {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}

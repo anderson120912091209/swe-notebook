@@ -128,7 +128,7 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, o
       <div
         onClick={handleClick}
         className="group relative flex flex-col rounded-lg border transition-all 
-        duration-200 cursor-pointer hover:shadow-lg"
+        duration-200 cursor-pointer hover:shadow-lg h-[240px]"
         style={{
           borderColor: 'var(--border-color)',
           background: 'var(--card-bg)',

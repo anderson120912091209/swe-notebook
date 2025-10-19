@@ -18,6 +18,13 @@ export default function WorkspaceView() {
   // Get root-level folders and pages (memoized)
   const rootFolders = useMemo(() => folders.filter(f => !f.parent_folder_id), [folders]);
   const rootPages = useMemo(() => pages.filter(p => !p.folder_id), [pages]);
+  
+  // Get recent pages (10 most recently edited pages across all folders)
+  const recentPages = useMemo(() => {
+    return [...pages]
+      .sort((a, b) => new Date(b.last_edited_at).getTime() - new Date(a.last_edited_at).getTime())
+      .slice(0, 10);
+  }, [pages]);
 
   // Get page count for each folder (memoized)
   const getFolderPageCount = useCallback((folderId: string) => {
@@ -181,9 +188,14 @@ export default function WorkspaceView() {
         {/* Folders Section */}
         {filteredRootFolders.length > 0 && (
           <section className="mb-8">
-                  <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
-              Folders {searchQuery && `(${filteredRootFolders.length} found)`}
-                  </h3>
+            <div className="flex items-center gap-2 mb-4">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--foreground-muted)' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+              </svg>
+              <h3 className="text-lg font-medium" style={{ color: 'var(--foreground)' }}>
+                Folders {searchQuery && `(${filteredRootFolders.length} found)`}
+              </h3>
+            </div>
             <div className="flex flex-wrap gap-6 justify-start">
               {filteredRootFolders.map(folder => (
                 <FolderCard
@@ -194,6 +206,93 @@ export default function WorkspaceView() {
                   onEdit={() => {/* TODO: Implement edit modal */}}
                 />
               ))}
+            </div>
+          </section>
+        )}
+
+        {/* Recent Pages Section */}
+        {recentPages.length > 0 && !searchQuery && (
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--foreground-muted)' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="text-lg font-medium" style={{ color: 'var(--foreground)' }}>
+                Recently visited
+              </h3>
+            </div>
+            <div className="relative">
+              {/* Left shadow overlay */}
+              <div 
+                className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none transition-opacity duration-200"
+                id="left-shadow"
+                style={{ 
+                  opacity: 0,
+                  background: 'linear-gradient(to right, var(--background) 0%, var(--background) 20%, transparent 100%)'
+                }}
+              />
+              
+              {/* Right shadow overlay */}
+              <div 
+                className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none transition-opacity duration-200"
+                id="right-shadow"
+                style={{ 
+                  opacity: 1,
+                  background: 'linear-gradient(to left, var(--background) 0%, var(--background) 20%, transparent 100%)'
+                }}
+              />
+              
+              <div 
+                className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+                ref={(el) => {
+                  if (el) {
+                    // Check initial state on mount
+                    const leftShadow = document.getElementById('left-shadow');
+                    const rightShadow = document.getElementById('right-shadow');
+                    
+                    if (leftShadow && rightShadow) {
+                      const scrollLeft = el.scrollLeft;
+                      const maxScroll = el.scrollWidth - el.clientWidth;
+                      
+                      // Show right shadow by default if there's more content
+                      rightShadow.style.opacity = maxScroll > 1 ? '1' : '0';
+                      leftShadow.style.opacity = scrollLeft > 0 ? '1' : '0';
+                    }
+                  }
+                }}
+                onScroll={(e) => {
+                  const container = e.currentTarget;
+                  const leftShadow = document.getElementById('left-shadow');
+                  const rightShadow = document.getElementById('right-shadow');
+                  
+                  if (leftShadow && rightShadow) {
+                    const scrollLeft = container.scrollLeft;
+                    const maxScroll = container.scrollWidth - container.clientWidth;
+                    
+                    // Show left shadow if not at the beginning
+                    leftShadow.style.opacity = scrollLeft > 0 ? '1' : '0';
+                    
+                    // Show right shadow if not at the end
+                    rightShadow.style.opacity = scrollLeft < maxScroll - 1 ? '1' : '0';
+                  }
+                }}
+              >
+                {recentPages.map(page => {
+                  const folder = page.folder_id ? folders.find(f => f.id === page.folder_id) : null;
+                  return (
+                    <div key={page.id} className="flex-shrink-0 w-48 h-80">
+                      <PageCard
+                        page={page}
+                        folderName={folder?.name}
+                        folderColor={folder?.color}
+                        onDelete={deletePage}
+                        onEdit={() => {/* TODO: Implement edit modal */}}
+                        onMove={() => {/* TODO: Implement move functionality */}}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </section>
         )}
