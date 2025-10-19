@@ -79,8 +79,8 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <WorkspaceProvider sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-      <div className="min-h-screen" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
-        <PanelGroup direction="horizontal" className="min-h-screen">
+      <div className="h-screen overflow-hidden" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+        <PanelGroup direction="horizontal" className="h-screen">
           <Panel
             ref={sidebarPanelRef}
             defaultSize={20}
@@ -102,7 +102,7 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
                 setSidebarOpen(shouldBeOpen);
               }
             }}
-            className="min-h-screen"
+            className="h-screen"
             style={{
               transition: shouldAnimateLayout ? 'flex-grow 0.3s ease, min-width 0.3s ease, width 0.3s ease' : 'none',
             }}
@@ -124,7 +124,7 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
             }}
           />
           <Panel
-            className="min-h-screen"
+            className="h-screen"
             style={{
               transition: shouldAnimateLayout ? 'flex-grow 0.3s ease' : 'none',
             }}

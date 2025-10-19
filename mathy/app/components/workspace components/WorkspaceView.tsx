@@ -5,6 +5,7 @@ import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import FolderCard from './FolderCard';
 import PageCard from './PageCard';
 import WorkspaceLayout from './WorkspaceLayout';
+import SearchAndNewButtons from './SearchAndNewButtons';
 
 type TabType = 'items' | 'notebooks' | 'canvases';
 
@@ -12,6 +13,7 @@ type TabType = 'items' | 'notebooks' | 'canvases';
 export default function WorkspaceView() {
   const { folders, pages, deleteFolder, deletePage, loading } = useWorkspace();
   const [activeTab, setActiveTab] = useState<TabType>('notebooks');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Get root-level folders and pages (memoized)
   const rootFolders = useMemo(() => folders.filter(f => !f.parent_folder_id), [folders]);
@@ -22,89 +24,26 @@ export default function WorkspaceView() {
     return pages.filter(p => p.folder_id === folderId).length;
   }, [pages]);
 
-  // Mock research papers data (in a real app, this would come from your backend)
-  const researchPapers = useMemo(() => [
-    {
-      id: '1',
-      year: 2025,
-      field: 'Computer Science',
-      title: 'Disentangling the Factors of Convergence between Brains and Computer Vision Models',
-      authors: ['Joséphine Rauge', 'Marc Szafraniec', 'Huy V. Vo', 'Camille Couprie', 'Patrick Labatut', 'Piotr Bojanowski', 'Valentin Wyart', 'Jean-R...'],
-      citations: 0,
-      downloads: 4,
-      fieldColor: 'bg-blue-100 text-blue-800'
-    },
-    {
-      id: '2',
-      year: 2007,
-      field: 'Computer Science',
-      title: 'The neural basis of loss aversion in decision-making under risk',
-      authors: ['Sabrina M. Tom', 'Craig R. Fox', 'Christopher Trepel', 'Russell A. Poldrack'],
-      citations: 4,
-      downloads: 0,
-      fieldColor: 'bg-purple-100 text-purple-800'
-    },
-    {
-      id: '3',
-      year: 2025,
-      field: 'Computer Science',
-      title: 'The Future of Memory: Limits and Opportunities',
-      authors: ['Shuhan Liu', 'Samuel Dayo', 'Peijing Li', 'Philip Levis', 'Subhasish Mitra', 'Thierry Tambe', 'David Tenenhouse', 'H.-S. Philip Wong'],
-      citations: 0,
-      downloads: 0,
-      fieldColor: 'bg-green-100 text-green-800'
-    },
-    {
-      id: '4',
-      year: 2023,
-      field: 'Computer Science',
-      title: 'AnimateDiff: Animate Your Personalized Text-to-Image Diffusion Models without Specific Tuning',
-      authors: ['Dahua Lin', 'Yuwei Guo', 'Ceyuan Yang', 'Anyi Rao', 'Zhengyang Liang', 'Yaohui Wang', 'Yu Qiao', 'Maneesh Agrawala', 'Bo Dai'],
-      citations: 1,
-      downloads: 0,
-      fieldColor: 'bg-yellow-100 text-yellow-800'
-    },
-    {
-      id: '5',
-      year: 2007,
-      field: 'Computer Science',
-      title: 'What every programmer should know about memory',
-      authors: ['Ulrich Drepper'],
-      citations: 0,
-      downloads: 0,
-      fieldColor: 'bg-red-100 text-red-800'
-    },
-    {
-      id: '6',
-      year: 2023,
-      field: 'Computer Science',
-      title: 'Reconstructing the Mind\'s Eye: fMRI-to-Image with Contrastive Learning and Diffusion Priors',
-      authors: ['Paul S. Scotti', 'Atmadeep Banerjee', 'Jimmie Goode', 'Stephan Shabalini', 'Alex Nguyen', 'Ethan Cohen', 'Aidan J. Dempster', 'Nathalie...'],
-      citations: 0,
-      downloads: 0,
-      fieldColor: 'bg-indigo-100 text-indigo-800'
-    },
-    {
-      id: '7',
-      year: 2014,
-      field: 'Computer Science',
-      title: 'Quantifying the Rise and Fall of Complexity in Closed Systems: The Coffee Automaton',
-      authors: ['Scott Aaronson', 'Sean M. Carroll', 'Lauren Ouellette'],
-      citations: 0,
-      downloads: 0,
-      fieldColor: 'bg-pink-100 text-pink-800'
-    },
-    {
-      id: '8',
-      year: 1986,
-      field: 'Computer Science',
-      title: 'You and Your Research',
-      authors: ['Richard Hamming'],
-      citations: 0,
-      downloads: 0,
-      fieldColor: 'bg-gray-100 text-gray-800'
-    }
-  ], []);
+  // Search filtering logic
+  const filteredRootFolders = useMemo(() => {
+    if (!searchQuery.trim()) return rootFolders;
+    return rootFolders.filter(folder => 
+      folder.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [rootFolders, searchQuery]);
+
+  const filteredRootPages = useMemo(() => {
+    if (!searchQuery.trim()) return rootPages;
+    return rootPages.filter(page => 
+      page.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [rootPages, searchQuery]);
+
+  // Search handler
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+
 
 
   if (loading) {
@@ -118,7 +57,7 @@ export default function WorkspaceView() {
     );
   }
 
-  if (rootFolders.length === 0 && rootPages.length === 0) {
+  if (filteredRootFolders.length === 0 && filteredRootPages.length === 0 && !searchQuery) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center max-w-md">
@@ -137,22 +76,51 @@ export default function WorkspaceView() {
 
   const headerContent = (
     <>
-      <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-        Workspace
-      </span>
+      {/* Empty - buttons moved to main content area */}
     </>
   );
 
+  const breadcrumb = (
+    <nav className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
+      <span>Workspace</span>
+    </nav>
+  );
+
   return (
-    <WorkspaceLayout header={headerContent}>
+    <WorkspaceLayout header={headerContent} breadcrumb={breadcrumb}>
       <div className="max-w-7xl mx-auto p-6">
-          {/* Tabs */}
-          <div className="flex items-center gap-1 mb-8 p-1 rounded-lg" style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)' }}>
+        {/* Header with title and compact tabs */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+              Workspace
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
+              Manage your notebooks, folders, and pages
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            {/* Search and New Buttons */}
+            <SearchAndNewButtons
+              onNewClick={() => {
+                // TODO: Implement new page/folder creation
+              }}
+              newButtonText="New"
+              newButtonDisabled={false}
+              newButtonLoading={false}
+              searchPlaceholder="Search title..."
+              onSearchChange={handleSearchChange}
+              searchQuery={searchQuery}
+            />
+            
+            {/* Compact Tabs */}
+            <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)' }}>
             {(['items', 'notebooks', 'canvases'] as TabType[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                   activeTab === tab
                     ? 'text-white'
                     : ''
@@ -164,15 +132,15 @@ export default function WorkspaceView() {
               >
                 {tab === 'items' && (
                   <>
-                    <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
-                    Papers & Materials
+                    Papers
                   </>
                 )}
                 {tab === 'notebooks' && (
                   <>
-                    <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                     Notebooks
@@ -180,7 +148,7 @@ export default function WorkspaceView() {
                 )}
                 {tab === 'canvases' && (
                   <>
-                    <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                     Canvases
@@ -188,105 +156,36 @@ export default function WorkspaceView() {
                 )}
               </button>
             ))}
+            </div>
           </div>
+        </div>
 
 
           {/* Items Section */}
           {activeTab === 'items' && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
-                  Items ({researchPapers.length})
-                </h2>
-                <div className="flex items-center gap-4 text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                  <button className="flex items-center gap-2 hover:text-[var(--foreground)] transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Add
-                  </button>
-                  <button className="flex items-center gap-2 hover:text-[var(--foreground)] transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Recently accessed
-                  </button>
-                </div>
-              </div>
-
-              {/* Research Papers Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {researchPapers.map((paper) => (
-                  <div
-                    key={paper.id}
-                    className="rounded-lg border p-4 hover:shadow-md transition-shadow cursor-pointer"
-                    style={{
-                      background: 'var(--card-bg)',
-                      borderColor: 'var(--border-color)',
-                    }}
-                  >
-                    {/* Year and Field */}
-                    <div className="flex items-center justify-between mb-3">
-                      <span className={`text-xs font-medium px-2 py-1 rounded ${paper.fieldColor}`}>
-                        {paper.year} {paper.field}
-                      </span>
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="font-medium text-sm mb-2 leading-tight line-clamp-3" style={{ color: 'var(--foreground)' }}>
-                      {paper.title}
-                    </h3>
-
-                    {/* Authors */}
-                    <p className="text-xs mb-3 leading-relaxed line-clamp-2" style={{ color: 'var(--foreground-muted)' }}>
-                      {paper.authors.join(', ')}
-                    </p>
-
-                    {/* Metrics */}
-                    <div className="flex items-center justify-between text-xs" style={{ color: 'var(--foreground-muted)' }}>
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                          </svg>
-                          {paper.citations}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l4-4m-4 4l-4-4m8 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                          </svg>
-                          {paper.downloads}
-                        </span>
-                      </div>
-                      <button className="p-1 hover:bg-[var(--hover-bg)] rounded transition-colors">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="text-center py-12">
+              <div className="text-4xl mb-4">📚</div>
+              <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+                Papers & Materials
+              </h2>
+              <p style={{ color: 'var(--foreground-muted)' }}>
+                Research papers and materials coming soon...
+              </p>
             </div>
           )}
 
-          {/* Notebooks Section */}
-          {activeTab === 'notebooks' && (
-            <div>
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
-                  Notebooks
-                </h2>
-          </div>
+        {/* Notebooks Section */}
+        {activeTab === 'notebooks' && (
+          <div>
 
         {/* Folders Section */}
-        {rootFolders.length > 0 && (
+        {filteredRootFolders.length > 0 && (
           <section className="mb-8">
                   <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
-              Folders
+              Folders {searchQuery && `(${filteredRootFolders.length} found)`}
                   </h3>
             <div className="flex flex-wrap gap-6 justify-start">
-              {rootFolders.map(folder => (
+              {filteredRootFolders.map(folder => (
                 <FolderCard
                   key={folder.id}
                   folder={folder}
@@ -300,19 +199,19 @@ export default function WorkspaceView() {
         )}
 
         {/* Pages Section */}
-        {rootPages.length > 0 && (
+        {filteredRootPages.length > 0 && (
           <section>
                   <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
-              Pages
+              Pages {searchQuery && `(${filteredRootPages.length} found)`}
                   </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {rootPages.map(page => (
+              {filteredRootPages.map(page => (
                 <PageCard
                   key={page.id}
                   page={page}
                   onDelete={deletePage}
                   onEdit={() => {/* TODO: Implement edit modal */}}
-                  onMove={(_pageId, _folderId) => {/* TODO: Implement move functionality */}}
+                  onMove={() => {/* TODO: Implement move functionality */}}
                 />
               ))}
             </div>
@@ -333,7 +232,21 @@ export default function WorkspaceView() {
               </p>
             </div>
         )}
+
+        {/* Search Results Empty State */}
+        {searchQuery && filteredRootFolders.length === 0 && filteredRootPages.length === 0 && (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+              No results found
+            </h3>
+            <p style={{ color: 'var(--foreground-muted)' }}>
+              No pages or folders match &ldquo;{searchQuery}&rdquo;
+            </p>
+          </div>
+        )}
       </div>
+
     </WorkspaceLayout>
   );
 }
