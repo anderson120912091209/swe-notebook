@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { createReactInlineContentSpec } from '@blocknote/react';
+import { preprocessToLatex } from '@/app/lib/math-dsl/preprocessor';
 
 // Inline math content component - renders saved LaTeX
 const InlineMathContent: React.FC<{
@@ -55,12 +56,11 @@ const InlineMathContent: React.FC<{
         onClick={onEdit}
         style={{
           padding: '2px 6px',
-          border: '1px dashed var(--border-color)',
           borderRadius: '3px',
           color: 'var(--muted-text)',
           cursor: 'pointer',
           backgroundColor: 'var(--math-bg)',
-          fontSize: '0.9em',
+          fontSize: '0.85em',
         }}
       >
         $math$
@@ -75,13 +75,12 @@ const InlineMathContent: React.FC<{
         className="inline-math-loading"
         style={{
           padding: '2px 6px',
-          border: '1px solid var(--math-border)',
           borderRadius: '3px',
           backgroundColor: 'var(--math-bg)',
           cursor: 'pointer',
           display: 'inline-block',
           margin: '0 2px',
-          fontSize: '0.9em',
+          fontSize: '0.85em',
           color: 'var(--muted-text)',
         }}
       >
@@ -96,13 +95,13 @@ const InlineMathContent: React.FC<{
       onClick={onEdit}
       style={{
         padding: '2px 6px',
-        border: '1px solid var(--math-border)',
         borderRadius: '3px',
         backgroundColor: 'var(--math-bg)',
         cursor: 'pointer',
         display: 'inline-block',
         margin: '0 2px',
         verticalAlign: 'middle',
+        fontSize: '0.85em',
       }}
       dangerouslySetInnerHTML={{ __html: renderedMath || latex }}
     />
@@ -198,7 +197,7 @@ export const InlineMath = createReactInlineContentSpec(
   }
 );
 
-// Simple LaTeX input editor component
+// Simple LaTeX input editor component with preprocessing
 interface InlineMathEditorProps {
   initialLatex: string;
   onSave: (latex: string) => void;
@@ -213,8 +212,15 @@ const InlineMathEditor: React.FC<InlineMathEditorProps> = ({
   autoFocus = true,
 }) => {
   const [latex, setLatex] = useState(initialLatex);
+  const [previewLatex, setPreviewLatex] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Preprocess input to LaTeX for preview
+  useEffect(() => {
+    const processed = preprocessToLatex(latex);
+    setPreviewLatex(processed);
+  }, [latex]);
 
   useEffect(() => {
     if (autoFocus && inputRef.current) {
@@ -257,7 +263,8 @@ const InlineMathEditor: React.FC<InlineMathEditorProps> = ({
     }
     
     if (latex.trim()) {
-      onSave(latex);
+      // Save the preprocessed LaTeX
+      onSave(previewLatex);
     } else {
       onCancel();
     }
@@ -304,31 +311,46 @@ const InlineMathEditor: React.FC<InlineMathEditorProps> = ({
   };
 
   return (
-    <input
-      ref={inputRef}
-      type="text"
-      value={latex}
-      onChange={handleChange}
-      onKeyDown={handleKeyDown}
-      onMouseDown={handleMouseDown}
-      onBlur={handleBlur}
-      placeholder="Type LaTeX: x^2, \frac{a}{b}, \sqrt{x}, etc."
-      className="inline-math-input"
-      autoComplete="off"
-      spellCheck={false}
-      style={{
-        minWidth: '200px',
-        padding: '6px 10px',
-        border: '2px solid var(--input-border)',
-        borderRadius: '4px',
-        fontSize: '14px',
-        fontFamily: 'monospace',
-        outline: 'none',
-        backgroundColor: 'var(--input-bg)',
-        color: 'var(--foreground)',
-        boxShadow: '0 2px 8px var(--shadow)',
-      }}
-    />
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px' }}>
+      {/* Input field */}
+      <input
+        ref={inputRef}
+        type="text"
+        value={latex}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        onMouseDown={handleMouseDown}
+        onBlur={handleBlur}
+        placeholder="Type: x/y, alpha, x^2, \\frac{a}{b}"
+        autoComplete="off"
+        spellCheck={false}
+        style={{
+          flex: 1,
+          padding: '4px 8px',
+          border: '1px solid var(--border-color)',
+          borderRadius: '4px',
+          fontSize: '13px',
+          fontFamily: 'monospace',
+          outline: 'none',
+          backgroundColor: 'var(--input-bg)',
+          color: 'var(--foreground)'
+        }}
+      />
+      
+      {/* Live preview */}
+      {previewLatex && (
+        <div style={{ 
+          padding: '2px 6px',
+          borderRadius: '3px',
+          backgroundColor: 'var(--math-bg)',
+          fontSize: '11px',
+          minWidth: '40px',
+          textAlign: 'center'
+        }}>
+          {previewLatex}
+        </div>
+      )}
+    </div>
   );
 };
 
