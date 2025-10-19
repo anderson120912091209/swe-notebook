@@ -210,7 +210,7 @@ interface DraggablePageProps {
 
 const DraggablePage = React.memo(function DraggablePage({ page, isActive, isBeingDragged, onClick, depth }: DraggablePageProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: `page-${page.id}`,
+    id: `folder-page-${page.id}`,
     data: { type: 'page', id: page.id },
   });
 
@@ -264,7 +264,7 @@ interface RecentPageProps {
 
 const RecentPage = React.memo(function RecentPage({ page, folder, isActive, isBeingDragged, onClick }: RecentPageProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: `page-${page.id}`,
+    id: `recent-page-${page.id}`,
     data: { type: 'page', id: page.id },
   });
 
@@ -623,23 +623,54 @@ export default function Sidebar() {
     if (!over || active.id === over.id) return;
     
     // Extract type and id from the drag/drop ids
-    // Format is "type-uuid", but UUIDs contain dashes, so we need to be careful
+    // Format is "context-type-uuid", but UUIDs contain dashes, so we need to be careful
     const activeIdStr = active.id.toString();
     const overIdStr = over.id.toString();
     
     // Check if dropped on trash
     if (overIdStr === 'trash-zone') {
-      const dragType = activeIdStr.split('-')[0] as 'folder' | 'page';
-      const dragId = activeIdStr.substring(dragType.length + 1);
+      // Handle different ID formats: folder-*, folder-page-*, recent-page-*
+      let dragType: 'folder' | 'page';
+      let dragId: string;
+      
+      if (activeIdStr.startsWith('folder-page-')) {
+        dragType = 'page';
+        dragId = activeIdStr.substring('folder-page-'.length);
+      } else if (activeIdStr.startsWith('recent-page-')) {
+        dragType = 'page';
+        dragId = activeIdStr.substring('recent-page-'.length);
+      } else if (activeIdStr.startsWith('folder-')) {
+        dragType = 'folder';
+        dragId = activeIdStr.substring('folder-'.length);
+      } else {
+        // Fallback for old format
+        dragType = activeIdStr.split('-')[0] as 'folder' | 'page';
+        dragId = activeIdStr.substring(dragType.length + 1);
+      }
       
       // Trigger delete confirmation
       handleDeleteRequest(dragId, dragType);
       return;
     }
     
-    // Split only on the first dash
-    const dragType = activeIdStr.split('-')[0] as 'folder' | 'page';
-    const dragId = activeIdStr.substring(dragType.length + 1); // Get everything after "type-"
+    // Parse drag item type and ID
+    let dragType: 'folder' | 'page';
+    let dragId: string;
+    
+    if (activeIdStr.startsWith('folder-page-')) {
+      dragType = 'page';
+      dragId = activeIdStr.substring('folder-page-'.length);
+    } else if (activeIdStr.startsWith('recent-page-')) {
+      dragType = 'page';
+      dragId = activeIdStr.substring('recent-page-'.length);
+    } else if (activeIdStr.startsWith('folder-')) {
+      dragType = 'folder';
+      dragId = activeIdStr.substring('folder-'.length);
+    } else {
+      // Fallback for old format
+      dragType = activeIdStr.split('-')[0] as 'folder' | 'page';
+      dragId = activeIdStr.substring(dragType.length + 1);
+    }
     
     const targetType = overIdStr.split('-')[0] as 'folder' | 'page';
     const targetId = overIdStr.substring(targetType.length + 1); // Get everything after "type-"
@@ -670,8 +701,23 @@ export default function Sidebar() {
   const getActiveItem = () => {
     if (!activeId) return null;
     
-    const type = activeId.split('-')[0];
-    const id = activeId.substring(type.length + 1);
+    let type: string;
+    let id: string;
+    
+    if (activeId.startsWith('folder-page-')) {
+      type = 'page';
+      id = activeId.substring('folder-page-'.length);
+    } else if (activeId.startsWith('recent-page-')) {
+      type = 'page';
+      id = activeId.substring('recent-page-'.length);
+    } else if (activeId.startsWith('folder-')) {
+      type = 'folder';
+      id = activeId.substring('folder-'.length);
+    } else {
+      // Fallback for old format
+      type = activeId.split('-')[0];
+      id = activeId.substring(type.length + 1);
+    }
     
     if (type === 'folder') {
       return folders.find(f => f.id === id);
@@ -727,7 +773,7 @@ export default function Sidebar() {
                 key={page.id}
                 page={page}
                 isActive={isActive(page.id, 'page')}
-                isBeingDragged={activeId === `page-${page.id}`}
+                isBeingDragged={activeId === `folder-page-${page.id}`}
                 onClick={() => navigateToPage(page.id)}
                 depth={depth + 1}
               />
@@ -865,7 +911,7 @@ export default function Sidebar() {
                     page={page}
                     folder={folder}
                     isActive={isActive(page.id, 'page')}
-                    isBeingDragged={activeId === `page-${page.id}`}
+                    isBeingDragged={activeId === `recent-page-${page.id}`}
                     onClick={() => navigateToPage(page.id)}
                   />
                 );
@@ -935,7 +981,7 @@ export default function Sidebar() {
       </div>
 
       {/* Theme Toggle - Bottom Right Corner */}
-      <div className="flex justify-end items-center pt-3 mt-auto" style={{ borderTop: '1px solid var(--border-color)' }}>
+      <div className="flex justify-end items-center pt-3 mt-auto pb-2" style={{ borderTop: '1px solid var(--border-color)' }}>
         <button
           onClick={toggleTheme}
           className="relative w-10 h-5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95"
