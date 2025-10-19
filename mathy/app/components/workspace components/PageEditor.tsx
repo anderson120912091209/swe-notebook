@@ -12,6 +12,7 @@ import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 import WorkspaceLayout from './WorkspaceLayout';
+import { getFolderBreadcrumbPath, generateFolderBreadcrumbJSX } from '@/app/lib/breadcrumbUtils';
 
 const FALLBACK_COLOR = '#9CC5FF';
 
@@ -115,6 +116,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
   const [page, setPage] = useState(pages.find(p => p.id === pageId));
   const [title, setTitle] = useState(page?.title || 'Untitled');
   const [isSaving, setIsSaving] = useState(false);
+  const [showAddTags, setShowAddTags] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentTime, setCurrentTime] = useState(new Date()); // Used to trigger re-renders for relative time updates
 
@@ -254,28 +256,20 @@ export default function PageEditor({ pageId }: PageEditorProps) {
     if (!page) return null;
     
     if (page.folder_id) {
-      const folder = folders.find(f => f.id === page.folder_id);
-      if (folder) {
-        return (
-          <>
-            <button
-              onClick={() => router.push('/notebook')}
-              className="hover:underline"
-            >
-              Workspace
-            </button>
-            <span className="mx-2">/</span>
-            <button
-              onClick={() => router.push(`/notebook/folder/${folder.id}`)}
-              className="hover:underline"
-            >
-              {folder.name}
-            </button>
-            <span className="mx-2">/</span>
-            <span>{title}</span>
-          </>
-        );
-      }
+      const folderPath = getFolderBreadcrumbPath(page.folder_id, folders);
+      const folderBreadcrumbs = generateFolderBreadcrumbJSX(
+        folderPath,
+        (folderId) => router.push(`/notebook/folder/${folderId}`),
+        () => router.push('/notebook')
+      );
+      
+      return (
+        <>
+          {folderBreadcrumbs}
+          <span className="mx-2">/</span>
+          <span>{title}</span>
+        </>
+      );
     }
     
     return (
@@ -336,7 +330,11 @@ export default function PageEditor({ pageId }: PageEditorProps) {
     <WorkspaceLayout header={headerContent} rightHeader={rightHeaderContent} breadcrumb={breadcrumb}>
 
           {/* Page Header with Title and Metadata */}
-          <div className="px-8 pt-4 pb-2">
+          <div 
+            className="px-8 pt-4 pb-2 relative group"
+            onMouseEnter={() => setShowAddTags(true)}
+            onMouseLeave={() => setShowAddTags(false)}
+          >
             {/* Folder Tag */}
             {currentFolder && (
               <div className="mb-2">
@@ -384,15 +382,34 @@ export default function PageEditor({ pageId }: PageEditorProps) {
                 Created by {getUserDisplayName(user)}
               </span>
             </div>
+
+            {/* Add Tags Button - Hover Revealed */}
+            <button
+              className={`absolute right-8 top-4 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${
+                showAddTags ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
+              }`}
+              style={{ 
+                background: 'var(--hover-bg)',
+                color: 'var(--foreground-muted)',
+                border: '1px solid var(--border-color)'
+              }}
+              onClick={() => {
+                // TODO: Implement add tags functionality
+                console.log('Add tags clicked');
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              <span>Add Tags</span>
+            </button>
           </div>
 
           {/* Editor - scrollable content within container */}
           <div className="flex-1 overflow-y-auto px-8 pb-8">
             <div 
-              className="rounded-lg p-4"
+              className="p-4"
               style={{
-                background: 'var(--card-bg)',
-                border: '1px solid var(--border-color)',
                 minHeight: 'calc(100vh - 350px)',
               }}
             >
@@ -400,7 +417,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
                 editor={editor}
                 theme={theme}
                 onChange={handleContentChange}
-                className="font-[family-name:var(--font-geist-sans)]"
+                className="font-[family-name:var(--font-geist-sans)] [&_.bn-editor]:!bg-transparent [&_.bn-container]:!bg-transparent"
               >
                 {/* $ menu for inline math */}
                 {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}

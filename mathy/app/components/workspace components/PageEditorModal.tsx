@@ -115,6 +115,7 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
   const [isSaving, setIsSaving] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isExpanding, setIsExpanding] = useState(false);
+  const [showAddTags, setShowAddTags] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentTime, setCurrentTime] = useState(new Date()); // Used to trigger re-renders for relative time updates
 
@@ -309,16 +310,32 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
       }}
     >
       <ModalContent className="h-full sm:h-[95vh] 
-      md:h-[90vh] lg:h-[85vh] rounded-lg sm:rounded-md 
-      md:rounded-md lg:rounded-lg 
+      md:h-[90vh] lg:h-[85vh] rounded-lg 
       border-1 border-white/10 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
         {() => (
           <>
             {/* Header */}
             <ModalHeader className="flex h-16 items-center justify-between px-4 backdrop-blur 
             sm:px-6 border-b border-gray-200" style={{ borderColor: 'var(--border-color)', background: 'var(--card-bg)' }}>
-              {/* Left side - Title display */}
-              <div className="flex items-center gap-2 flex-1">
+              {/* Left side - Folder tag and Title display */}
+              <div className="flex items-center gap-3 flex-1">
+                {/* Folder Tag */}
+                {currentFolder && (
+                  <span 
+                    className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium flex-shrink-0"
+                    style={{ 
+                      background: currentFolder.color ? lightenHex(parseHex(currentFolder.color)?.hex ?? FALLBACK_COLOR, 0.7) : 'var(--hover-bg)',
+                      color: '#374151',
+                      border: '1px solid var(--border-color)'
+                    }}
+                  >
+                    {/*Folder Icon in the Tag*/}
+                    <svg className="w-3 h-3 mr-1" fill={currentFolder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
+                      <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    {currentFolder.name}
+                  </span>
+                )}
                 <span className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
                   {title || 'Untitled'}
                 </span>
@@ -364,7 +381,11 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
             <ModalBody className="p-0 overflow-hidden">
               <div className="h-full overflow-auto">
                 {/* Page Header with Title and Metadata */}
-                <div className="px-8 pt-8 pb-4">
+                <div 
+                  className="px-8 pt-8 pb-4 relative group"
+                  onMouseEnter={() => setShowAddTags(true)}
+                  onMouseLeave={() => setShowAddTags(false)}
+                >
                   {/* Title */}
                   <input
                     type="text"
@@ -392,25 +413,26 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                     </span>
                   </div>
 
-                  {/* Folder Tag */}
-                  {currentFolder && (
-                    <div className="mt-4">
-                      <span 
-                        className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium"
-                        style={{ 
-                          background: currentFolder.color ? lightenHex(parseHex(currentFolder.color)?.hex ?? FALLBACK_COLOR, 0.7) : 'var(--hover-bg)',
-                          color: '#374151',
-                          border: '1px solid var(--border-color)'
-                        }}
-                      >
-                        {/*Folder Icon in the Tag*/}
-                        <svg className="w-3 h-3 mr-1" fill={currentFolder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
-                          <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                        </svg>
-                        {currentFolder.name}
-                      </span>
-                    </div>
-                  )}
+                  {/* Add Tags Button - Hover Revealed */}
+                  <button
+                    className={`absolute right-8 top-8 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 ${
+                      showAddTags ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
+                    }`}
+                    style={{ 
+                      background: 'var(--hover-bg)',
+                      color: 'var(--foreground-muted)',
+                      border: '1px solid var(--border-color)'
+                    }}
+                    onClick={() => {
+                      // TODO: Implement add tags functionality
+                      console.log('Add tags clicked');
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    <span>Add Tags</span>
+                  </button>
                 </div>
 
                 {/* Editor */}

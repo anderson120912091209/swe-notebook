@@ -27,7 +27,7 @@ export default function WorkspaceLayout({ children, header, rightHeader, breadcr
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--outer-bg)' }}>
+    <div className="h-screen overflow-hidden" style={{ background: 'var(--outer-bg)' }}>
       {/* Top-level header with navigation buttons */}
       <header className="flex h-16 items-center justify-between px-4 backdrop-blur" style={{ background: 'var(--outer-bg)' }}>
         {/* Left side - Navigation buttons + Sidebar toggle (when hidden) + Breadcrumb */}
@@ -92,8 +92,15 @@ export default function WorkspaceLayout({ children, header, rightHeader, breadcr
 
       {/* Main content container - fixed layout */}
       <div 
-        className="h-[calc(100vh-3rem)] w-calc[100%] m-2 mt-1 rounded-lg overflow-hidden"
+        className="rounded-lg overflow-hidden"
         style={{ 
+          height: 'calc(100vh - 4rem - 0.8em)', // 4rem header + 1rem total margins
+          width: 'calc(100vw - 1rem)',
+          maxWidth: 'calc(100% - 1rem)',
+          marginLeft: '0.5rem',
+          marginRight: '0.5rem',
+          marginTop: '0.25rem',
+          marginBottom: '0.75rem',
           background: 'var(--background)',
           border: '1px solid var(--border-color)'
         }}
