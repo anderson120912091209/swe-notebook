@@ -196,16 +196,98 @@ export default function WorkspaceView() {
                 Folders {searchQuery && `(${filteredRootFolders.length} found)`}
               </h3>
             </div>
-            <div className="flex flex-wrap gap-6 justify-start">
-              {filteredRootFolders.map(folder => (
-                <FolderCard
-                  key={folder.id}
-                  folder={folder}
-                  pageCount={getFolderPageCount(folder.id)}
-                  onDelete={deleteFolder}
-                  onEdit={() => {/* TODO: Implement edit modal */}}
-                />
-              ))}
+            <div className="relative">
+              {/* Left chevron button */}
+              <button
+                id="folders-left-chevron"
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full p-2 transition-opacity duration-200 opacity-0"
+                style={{
+                  background: 'var(--card-bg)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--foreground-muted)',
+                }}
+                onClick={() => {
+                  const container = document.getElementById('folders-scroll-container');
+                  if (container) {
+                    container.scrollBy({ left: -300, behavior: 'smooth' });
+                  }
+                }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              {/* Right chevron button */}
+              <button
+                id="folders-right-chevron"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full p-2 transition-opacity duration-200"
+                style={{
+                  background: 'var(--card-bg)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--foreground-muted)',
+                  opacity: 0,
+                }}
+                onClick={() => {
+                  const container = document.getElementById('folders-scroll-container');
+                  if (container) {
+                    container.scrollBy({ left: 300, behavior: 'smooth' });
+                  }
+                }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              
+              <div 
+                id="folders-scroll-container"
+                className="flex gap-6 overflow-x-auto pb-2"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                ref={(el) => {
+                  if (el) {
+                    // Check initial state on mount
+                    const leftChevron = document.getElementById('folders-left-chevron');
+                    const rightChevron = document.getElementById('folders-right-chevron');
+                    
+                    if (leftChevron && rightChevron) {
+                      const scrollLeft = el.scrollLeft;
+                      const maxScroll = el.scrollWidth - el.clientWidth;
+                      
+                      // Show chevrons based on scroll position
+                      leftChevron.style.opacity = scrollLeft > 0 ? '1' : '0';
+                      rightChevron.style.opacity = maxScroll > 1 ? '1' : '0';
+                    }
+                  }
+                }}
+                onScroll={(e) => {
+                  const container = e.currentTarget;
+                  const leftChevron = document.getElementById('folders-left-chevron');
+                  const rightChevron = document.getElementById('folders-right-chevron');
+                  
+                  if (leftChevron && rightChevron) {
+                    const scrollLeft = container.scrollLeft;
+                    const maxScroll = container.scrollWidth - container.clientWidth;
+                    
+                    // Show left chevron if not at the beginning
+                    leftChevron.style.opacity = scrollLeft > 0 ? '1' : '0';
+                    
+                    // Show right chevron if not at the end
+                    rightChevron.style.opacity = scrollLeft < maxScroll - 1 ? '1' : '0';
+                  }
+                }}
+              >
+                {filteredRootFolders.map(folder => (
+                  <div key={folder.id} className="flex-shrink-0">
+                    <FolderCard
+                      folder={folder}
+                      pageCount={getFolderPageCount(folder.id)}
+                      onDelete={deleteFolder}
+                      onEdit={() => {/* TODO: Implement edit modal */}}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
