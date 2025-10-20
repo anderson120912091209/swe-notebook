@@ -791,6 +791,7 @@ export default function Sidebar() {
         background: 'var(--sidebar-bg)',
         borderRight: sidebarOpen ? '1px solid var(--border-color)' : 'none',
         width: sidebarOpen ? '100%' : '0px',
+        minWidth: sidebarOpen ? '180px' : '0px', // This controls the actual sidebar width limit
         transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), border 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
@@ -980,72 +981,269 @@ export default function Sidebar() {
       />
       </div>
 
-      {/* Theme Toggle - Bottom Right Corner */}
-      <div className="flex justify-end items-center pt-3 mt-auto pb-2" style={{ borderTop: '1px solid var(--border-color)' }}>
-        <button
-          onClick={toggleTheme}
-          className="relative w-10 h-5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95"
-          style={{
-            background: theme === 'light' ? 'var(--border-color)' : 'var(--hover-bg)',
-            border: '1px solid var(--border-color)',
-          }}
-          title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-          aria-label="Toggle theme"
-        >
-          {/* Sliding circle with icon */}
-          <div
-            className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full flex items-center justify-center transition-all duration-300"
-            style={{
-              background: theme === 'light' ? 'var(--foreground)' : '#ffffff',
-              transform: theme === 'light' ? 'translateX(0)' : 'translateX(20px)',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+      {/* Bottom Menu Items */}
+      <div className="pt-3 mt-auto pb-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+        {/* Main Menu Items */}
+        <div className="space-y-1 mb-4">
+          {/* Ask a Question */}
+          <button
+            onClick={() => {
+              // You can implement ask a question functionality here
+              console.log('Ask a question clicked');
             }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            style={{ color: 'var(--foreground)' }}
           >
-            {/* Sun icon for light mode */}
+            <div className="w-5 h-5 flex items-center justify-center">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: 'var(--foreground-muted)' }}
+              >
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </div>
+            <span className="text-sm font-medium">Ask a question</span>
+          </button>
+
+          {/* Academy */}
+          <button
+            onClick={() => window.open('https://academy.example.com', '_blank')}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            style={{ color: 'var(--foreground)' }}
+          >
+            <div className="w-5 h-5 flex items-center justify-center">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: 'var(--foreground-muted)' }}
+              >
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+              </svg>
+            </div>
+            <span className="text-sm font-medium">Academy</span>
+          </button>
+
+          {/* Documentation */}
+          <button
+            onClick={() => window.open('https://docs.example.com', '_blank')}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            style={{ color: 'var(--foreground)' }}
+          >
+            <div className="w-5 h-5 flex items-center justify-center">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: 'var(--foreground-muted)' }}
+              >
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </div>
+            <span className="text-sm font-medium">Documentation</span>
             <svg
-              width="10"
-              height="10"
+              width="12"
+              height="12"
               viewBox="0 0 24 24"
               fill="none"
-              stroke={theme === 'light' ? '#ffffff' : 'transparent'}
-              strokeWidth="2.5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: 'var(--foreground-muted)', marginLeft: 'auto' }}
+            >
+              <path d="M7 17L17 7"/>
+              <path d="M7 7h10v10"/>
+            </svg>
+          </button>
+
+          {/* Feedback */}
+          <button
+            onClick={() => window.open('https://feedback.example.com', '_blank')}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            style={{ color: 'var(--foreground)' }}
+          >
+            <div className="w-5 h-5 flex items-center justify-center">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: 'var(--foreground-muted)' }}
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21,15 16,10 5,21"/>
+              </svg>
+            </div>
+            <span className="text-sm font-medium">Feedback</span>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: 'var(--foreground-muted)', marginLeft: 'auto' }}
+            >
+              <path d="M7 17L17 7"/>
+              <path d="M7 7h10v10"/>
+            </svg>
+          </button>
+
+          {/* Trash */}
+          <button
+            onClick={() => {
+              // You can implement trash functionality here
+              console.log('Trash clicked');
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            style={{ color: 'var(--foreground)' }}
+          >
+            <div className="w-5 h-5 flex items-center justify-center">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: 'var(--foreground-muted)' }}
+              >
+                <path d="M3 6h18"/>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              </svg>
+            </div>
+            <span className="text-sm font-medium">Trash</span>
+          </button>
+        </div>
+
+        {/* Bottom Icon Row */}
+        <div className="flex items-center justify-center gap-4">
+          {/* Settings */}
+          <button
+            onClick={() => {
+              // You can implement settings functionality here
+              console.log('Settings clicked');
+            }}
+            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded"
+            title="Settings"
+            aria-label="Settings"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: 'var(--foreground-muted)' }}
+            >
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded"
+            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+            aria-label="Toggle theme"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
               style={{
-                position: 'absolute',
-                opacity: theme === 'light' ? 1 : 0,
-                transform: theme === 'light' ? 'scale(1) rotate(0deg)' : 'scale(0.5) rotate(90deg)',
-                transition: 'opacity 0.2s ease, transform 0.3s ease',
+                color: 'var(--foreground-muted)',
+                transform: theme === 'light' ? 'rotate(0deg)' : 'rotate(180deg)',
+                transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease',
               }}
             >
-              <circle cx="12" cy="12" r="4"/>
-              <line x1="12" y1="1" x2="12" y2="3"/>
-              <line x1="12" y1="21" x2="12" y2="23"/>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-              <line x1="1" y1="12" x2="3" y2="12"/>
-              <line x1="21" y1="12" x2="23" y2="12"/>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              {theme === 'light' ? (
+                // Sun icon for light mode
+                <>
+                  <circle cx="12" cy="12" r="4"/>
+                  <line x1="12" y1="1" x2="12" y2="3"/>
+                  <line x1="12" y1="21" x2="12" y2="23"/>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                  <line x1="1" y1="12" x2="3" y2="12"/>
+                  <line x1="21" y1="12" x2="23" y2="12"/>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </>
+              ) : (
+                // Moon icon for dark mode
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              )}
             </svg>
-            {/* Moon icon for dark mode */}
+          </button>
+
+          {/* User Profile */}
+          <button
+            onClick={() => {
+              // You can implement user profile functionality here
+              console.log('User profile clicked');
+            }}
+            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded"
+            title="User Profile"
+            aria-label="User Profile"
+          >
             <svg
-              width="10"
-              height="10"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
-              fill={theme === 'dark' ? '#1a1a1a' : 'transparent'}
-              stroke="none"
-              style={{
-                position: 'absolute',
-                opacity: theme === 'dark' ? 1 : 0,
-                transform: theme === 'dark' ? 'scale(1) rotate(0deg)' : 'scale(0.5) rotate(-90deg)',
-                transition: 'opacity 0.2s ease, transform 0.3s ease',
-              }}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: 'var(--foreground-muted)' }}
             >
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
             </svg>
-          </div>
-        </button>
+          </button>
+        </div>
       </div>
       </div>
     </aside>

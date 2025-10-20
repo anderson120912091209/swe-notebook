@@ -84,7 +84,7 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
           <Panel
             ref={sidebarPanelRef}
             defaultSize={20}
-            minSize={sidebarOpen ? 15 : 0}
+            minSize={sidebarOpen ? 20 : 0}
             maxSize={40}
             onResize={(size) => {
               if (!suppressAnimationResetRef.current && shouldAnimateLayout) {
