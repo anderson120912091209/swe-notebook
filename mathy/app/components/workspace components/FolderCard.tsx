@@ -70,13 +70,6 @@ function darkenHex(hex: string, amount: number) {
   return rgbToHex(r, g, b);
 }
 
-function getReadableTextColor(backgroundHex: string) {
-  const parsed = parseHex(backgroundHex);
-  if (!parsed) return '#0F172A';
-  const luminance = (0.299 * parsed.r + 0.587 * parsed.g + 0.114 * parsed.b) / 255;
-  // Lowered threshold to 0.85 to ensure more colors use white text for better readability
-  return luminance > 0.85 ? '#1F2933' : '#F9FAFB';
-}
 
 const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDelete, onEdit }: FolderCardProps) {
   const router = useRouter();
@@ -111,7 +104,6 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
   const controlBackground = 'rgba(255, 255, 255, 0.7)';
   const controlHoverBackground = 'rgba(255, 255, 255, 0.9)';
   const controlIconColor = '#0F172A';
-  const shadowColor = 'rgba(15, 23, 42, 0.12)';
 
   const createdDate = folder.created_at ? new Date(folder.created_at) : null;
   const createdYear = createdDate && !Number.isNaN(createdDate.valueOf()) ? createdDate.getFullYear() : '—';
@@ -126,33 +118,60 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
       : 'Add a short description so collaborators know what lives here.';
 
   return (
-    <div
-      onClick={handleClick}
-      className="group relative flex w-60 cursor-pointer select-none
-      overflow-hidden transition-all duration-500 ease-in-out hover:scale-101"
-      style={{
-        background: cardBackground,
-        borderRadius: '10px 23px 23px 10px',
-        border: `1px solid ${borderColor}`,
-        boxShadow: `0 0px 0px ${shadowColor}`,
-        color: textColor,
-        minHeight: '280px',
-      }}
-    >
-
-
-      {/* Subtle ambient highlight */}
+    <div className="relative w-60">
+      {/* Background layer - darkened folder base - STAYS STATIONARY */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-0
-        transition-opacity duration-300 group-hover:opacity-100"
+        id="background-layer"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(80% 60% at 80% 0%, rgba(255,255,255,0.22) 0%, transparent 70%)`,
+          background: darkenHex(cardBackground, 0.15),
+          borderRadius: '10px 23px 23px 10px',
+          zIndex: 0,
         }}
       />
-
-      {/* Content */}
+      
+      {/* Top layer - folder card that MOVES */}
       <div
-        className="relative flex flex-1 flex-col p-6"
+        id="folder-card"
+        onClick={handleClick}
+        className="group relative flex w-60 cursor-pointer select-none overflow-hidden"
+        style={{
+          background: cardBackground,
+          borderRadius: '10px 23px 23px 10px',
+          border: `1px solid ${borderColor}`,
+          boxShadow: `0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)`,
+          color: textColor,
+          minHeight: '280px',
+          transform: 'translateY(0px)',
+          transformOrigin: 'left', // For rotateY (spine rotation)
+          transition: 'all 200ms ease-out',
+          filter: 'brightness(1)',
+          zIndex: 1,
+        }}
+        onMouseEnter={(e) => {
+          const target = e.currentTarget;
+          // Only move the top layer (folder-card), background layer stays stationary
+          target.style.transform = 'rotateY(-13deg)';
+          target.style.boxShadow = '0 10px 10px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1)';
+          target.style.borderRadius = '8px 20px 20px 8px';
+          target.style.filter = 'brightness(1.05)';
+          // Background layer stays in place - no transform applied to it
+        }}
+        onMouseLeave={(e) => {
+          const target = e.currentTarget;
+          // Reset only the top layer
+          target.style.transform = 'translateX(0px) translateY(0px) rotateY(0deg)';
+          target.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)';
+          target.style.borderRadius = '10px 23px 23px 10px';
+          target.style.filter = 'brightness(1)';
+        }}
+      >
+      
+
+      {/* Content - stays stable during hover */}
+      <div
+        className="relative flex flex-1 flex-col p-6 transition-transform duration-[220ms] ease-out
+        group-hover:translate-y-0"
         style={{ gap: '18px' }}
       >
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
@@ -236,6 +255,7 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
+      </div>
       </div>
     </div>
   );

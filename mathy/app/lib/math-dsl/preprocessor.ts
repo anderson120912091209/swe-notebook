@@ -36,6 +36,7 @@ const GREEK_LETTERS: Record<string, string> = {
   'abs': '\\abs',
   'lim': '\\lim',
   'int': '\\int',
+  'infty': '\\infty',
 };
 
 /**

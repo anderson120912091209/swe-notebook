@@ -80,6 +80,21 @@ export function getSuggestions(prefix: string): Suggestion[] {
   return [...exactMatches, ...startsWith, ...contains].slice(0, 8);
 }
 
+// Greek-only provider (for keystroke MVP)
+export function getGreekSuggestions(prefix: string): Suggestion[] {
+  if (!prefix || prefix.length < 1) return [];
+  const greekSet = new Set([
+    'alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega'
+  ]);
+  const lower = prefix.toLowerCase();
+  const greekKeywords = KEYWORDS.filter(k => greekSet.has(k.keyword));
+  const nameOf = (k: string) => k.split('(')[0].toLowerCase();
+  const exact = greekKeywords.filter(k => nameOf(k.keyword) === lower);
+  const starts = greekKeywords.filter(k => nameOf(k.keyword).startsWith(lower) && nameOf(k.keyword) !== lower);
+  const contains = greekKeywords.filter(k => nameOf(k.keyword).includes(lower) && !nameOf(k.keyword).startsWith(lower));
+  return [...exact, ...starts, ...contains].slice(0, 8);
+}
+
 /**
  * Get the current token being typed at cursor position
  */

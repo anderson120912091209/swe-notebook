@@ -5,6 +5,7 @@ import { useCreateBlockNote, SuggestionMenuController } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { customSchema, getMathMenuItems } from '@/app/lib/blocknote-schema';
+import { useMathSuggest } from '@/app/components/product components/useMathSuggest';
 import { filterSuggestionItems } from '@blocknote/core';
 import { useTheme } from '@/app/contexts/ThemeContext';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
@@ -203,6 +204,9 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
     schema: customSchema,
     initialContent: getInitialContent(),
   });
+
+  // Keystroke-based math suggestions (Greek-first)
+  const { Popover: MathSuggest } = useMathSuggest({ editor, enabled: true });
 
   // Auto-save content with debouncing
   const handleContentChange = useCallback(async () => {
@@ -458,6 +462,7 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                         }
                       />
                     </BlockNoteView>
+                    {MathSuggest}
                   </div>
                 </div>
               </div>
