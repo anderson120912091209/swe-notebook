@@ -98,7 +98,10 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
   const lightenAmount = theme === 'dark' ? 0.25 : 0.42;
   const cardBackground = lightenHex(baseColor, lightenAmount);
   const chipBackground = lightenHex(baseColor, theme === 'dark' ? 0.35 : 0.58);
-  const borderColor = darkenHex(cardBackground, 0.2);
+  // Use a more appropriate border color for dark mode
+  const borderColor = theme === 'dark' 
+    ? darkenHex(cardBackground, 0.4) // Darker border in dark mode for better contrast
+    : darkenHex(cardBackground, 0.2); // Original border for light mode
   const textColor = '#ffffff'; // White text for better readability on light backgrounds
   const mutedTextColor = 'rgba(255, 255, 255, 0.8)'; // Semi-transparent white for secondary text
   const controlBackground = 'rgba(255, 255, 255, 0.7)';
@@ -151,7 +154,7 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
         onMouseEnter={(e) => {
           const target = e.currentTarget;
           // Only move the top layer (folder-card), background layer stays stationary
-          target.style.transform = 'rotateY(-13deg)';
+          target.style.transform = 'rotateY(-14deg)';
           target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)';
           target.style.borderRadius = '8px 20px 20px 8px';
           target.style.filter = 'brightness(1.05)';

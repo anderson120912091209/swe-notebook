@@ -71,6 +71,7 @@ export default function SearchAndNewButtons({
       {/* Search Button */}
       <button
         onClick={() => setIsSearchActive(true)}
+        onHover={() => cursor = 'pointer'}
         className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-[var(--hover-bg)] transition-colors"
         style={{ color: 'var(--foreground-muted)' }}
       >
