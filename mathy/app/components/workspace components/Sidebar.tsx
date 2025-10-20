@@ -321,57 +321,57 @@ const RecentPage = React.memo(function RecentPage({ page, folder, isActive, isBe
   );
 });
 
-// ============================================================================
-// TRASH ZONE COMPONENT
-// ============================================================================
-interface TrashZoneProps {
-  isHovered: boolean;
-  isDragging: boolean;
-}
 
-const TrashZone = React.memo(function TrashZone({ isHovered, isDragging }: TrashZoneProps) {
-  const { setNodeRef } = useDroppable({
-    id: 'trash-zone',
+// ============================================================================
+// TRASH BUTTON COMPONENT - Droppable for deletion
+// ============================================================================
+const TrashButton = React.memo(function TrashButton() {
+  const { setNodeRef, isOver } = useDroppable({
+    id: 'trash-button',
   });
 
   return (
-    <div
+    <button
       ref={setNodeRef}
-      className="mt-4 mx-2 px-4 py-3 rounded-lg transition-all duration-200"
-      style={{
-        background: isHovered ? 'rgba(239, 68, 68, 0.15)' : isDragging ? 'rgba(239, 68, 68, 0.05)' : 'transparent',
-        border: isHovered ? '2px dashed #ef4444' : isDragging ? '2px dashed rgba(239, 68, 68, 0.3)' : '2px dashed var(--border-color)',
-        opacity: isDragging ? 1 : 0.5,
-        transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+      onClick={() => {
+        // You can implement trash functionality here
+        console.log('Trash clicked');
+      }}
+      className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+      style={{ 
+        color: 'var(--foreground)',
+        background: isOver ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
+        border: isOver ? '2px dashed #ef4444' : 'none',
       }}
     >
-      <div className="flex items-center justify-center gap-2">
+      <div className="w-5 h-5 flex items-center justify-center">
         <svg
-          className="w-5 h-5 transition-transform duration-200"
-          fill="none"
-          stroke={isHovered ? '#ef4444' : 'var(--foreground-muted)'}
+          width="16"
+          height="16"
           viewBox="0 0 24 24"
-          style={{
-            transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ 
+            color: isOver ? '#ef4444' : 'var(--foreground-muted)',
+            transform: isOver ? 'scale(1.1)' : 'scale(1)',
+            transition: 'color 0.2s ease, transform 0.2s ease',
           }}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-          />
+          <path d="M3 6h18"/>
+          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
         </svg>
-        <span
-          className="text-sm font-medium"
-          style={{
-            color: isHovered ? '#ef4444' : 'var(--foreground-muted)',
-          }}
-        >
-          {isHovered ? 'Drop to Delete' : 'Trash'}
-        </span>
       </div>
-    </div>
+      <span 
+        className="text-sm font-medium"
+        style={{ color: isOver ? '#ef4444' : 'var(--foreground)' }}
+      >
+        {isOver ? 'Drop to Delete' : 'Trash'}
+      </span>
+    </button>
   );
 });
 
@@ -628,7 +628,7 @@ export default function Sidebar() {
     const overIdStr = over.id.toString();
     
     // Check if dropped on trash
-    if (overIdStr === 'trash-zone') {
+    if (overIdStr === 'trash-button') {
       // Handle different ID formats: folder-*, folder-page-*, recent-page-*
       let dragType: 'folder' | 'page';
       let dragId: string;
@@ -922,8 +922,6 @@ export default function Sidebar() {
         )}
         </nav>
 
-        {/* Trash Zone - Droppable area for deleting items */}
-        <TrashZone isHovered={overId === 'trash-zone'} isDragging={activeId !== null} />
 
         {/* Drag Overlay - shows dragged item */}
         <DragOverlay>
@@ -982,7 +980,7 @@ export default function Sidebar() {
       </div>
 
       {/* Bottom Menu Items */}
-      <div className="pt-3 mt-auto pb-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+      <div className="pt-3 mt-auto pb-2">
         {/* Main Menu Items */}
         <div className="space-y-1 mb-4">
           {/* Ask a Question */}
@@ -1118,34 +1116,8 @@ export default function Sidebar() {
             </svg>
           </button>
 
-          {/* Trash */}
-          <button
-            onClick={() => {
-              // You can implement trash functionality here
-              console.log('Trash clicked');
-            }}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
-            style={{ color: 'var(--foreground)' }}
-          >
-            <div className="w-5 h-5 flex items-center justify-center">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: 'var(--foreground-muted)' }}
-              >
-                <path d="M3 6h18"/>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-              </svg>
-            </div>
-            <span className="text-sm font-medium">Trash</span>
-          </button>
+          {/* Trash - Droppable for deletion */}
+          <TrashButton />
         </div>
 
         {/* Bottom Icon Row */}
