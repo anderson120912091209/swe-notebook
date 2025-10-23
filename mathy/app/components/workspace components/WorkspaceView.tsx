@@ -304,58 +304,87 @@ export default function WorkspaceView() {
               </h3>
             </div>
             <div className="relative">
-              {/* Left shadow overlay */}
-              <div 
-                className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none transition-opacity duration-200"
-                id="left-shadow"
-                style={{ 
+              {/* Left chevron button */}
+              <button
+                id="pages-left-chevron"
+                className="absolute left-2 z-10 rounded-full p-2 transition-opacity duration-200 opacity-0"
+                style={{
+                  background: 'var(--card-bg)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--foreground-muted)',
+                  top: '40%',
+                  transform: 'translateY(-50%)',
+                }}
+                onClick={() => {
+                  const container = document.getElementById('pages-scroll-container');
+                  if (container) {
+                    container.scrollBy({ left: -300, behavior: 'smooth' });
+                  }
+                }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              {/* Right chevron button */}
+              <button
+                id="pages-right-chevron"
+                className="absolute right-2 z-10 rounded-full p-2 transition-opacity duration-200"
+                style={{
+                  background: 'var(--card-bg)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--foreground-muted)',
+                  top: '40%',
+                  transform: 'translateY(-50%)',
                   opacity: 0,
-                  background: 'linear-gradient(to right, var(--background) 0%, var(--background) 20%, transparent 100%)'
                 }}
-              />
-              
-              {/* Right shadow overlay */}
-              <div 
-                className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none transition-opacity duration-200"
-                id="right-shadow"
-                style={{ 
-                  opacity: 1,
-                  background: 'linear-gradient(to left, var(--background) 0%, var(--background) 20%, transparent 100%)'
+                onClick={() => {
+                  const container = document.getElementById('pages-scroll-container');
+                  if (container) {
+                    container.scrollBy({ left: 300, behavior: 'smooth' });
+                  }
                 }}
-              />
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
               
               <div 
-                className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+                id="pages-scroll-container"
+                className="flex gap-4 overflow-x-auto pb-2"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 ref={(el) => {
                   if (el) {
                     // Check initial state on mount
-                    const leftShadow = document.getElementById('left-shadow');
-                    const rightShadow = document.getElementById('right-shadow');
+                    const leftChevron = document.getElementById('pages-left-chevron');
+                    const rightChevron = document.getElementById('pages-right-chevron');
                     
-                    if (leftShadow && rightShadow) {
+                    if (leftChevron && rightChevron) {
                       const scrollLeft = el.scrollLeft;
                       const maxScroll = el.scrollWidth - el.clientWidth;
                       
-                      // Show right shadow by default if there's more content
-                      rightShadow.style.opacity = maxScroll > 1 ? '1' : '0';
-                      leftShadow.style.opacity = scrollLeft > 0 ? '1' : '0';
+                      // Show chevrons based on scroll position
+                      leftChevron.style.opacity = scrollLeft > 0 ? '1' : '0';
+                      rightChevron.style.opacity = maxScroll > 1 ? '1' : '0';
                     }
                   }
                 }}
                 onScroll={(e) => {
                   const container = e.currentTarget;
-                  const leftShadow = document.getElementById('left-shadow');
-                  const rightShadow = document.getElementById('right-shadow');
+                  const leftChevron = document.getElementById('pages-left-chevron');
+                  const rightChevron = document.getElementById('pages-right-chevron');
                   
-                  if (leftShadow && rightShadow) {
+                  if (leftChevron && rightChevron) {
                     const scrollLeft = container.scrollLeft;
                     const maxScroll = container.scrollWidth - container.clientWidth;
                     
-                    // Show left shadow if not at the beginning
-                    leftShadow.style.opacity = scrollLeft > 0 ? '1' : '0';
+                    // Show left chevron if not at the beginning
+                    leftChevron.style.opacity = scrollLeft > 0 ? '1' : '0';
                     
-                    // Show right shadow if not at the end
-                    rightShadow.style.opacity = scrollLeft < maxScroll - 1 ? '1' : '0';
+                    // Show right chevron if not at the end
+                    rightChevron.style.opacity = scrollLeft < maxScroll - 1 ? '1' : '0';
                   }
                 }}
               >
@@ -379,25 +408,6 @@ export default function WorkspaceView() {
           </section>
         )}
 
-        {/* Pages Section */}
-        {filteredRootPages.length > 0 && (
-          <section>
-                  <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
-              Pages {searchQuery && `(${filteredRootPages.length} found)`}
-                  </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredRootPages.map(page => (
-                <PageCard
-                  key={page.id}
-                  page={page}
-                  onDelete={deletePage}
-                  onEdit={() => {/* TODO: Implement edit modal */}}
-                  onMove={() => {/* TODO: Implement move functionality */}}
-                />
-              ))}
-            </div>
-          </section>
-              )}
             </div>
           )}
 

@@ -980,16 +980,16 @@ export default function Sidebar() {
       </div>
 
       {/* Bottom Menu Items */}
-      <div className="pt-3 mt-auto pb-2">
+      <div className="pt-2 mt-auto pb-2">
         {/* Main Menu Items */}
-        <div className="space-y-1 mb-4">
+        <div className="space-y-0.5 mb-3">
           {/* Ask a Question */}
           <button
             onClick={() => {
               // You can implement ask a question functionality here
               console.log('Ask a question clicked');
             }}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
             style={{ color: 'var(--foreground)' }}
           >
             <div className="w-5 h-5 flex items-center justify-center">
@@ -1015,7 +1015,7 @@ export default function Sidebar() {
           {/* Academy */}
           <button
             onClick={() => window.open('https://academy.example.com', '_blank')}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
             style={{ color: 'var(--foreground)' }}
           >
             <div className="w-5 h-5 flex items-center justify-center">
@@ -1040,7 +1040,7 @@ export default function Sidebar() {
           {/* Documentation */}
           <button
             onClick={() => window.open('https://docs.example.com', '_blank')}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
             style={{ color: 'var(--foreground)' }}
           >
             <div className="w-5 h-5 flex items-center justify-center">
@@ -1079,7 +1079,7 @@ export default function Sidebar() {
           {/* Feedback */}
           <button
             onClick={() => window.open('https://feedback.example.com', '_blank')}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
             style={{ color: 'var(--foreground)' }}
           >
             <div className="w-5 h-5 flex items-center justify-center">
@@ -1121,7 +1121,7 @@ export default function Sidebar() {
         </div>
 
         {/* Bottom Icon Row */}
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-start gap-4 px-3">
           {/* Settings */}
           <button
             onClick={() => {

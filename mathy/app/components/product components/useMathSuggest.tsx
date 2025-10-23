@@ -16,13 +16,27 @@ export function useMathSuggest({ editor, enabled = true }: UseMathSuggestOptions
   const [activeIndex, setActiveIndex] = useState(0);
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
 
+
   const updateFromSelection = useCallback(() => {
-    if (!enabled) { setOpen(false); return; }
+    // If popover is already open, don't reset it - let user navigate
+    if (open) {
+      return;
+    }
+    
+    if (!enabled) { 
+      setOpen(false); 
+      return; 
+    }
     const sel = window.getSelection();
-    if (!sel || !sel.isCollapsed) { setOpen(false); return; }
+    if (!sel || !sel.isCollapsed) { 
+      setOpen(false); 
+      return; 
+    }
 
     const range = sel.rangeCount ? sel.getRangeAt(0) : null;
-    if (!range) return;
+    if (!range) {
+      return;
+    }
 
     // Get current text node and token
     const node = range.startContainer;
@@ -34,7 +48,11 @@ export function useMathSuggest({ editor, enabled = true }: UseMathSuggestOptions
     while (start > 0 && /[a-zA-Z]/.test(text[start - 1] || '')) start--;
     while (end < text.length && /[a-zA-Z]/.test(text[end] || '')) end++;
     const token = text.slice(start, end);
-    if (!token) { setOpen(false); return; }
+    
+    if (!token) { 
+      setOpen(false); 
+      return; 
+    }
 
     const sugg = getGreekSuggestions(token).map((s, idx) => ({
       id: `${s.keyword}-${idx}`,
@@ -42,17 +60,22 @@ export function useMathSuggest({ editor, enabled = true }: UseMathSuggestOptions
       glyph: getGreekSymbol(s.keyword),
     }));
 
-    if (sugg.length === 0) { setOpen(false); return; }
-
+    if (sugg.length === 0) { 
+      setOpen(false); 
+      return; 
+    }
+    
     setItems(sugg);
-    setActiveIndex(0);
+    setActiveIndex(0); //only if it is first initialized, if it 
+    //is not first initialized, then the active index should be the index 
+    //of the last selected item 
     setOpen(true);
 
     // Compute caret rect
     const rects = range.getClientRects();
     const lastRect = rects[rects.length - 1];
     if (lastRect) setAnchor(lastRect);
-  }, [enabled]);
+  }, [enabled, open]);
 
   // Listeners
   useEffect(() => {
@@ -62,7 +85,9 @@ export function useMathSuggest({ editor, enabled = true }: UseMathSuggestOptions
       if (metaKeys) return;
       updateFromSelection();
     };
-    const onSelection = () => updateFromSelection();
+    const onSelection = () => {
+      updateFromSelection();
+    };
     document.addEventListener('keyup', onKeyUp);
     document.addEventListener('selectionchange', onSelection);
     return () => {
@@ -89,7 +114,7 @@ export function useMathSuggest({ editor, enabled = true }: UseMathSuggestOptions
     // Find current token bounds (letters only)
     let start = cursor; let end = cursor;
     while (start > 0 && /[a-zA-Z]/.test(text[start - 1] || '')) start--;
-    while (end < text.length && /[a-zA-Z]/.test(text[end] || '')) end++;
+    while (end < text.length && /[a-zA-Z]/.test(text[end] || '')) end++; 
 
     // Select the token range so BlockNote replaces it upon insert
     try {
@@ -121,10 +146,22 @@ export function useMathSuggest({ editor, enabled = true }: UseMathSuggestOptions
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (!open) return;
-      if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIndex(i => Math.min(i + 1, items.length - 1)); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIndex(i => Math.max(i - 1, 0)); }
-      else if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); accept(activeIndex); }
-      else if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
+      if (e.key === 'ArrowDown') { 
+        e.preventDefault(); 
+        setActiveIndex(i => Math.min(i + 1, items.length - 1)); 
+      }
+      else if (e.key === 'ArrowUp') { 
+        e.preventDefault(); 
+        setActiveIndex(i => Math.max(i - 1, 0)); 
+      }
+      else if (e.key === 'Enter' || e.key === 'Tab') { 
+        e.preventDefault(); 
+        accept(activeIndex); 
+      }
+      else if (e.key === 'Escape') { 
+        e.preventDefault(); 
+        setOpen(false); 
+      }
     };
     document.addEventListener('keydown', onKeyDown, true);
     return () => document.removeEventListener('keydown', onKeyDown, true);
