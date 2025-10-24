@@ -19,6 +19,7 @@ export interface Page {
   user_id: string;
   folder_id?: string;
   title: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   content: any; // BlockNote JSON content
   icon?: string;
   cover_image?: string;
@@ -28,6 +29,41 @@ export interface Page {
   created_at: string;
   updated_at: string;
   last_edited_at: string;
+  // Paper-specific fields
+  item_type?: 'page' | 'paper';
+  paper_metadata?: {
+    doi?: string;
+    arxivId?: string;
+    authors?: string[];
+    venue?: string;
+    year?: number;
+    abstract?: string;
+  };
+  paper_source?: string;
+  paper_status?: 'queued' | 'parsing' | 'ready' | 'error';
+  paper_error_message?: string;
+  parsed_html_path?: string;
+  pdf_path?: string;
+  thumbnail_path?: string;
+}
+
+// Specialized interface for research papers
+export interface Paper extends Omit<Page, 'item_type'> {
+  item_type: 'paper';
+  paper_metadata: {
+    doi?: string;
+    arxivId?: string;
+    authors?: string[];
+    venue?: string;
+    year?: number;
+    abstract?: string;
+  };
+  paper_source: string;
+  paper_status: 'queued' | 'parsing' | 'ready' | 'error';
+  paper_error_message?: string;
+  parsed_html_path?: string;
+  pdf_path?: string;
+  thumbnail_path?: string;
 }
 
 export interface WorkspaceItem {

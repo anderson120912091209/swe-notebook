@@ -25,7 +25,9 @@ const MathRenderer: React.FC<MathRendererProps> = ({
   const [showSymbols, setShowSymbols] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isClient, setIsClient] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [MathQuill, setMathQuill] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [mathField, setMathField] = useState<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +58,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({
     }
   }, [isClient, value, defaultEquation]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleMathChange = (mathField: any) => {
     const latex = mathField.latex();
     setMathValue(latex);

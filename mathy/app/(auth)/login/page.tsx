@@ -1,7 +1,5 @@
 'use client'
 
-import Link from 'next/link'
-import Image from 'next/image';
 import SignInCard from '../../components/auth components/signin-card';
 
 export default function LoginPage () { 

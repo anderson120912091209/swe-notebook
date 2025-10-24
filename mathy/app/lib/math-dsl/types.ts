@@ -20,6 +20,7 @@ export interface Token {
   value: string;
   start: number; // Offset in src
   end: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: any; // Function args, etc.
 }
 

@@ -12,7 +12,7 @@ interface MathExpressionProps {
 /**
  * Main renderer component for AST nodes
  */
-export const MathExpression: React.FC<MathExpressionProps> = React.memo(({ node, theme = 'light' }) => {
+const MathExpressionComponent: React.FC<MathExpressionProps> = ({ node, theme = 'light' }) => {
   return (
     <span 
       data-ast-node-id={node.id}
@@ -183,7 +183,9 @@ function renderFunction(node: ASTNode, theme: 'light' | 'dark'): React.ReactNode
       ))})
     </span>
   );
-}
+};
+
+export const MathExpression = React.memo(MathExpressionComponent);
 
 /**
  * Render AST to HTML string (for copy/paste)

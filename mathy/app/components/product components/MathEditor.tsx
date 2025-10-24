@@ -239,6 +239,18 @@ const MathEditor: React.FC<MathEditorProps> = ({
     };
   }, [state.src, onSave, onCancel]);
 
+  // Parse the current source for rendering
+  const parsedAST = useMemo(() => {
+    if (!state.src.trim()) return null;
+    try {
+      const tokens = tokenize(state.src);
+      return parse(tokens);
+    } catch (error) {
+      console.error('MathEditor: Parse error:', error);
+      return null;
+    }
+  }, [state.src]);
+
   if (!isEditing) {
     // Display mode
     return (
@@ -263,18 +275,6 @@ const MathEditor: React.FC<MathEditorProps> = ({
       </div>
     );
   }
-
-  // Parse the current source for rendering
-  const parsedAST = useMemo(() => {
-    if (!state.src.trim()) return null;
-    try {
-      const tokens = tokenize(state.src);
-      return parse(tokens);
-    } catch (error) {
-      console.error('MathEditor: Parse error:', error);
-      return null;
-    }
-  }, [state.src]);
 
   // Editing mode - show both input and preview
   return (

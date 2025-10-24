@@ -37,8 +37,8 @@ body {
 /* Exclude elements with their own transitions */
 *[class*="transition"],
 *[style*="transition"],
-.katex,
-.katex *,
+math-field,
+math-field *,
 .inline-math-content,
 .inline-math-content *,
 [class*="theme-toggle"] {
@@ -51,38 +51,228 @@ body {
 }
 
 /* Override BlockNote fonts with Geist - but NOT math elements */
-.bn-container :not(.katex):not(.katex *):not(.inline-math-content):not(.inline-math-content *):not([class*="katex"]) {
+.bn-container :not(math-field):not(math-field *):not(.inline-math-content):not(.inline-math-content *):not([class*="math-field"]) {
   font-family: var(--font-geist-sans), "Alternate", system-ui, -apple-system, sans-serif;
 }
 
-.bn-container code:not(.katex):not(.katex *):not([class*="katex"]),
-.bn-container pre:not(.katex):not(.katex *):not([class*="katex"]) {
+.bn-container code:not(math-field):not(math-field *):not([class*="math-field"]),
+.bn-container pre:not(math-field):not(math-field *):not([class*="math-field"]) {
   font-family: var(--font-geist-mono), monospace;
 }
 
-/* Force original KaTeX fonts for all math - highest priority */
-.katex,
-.katex *,
-.katex-html,
-.katex-html *,
-.katex-mathml,
-.katex-mathml *,
-.inline-math-content,
-.inline-math-content *,
-.inline-math-content span,
-.inline-math-content span *,
-span[class*="katex"],
-span[class*="katex"] * {
-  font-family: unset !important;
-  font-family: KaTeX_Main, "Times New Roman", serif !important;
+/* MathLive styling - let MathLive handle its own fonts */
+math-field {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+  /* Completely disable virtual keyboard UI */
+  --keyboard-zindex: -1;
 }
 
-/* Additional specificity for deeply nested math elements */
-.bn-container .katex,
-.bn-container .katex *,
-.bn-container .inline-math-content,
-.bn-container .inline-math-content * {
-  font-family: KaTeX_Main, "Times New Roman", serif !important;
+/* Hide MathLive virtual keyboard icons completely */
+/* Hide the virtual keyboard toggle button */
+math-field::part(virtual-keyboard-toggle) {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Hide the menu toggle button (hamburger icon) */
+math-field::part(menu-toggle) {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Hide any other virtual keyboard related elements */
+math-field .ML__virtual-keyboard-toggle,
+math-field .ML__keyboard-toggle,
+math-field .ML__keyboard-layout-switcher,
+math-field [data-toggle="virtual-keyboard"],
+math-field [data-toggle="keyboard-layout"],
+math-field .ML__keyboard-layout,
+math-field .ML__keyboard-switcher {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Hide any keyboard-related icons that might appear */
+math-field .ML__keyboard-icon,
+math-field .ML__toggle-icon,
+math-field [class*="keyboard"],
+math-field [class*="toggle"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Hide any menu-related elements */
+math-field .ML__menu-toggle,
+math-field .ML__menu-icon,
+math-field [class*="menu"],
+math-field [data-toggle="menu"],
+math-field [data-menu] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* MathLive Suggestion Popup Customization */
+/* Match your app's design system with clean, modern styling */
+math-field .ML__suggestion,
+math-field .ML__popover,
+math-field .ML__autocomplete,
+math-field .ML__suggestion-panel {
+  /* Background and border matching your math field styling */
+  background-color: var(--background, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* Typography matching your app */
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  
+  /* Spacing and layout */
+  padding: 4px 0;
+  max-height: 240px;
+  overflow-y: auto;
+  min-width: 200px;
+  max-width: 320px;
+  
+  /* Smooth transitions */
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Individual suggestion items */
+math-field .ML__suggestion-item,
+math-field .ML__popover-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 4px;
+  margin: 2px 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+math-field .ML__suggestion-item:hover,
+math-field .ML__popover-item:hover {
+  background-color: var(--math-bg, #f8f9fa);
+}
+
+math-field .ML__suggestion-item.selected,
+math-field .ML__popover-item.selected {
+  background-color: var(--foreground, #171717);
+  color: var(--background, #ffffff);
+}
+
+/* Suggestion text styling */
+math-field .ML__suggestion-text,
+math-field .ML__popover-text {
+  font-weight: 500;
+  color: var(--foreground, #171717);
+  font-size: 14px;
+}
+
+math-field .ML__suggestion-item.selected .ML__suggestion-text,
+math-field .ML__popover-item.selected .ML__popover-text {
+  color: var(--background, #ffffff);
+}
+
+math-field .ML__suggestion-description,
+math-field .ML__popover-description {
+  font-size: 12px;
+  color: var(--muted-text, #6b7280);
+  margin-top: 2px;
+  opacity: 0.8;
+}
+
+math-field .ML__suggestion-item.selected .ML__suggestion-description,
+math-field .ML__popover-item.selected .ML__popover-description {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* LaTeX preview in suggestions */
+math-field .ML__suggestion-latex,
+math-field .ML__popover-latex {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 12px;
+  background-color: var(--math-bg, #f8f9fa);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  margin-left: auto;
+}
+
+math-field .ML__suggestion-item.selected .ML__suggestion-latex,
+math-field .ML__popover-item.selected .ML__popover-latex {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--background, #ffffff);
+}
+
+/* Keyboard shortcut hints */
+math-field .ML__suggestion-shortcut,
+math-field .ML__popover-shortcut {
+  font-size: 11px;
+  color: var(--muted-text, #6b7280);
+  background-color: var(--math-bg, #f8f9fa);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  font-family: var(--font-geist-mono), monospace;
+}
+
+math-field .ML__suggestion-item.selected .ML__suggestion-shortcut,
+math-field .ML__popover-item.selected .ML__popover-shortcut {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--background, #ffffff);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  math-field .ML__suggestion,
+  math-field .ML__popover,
+  math-field .ML__autocomplete,
+  math-field .ML__suggestion-panel {
+    background-color: var(--background, #0a0a0a);
+    border-color: var(--border-color, #374151);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  }
+  
+  math-field .ML__suggestion-item:hover,
+  math-field .ML__popover-item:hover {
+    background-color: var(--math-bg, #1f2937);
+  }
+  
+  math-field .ML__suggestion-item.selected,
+  math-field .ML__popover-item.selected {
+    background-color: var(--foreground, #ededed);
+    color: var(--background, #0a0a0a);
+  }
+  
+  math-field .ML__suggestion-text,
+  math-field .ML__popover-text {
+    color: var(--foreground, #ededed);
+  }
+  
+  math-field .ML__suggestion-item.selected .ML__suggestion-text,
+  math-field .ML__popover-item.selected .ML__popover-text {
+    color: var(--background, #0a0a0a);
+  }
+}
+
+/* Ensure MathLive integrates well with BlockNote */
+.bn-container math-field {
+  margin: 0 2px;
+  vertical-align: baseline;
+}
+
+/* Inline math content styling */
+.inline-math-content {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 2px;
 }
 
 /* Custom line height for reference image styling */

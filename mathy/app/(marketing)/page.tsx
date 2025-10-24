@@ -1,11 +1,9 @@
 'use client'
 
-import Link from "next/link";   
 import Image from "next/image";
 import WaitlistSmallBtn from "../components/marketing components/waitlist-small-btn";
 import ProductDemoWindow from "../components/marketing components/product-demo-window";
 import HeroVideoSection from "../components/marketing components/hero-video-section";
-import MathRenderer from "../components/marketing components/math-renderer";
 import { useNamespaceTranslation } from "../lib/i18n/LanguageContext";
 import ClientOnly from "../components/ClientOnly";
 

@@ -15,6 +15,7 @@ import type {
 const detectBrowserLanguage = (): Language => {
   if (typeof window === 'undefined') return 'en';
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const browserLang = navigator.language || (navigator as any).userLanguage;
   
   // Check for Traditional Chinese variants
