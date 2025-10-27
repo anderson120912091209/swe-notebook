@@ -6,6 +6,7 @@ import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import PageCard from './PageCard';
 import WorkspaceLayout from './WorkspaceLayout';
 import SearchAndNewButtons from './SearchAndNewButtons';
+import FolderTag from './FolderTag';
 import { getFolderBreadcrumbPath, generateFolderBreadcrumbJSX } from '@/app/lib/breadcrumbUtils';
 
 interface FolderViewProps {
@@ -16,15 +17,20 @@ export default function FolderView({ folderId }: FolderViewProps) {
   const router = useRouter();
   const { folders, pages, createPage, deletePage, loading } = useWorkspace();
   const [folder, setFolder] = useState(folders.find(f => f.id === folderId));
-  const [folderPages, setFolderPages] = useState(pages.filter(p => p.folder_id === folderId));
   const [creatingPage, setCreatingPage] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDescriptionField, setShowDescriptionField] = useState(false);
+  const [folderDescription, setFolderDescription] = useState(folder?.description || '');
+  const [folderTitle, setFolderTitle] = useState(folder?.name || '');
 
   useEffect(() => {
     const currentFolder = folders.find(f => f.id === folderId);
     setFolder(currentFolder);
-    setFolderPages(pages.filter(p => p.folder_id === folderId));
-  }, [folderId, folders, pages]);
+    if (currentFolder) {
+      setFolderTitle(currentFolder.name);
+      setFolderDescription(currentFolder.description || '');
+    }
+  }, [folderId, folders]);
 
   // Get child folders and pages
   const childFolders = useMemo(() => folders.filter(f => f.parent_folder_id === folderId), [folders, folderId]);
@@ -66,6 +72,12 @@ export default function FolderView({ folderId }: FolderViewProps) {
     router.push('/notebook');
   };
 
+  const handleTitleChange = useCallback((newTitle: string) => {
+    setFolderTitle(newTitle);
+    // TODO: Update folder name in database
+    console.log('Folder title changed to:', newTitle);
+  }, []);
+
   if (loading && !folder) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -100,8 +112,19 @@ export default function FolderView({ folderId }: FolderViewProps) {
 
   const headerContent = (
     <>
-      {/* Empty - buttons moved to main content area */}
+      {/* Empty - content moved to header */}
     </>
+  );
+
+  const rightHeaderContent = (
+    <SearchAndNewButtons
+      onNewClick={() => setCreatingPage(true)}
+      newButtonDisabled={creatingPage}
+      newButtonLoading={creatingPage}
+      searchPlaceholder="Search pages..."
+      onSearchChange={handleSearchChange}
+      searchQuery={searchQuery}
+    />
   );
 
   const breadcrumb = (
@@ -129,43 +152,31 @@ export default function FolderView({ folderId }: FolderViewProps) {
     </nav>
   );
 
-
   return (
-    <WorkspaceLayout header={headerContent} breadcrumb={breadcrumb}>
+    <WorkspaceLayout 
+      header={headerContent} 
+      rightHeader={rightHeaderContent}
+      breadcrumb={breadcrumb}
+      title={folderTitle}
+      editableTitle={true}
+      onTitleChange={handleTitleChange}
+      customTagContent={
+        <FolderTag 
+          folderName={`${filteredPages.length + filteredChildFolders.length} items`}
+          folderColor={folder.color}
+        />
+      }
+      description={folderDescription}
+      onDescriptionChange={(desc) => {
+        setFolderDescription(desc);
+        // TODO: Update folder description in database
+      }}
+      showDescriptionField={showDescriptionField}
+      onToggleDescription={() => setShowDescriptionField(!showDescriptionField)}
+      showHamburgerButton={true}
+    >
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
-          {/* Folder info with search/new buttons */}
-          <div className="flex items-start justify-between mb-8">
-            <div className="flex items-start gap-4">
-              <div
-                className="w-16 h-16 rounded-lg flex items-center justify-center text-3xl"
-                style={{ backgroundColor: folder.color || '#6B7280' }}
-              >
-                {folder.icon || '📁'}
-              </div>
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>
-                  {folder.name}
-                </h1>
-                <p style={{ color: 'var(--foreground-muted)' }}>
-                  {folderPages.length} {folderPages.length === 1 ? 'page' : 'pages'}
-                </p>
-              </div>
-            </div>
-            
-            {/* Search and New Buttons */}
-            <div className="flex items-center">
-              <SearchAndNewButtons
-                onNewClick={handleCreatePage}
-                newButtonText="New Page"
-                newButtonDisabled={creatingPage}
-                newButtonLoading={creatingPage}
-                searchPlaceholder="Search pages..."
-                onSearchChange={handleSearchChange}
-                searchQuery={searchQuery}
-              />
-            </div>
-          </div>
 
         {/* Child Folders */}
         {filteredChildFolders.length > 0 && (

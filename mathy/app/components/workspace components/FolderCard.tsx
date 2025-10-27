@@ -154,7 +154,7 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
         onMouseEnter={(e) => {
           const target = e.currentTarget;
           // Only move the top layer (folder-card), background layer stays stationary
-          target.style.transform = 'rotateY(-15deg)';
+          target.style.transform = 'rotateY(-13deg)';
           target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)';
           target.style.borderRadius = '8px 20px 20px 8px';
           target.style.filter = 'brightness(1.05)';

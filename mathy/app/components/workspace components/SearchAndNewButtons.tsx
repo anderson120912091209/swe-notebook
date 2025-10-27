@@ -4,7 +4,6 @@ import React, { useState, useCallback } from 'react';
 
 interface SearchAndNewButtonsProps {
   onNewClick: () => void;
-  newButtonText: string;
   newButtonDisabled?: boolean;
   newButtonLoading?: boolean;
   searchPlaceholder?: string;
@@ -14,7 +13,6 @@ interface SearchAndNewButtonsProps {
 
 export default function SearchAndNewButtons({
   onNewClick,
-  newButtonText,
   newButtonDisabled = false,
   newButtonLoading = false,
   searchPlaceholder = "Search...",
@@ -80,12 +78,12 @@ export default function SearchAndNewButtons({
         <span>Search</span>
       </button>
 
-      {/* New Button - Split Design */}
-      <div className="flex items-center rounded-md" style={{ border: '1px solid var(--border-color)' }}>
+      {/* New Button - More Rounded with Lighter Background */}
+      <div className="flex items-center rounded-xl" style={{ border: '1px solid var(--border-color)', background: 'var(--card-bg)' }}>
         <button
           onClick={onNewClick}
           disabled={newButtonDisabled}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-l-md hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-l-xl hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           style={{ 
             color: 'var(--foreground)',
             background: newButtonLoading ? 'var(--hover-bg)' : 'transparent'
@@ -98,14 +96,14 @@ export default function SearchAndNewButtons({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           )}
-          <span>{newButtonText}</span>
+          <span>New</span>
         </button>
         
         <div className="w-px" style={{ background: 'var(--border-color)' }} />
         
         <button
           disabled={newButtonDisabled}
-          className="px-2 py-1.5 text-sm hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-2 text-sm hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-r-xl cursor-pointer"
           style={{ color: 'var(--foreground-muted)' }}
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -337,7 +337,7 @@ const TrashButton = React.memo(function TrashButton() {
         // You can implement trash functionality here
         console.log('Trash clicked');
       }}
-      className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+      className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
       style={{ 
         color: 'var(--foreground)',
         background: isOver ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
@@ -811,7 +811,7 @@ export default function Sidebar() {
           <button
             onClick={navigateToWorkspace}
             className="flex-1 flex items-center gap-2 px-2 py-2 
-            rounded-lg hover:bg-[var(--hover-bg)] text-left min-w-0"
+            rounded-lg hover:bg-[var(--hover-bg)] text-left min-w-0 cursor-pointer"
             style={{ color: 'var(--foreground)' }}
           >
             {sidebarOpen && (
@@ -838,7 +838,7 @@ export default function Sidebar() {
           {/* Sidebar Toggle Button - Small */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0"
+            className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0 cursor-pointer"
             style={{ color: 'var(--foreground-muted)' }}
             title="Hide sidebar"
           >
@@ -855,7 +855,7 @@ export default function Sidebar() {
       <div className="mb-4 px-2 flex gap-2">
         <button
           onClick={() => setShowNewFolderModal(true)}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs hover:bg-[var(--hover-bg)]"
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs hover:bg-[var(--hover-bg)] cursor-pointer"
           style={{ color: 'var(--foreground)', border: '1px solid var(--border-color)' }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -865,7 +865,7 @@ export default function Sidebar() {
         </button>
         <button
           onClick={() => setShowNewPageModal(true)}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs hover:bg-[var(--hover-bg)]"
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs hover:bg-[var(--hover-bg)] cursor-pointer"
           style={{ color: 'var(--foreground)', border: '1px solid var(--border-color)' }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -989,7 +989,7 @@ export default function Sidebar() {
               // You can implement ask a question functionality here
               console.log('Ask a question clicked');
             }}
-            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
             style={{ color: 'var(--foreground)' }}
           >
             <div className="w-5 h-5 flex items-center justify-center">
@@ -1015,7 +1015,7 @@ export default function Sidebar() {
           {/* Academy */}
           <button
             onClick={() => window.open('https://academy.example.com', '_blank')}
-            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
             style={{ color: 'var(--foreground)' }}
           >
             <div className="w-5 h-5 flex items-center justify-center">
@@ -1040,7 +1040,7 @@ export default function Sidebar() {
           {/* Documentation */}
           <button
             onClick={() => window.open('https://docs.example.com', '_blank')}
-            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
             style={{ color: 'var(--foreground)' }}
           >
             <div className="w-5 h-5 flex items-center justify-center">
@@ -1079,7 +1079,7 @@ export default function Sidebar() {
           {/* Feedback */}
           <button
             onClick={() => window.open('https://feedback.example.com', '_blank')}
-            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)]"
+            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
             style={{ color: 'var(--foreground)' }}
           >
             <div className="w-5 h-5 flex items-center justify-center">
@@ -1128,7 +1128,7 @@ export default function Sidebar() {
               // You can implement settings functionality here
               console.log('Settings clicked');
             }}
-            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded"
+            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
             title="Settings"
             aria-label="Settings"
           >
@@ -1151,7 +1151,7 @@ export default function Sidebar() {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded"
+            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
             title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
             aria-label="Toggle theme"
           >
@@ -1196,7 +1196,7 @@ export default function Sidebar() {
               // You can implement user profile functionality here
               console.log('User profile clicked');
             }}
-            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded"
+            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
             title="User Profile"
             aria-label="User Profile"
           >

@@ -1,0 +1,54 @@
+{
+  "appId": "com.mathy.notebook",
+  "productName": "Mathy",
+  "directories": {
+    "output": "dist-electron",
+    "buildResources": "electron/build"
+  },
+  "files": [
+    "out/**/*",
+    "electron/**/*",
+    "node_modules/**/*",
+    "package.json"
+  ],
+  "extraResources": [
+    {
+      "from": "public",
+      "to": "public"
+    }
+  ],
+  "mac": {
+    "category": "public.app-category.productivity",
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["x64", "arm64"]
+      }
+    ],
+    "icon": "public/logos/roundedlogo-no-text.png"
+  },
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64", "ia32"]
+      }
+    ],
+    "icon": "public/logos/roundedlogo-no-text.png"
+  },
+  "linux": {
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "public/logos/roundedlogo-no-text.png"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true
+  }
+}
