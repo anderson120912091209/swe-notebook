@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor, closestCorners, DragStartEvent, DragOverEvent, DragEndEvent } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
@@ -8,9 +8,9 @@ import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useTheme } from '@/app/contexts/ThemeContext';
 import { getWorkspaceTitle } from '@/app/lib/workspaceTitle';
-import CreateFolderModal from './CreateFolderModal';
-import CreatePageModal from './CreatePageModal';
-import DeleteConfirmationModal from './DeleteConfirmationModal';
+import CreateFolderModal from '../Folders/CreateFolderModal';
+import CreatePageModal from '../Pages/CreatePageModal';
+import DeleteConfirmationModal from '../DeleteConfirmationModal';
 import type { Folder, Page } from '@/app/types/workspace';
 
 const FALLBACK_COLOR = '#9CC5FF';
@@ -395,7 +395,7 @@ export default function Sidebar() {
     deletePage,
     canDropItem
   } = useWorkspace();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   const workspaceTitle = useMemo(() => getWorkspaceTitle(user), [user]);
@@ -403,6 +403,29 @@ export default function Sidebar() {
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [showNewPageModal, setShowNewPageModal] = useState(false);
   const [isCompressed, setIsCompressed] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
+  
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showProfileMenu) {
+        const target = event.target as Element;
+        if (!target.closest('.profile-menu-container')) {
+          setShowProfileMenu(false);
+        }
+      }
+    };
+
+    if (showProfileMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfileMenu]);
   
   // Drag & Drop state
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -537,6 +560,14 @@ export default function Sidebar() {
   const navigateToPage = useCallback((pageId: string) => {
     router.push(`/notebook/page/${pageId}`);
   }, [router]);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  }, [signOut]);
 
   // ============================================================================
   // DELETE/TRASH HANDLERS
@@ -1122,6 +1153,29 @@ export default function Sidebar() {
 
         {/* Bottom Icon Row */}
         <div className="flex items-center justify-start gap-4 px-3">
+          {/* Home */}
+          <button
+            onClick={navigateToWorkspace}
+            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
+            title="Home"
+            aria-label="Home"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: 'var(--foreground-muted)' }}
+            >
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+          </button>
+
           {/* Settings */}
           <button
             onClick={() => {
@@ -1191,30 +1245,81 @@ export default function Sidebar() {
           </button>
 
           {/* User Profile */}
-          <button
-            onClick={() => {
-              // You can implement user profile functionality here
-              console.log('User profile clicked');
-            }}
-            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
-            title="User Profile"
-            aria-label="User Profile"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ color: 'var(--foreground-muted)' }}
+          <div className="relative profile-menu-container">
+            <button
+              ref={profileButtonRef}
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
+              title="User Profile"
+              aria-label="User Profile"
             >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </button>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: 'var(--foreground-muted)' }}
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </button>
+
+            {/* Profile Dropdown Menu */}
+            {showProfileMenu && (
+              <div 
+                ref={profileMenuRef}
+                className="fixed bottom-16 left-4 w-48 rounded-lg shadow-lg border py-1 z-[9999]"
+                style={{ 
+                  background: 'var(--card-bg)',
+                  borderColor: 'var(--border-color)',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                }}>
+                <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--border-color)' }}>
+                  <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
+                    {user?.user_metadata?.preferred_name || 
+                     user?.user_metadata?.given_name || 
+                     user?.email?.split('@')[0] || 
+                     'User'}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: 'var(--foreground-muted)' }}>
+                    {user?.email}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    handleLogout();
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  <div className="flex items-center gap-2">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ color: 'var(--foreground-muted)' }}
+                    >
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                      <polyline points="16,17 21,12 16,7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    Sign Out
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       </div>

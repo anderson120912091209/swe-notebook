@@ -28,11 +28,17 @@ export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderMo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
+    
+    const trimmedName = name.trim();
+    if (trimmedName.length > 25) {
+      alert('Folder name must be 25 characters or less.');
+      return;
+    }
 
     setCreating(true);
     try {
       const newFolder = await createFolder(
-        name.trim(),
+        trimmedName,
         undefined, // No icon
         color
       );
@@ -71,13 +77,19 @@ export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderMo
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., My Research"
               autoFocus
+              maxLength={25}
               className="w-full px-4 py-2 rounded-lg border"
               style={{
                 background: 'var(--background)',
-                borderColor: 'var(--border-color)',
+                borderColor: name.length > 25 ? '#ef4444' : 'var(--border-color)',
                 color: 'var(--foreground)',
               }}
             />
+            <div className="flex justify-between items-center mt-1">
+              <span className="text-xs" style={{ color: name.length > 25 ? '#ef4444' : 'var(--foreground-muted)' }}>
+                {name.length > 25 ? 'Name too long' : `${name.length}/25 characters`}
+              </span>
+            </div>
           </div>
 
 
@@ -114,7 +126,7 @@ export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderMo
             </button>
             <button
               type="submit"
-              disabled={!name.trim() || creating}
+              disabled={!name.trim() || creating || name.length > 25}
               className="px-4 py-2 rounded-full transition-all duration-200 active:scale-95 disabled:opacity-50"
               style={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',

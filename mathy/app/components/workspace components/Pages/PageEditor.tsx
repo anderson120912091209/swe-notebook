@@ -11,7 +11,7 @@ import { useTheme } from '@/app/contexts/ThemeContext';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
-import WorkspaceLayout from './WorkspaceLayout';
+import WorkspaceLayout from './Workspace View/WorkspaceLayout';
 import { getFolderBreadcrumbPath, generateFolderBreadcrumbJSX } from '@/app/lib/breadcrumbUtils';
 
 const FALLBACK_COLOR = '#9CC5FF';

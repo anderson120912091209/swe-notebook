@@ -3,13 +3,15 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/app/contexts/AuthContext';
-import type { Folder, Page, WorkspaceItem, ViewMode } from '@/app/types/workspace';
+import type { Folder, Page, Canvas, WorkspaceItem, ViewMode, Paper } from '@/app/types/workspace';
 import * as workspaceAPI from '@/app/lib/api/workspace';
+import { createClient } from '@/app/lib/supabase/client';
 
 interface WorkspaceContextType {
   // Data
   folders: Folder[];
   pages: Page[];
+  canvas: Canvas[];
   workspaceItems: WorkspaceItem[];
   currentFolder: Folder | null;
   currentPage: Page | null;
@@ -33,10 +35,22 @@ interface WorkspaceContextType {
   deletePage: (pageId: string) => Promise<void>;
   movePageToFolder: (pageId: string, folderId: string | null) => Promise<void>;
   
+  // Actions - Canvas
+  createCanvas: (title: string, folderId?: string, icon?: string) => Promise<Canvas>;
+  updateCanvas: (canvasId: string, updates: Partial<Canvas>) => Promise<void>;
+  deleteCanvas: (canvasId: string) => Promise<void>;
+  moveCanvasToFolder: (canvasId: string, folderId: string | null) => Promise<void>;
+  
+  // Actions - Papers
+  createPaper: (metadata: Record<string, unknown>, source: string, type: 'doi' | 'arxiv' | 'pdf', file?: File) => Promise<Paper>;
+  updatePaperStatus: (paperId: string, status: string, data?: Record<string, unknown>) => Promise<void>;
+  deletePaper: (paperId: string) => Promise<void>;
+  reparsePaper: (paperId: string) => Promise<void>;
+  
   // Drag & Drop
   moveFolderToFolder: (folderId: string, targetFolderId: string | null) => Promise<void>;
   calculateFolderDepth: (folderId: string, targetParentId?: string | null) => number;
-  canDropItem: (dragType: 'folder' | 'page', dragId: string, targetType: 'folder' | 'page', targetId: string) => boolean;
+  canDropItem: (dragType: 'folder' | 'page' | 'canvas', dragId: string, targetType: 'folder' | 'page' | 'canvas', targetId: string) => boolean;
   
   // Navigation
   openFolder: (folderId: string) => void;
@@ -54,6 +68,7 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefin
 const QUERY_KEYS = {
   folders: (userId: string) => ['folders', userId],
   pages: (userId: string) => ['pages', userId],
+  canvas: (userId: string) => ['canvas', userId],
   workspaceItems: (userId: string) => ['workspaceItems', userId],
 } as const;
 
@@ -104,6 +119,17 @@ export function WorkspaceProvider({
     enabled: !!user,
   });
 
+  // Fetch canvas with React Query
+  const { 
+    data: canvas = [], 
+    isLoading: canvasLoading,
+    error: canvasError 
+  } = useQuery({
+    queryKey: QUERY_KEYS.canvas(user?.id || ''),
+    queryFn: () => workspaceAPI.getCanvas(user!.id),
+    enabled: !!user,
+  });
+
   // Fetch workspace items with React Query
   const { 
     data: workspaceItems = [], 
@@ -116,8 +142,8 @@ export function WorkspaceProvider({
   });
 
   // Combined loading and error states
-  const loading = foldersLoading || pagesLoading || workspaceItemsLoading;
-  const error = foldersError || pagesError || workspaceItemsError 
+  const loading = foldersLoading || pagesLoading || canvasLoading || workspaceItemsLoading;
+  const error = foldersError || pagesError || canvasError || workspaceItemsError 
     ? 'Failed to load workspace data' 
     : null;
 
@@ -128,6 +154,7 @@ export function WorkspaceProvider({
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.folders(user.id) }),
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.pages(user.id) }),
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.canvas(user.id) }),
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user.id) }),
     ]);
   }, [user, queryClient]);
@@ -427,6 +454,115 @@ export function WorkspaceProvider({
   });
 
   // ============================================================================
+  // CANVAS MUTATIONS - Optimistic updates with automatic rollback on error
+  // ============================================================================
+
+  const createCanvasMutation = useMutation({
+    mutationFn: ({ 
+      userId, 
+      title, 
+      folderId, 
+      icon 
+    }: { 
+      userId: string; 
+      title: string; 
+      folderId?: string; 
+      icon?: string; 
+    }) => workspaceAPI.createCanvas(userId, title, icon, undefined, folderId),
+    onSuccess: (newCanvas) => {
+      queryClient.setQueryData<Canvas[]>(
+        QUERY_KEYS.canvas(user!.id),
+        (old = []) => [...old, newCanvas]
+      );
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user!.id) });
+    },
+  });
+
+  const updateCanvasMutation = useMutation({
+    mutationFn: ({ canvasId, updates }: { canvasId: string; updates: Partial<Canvas> }) =>
+      workspaceAPI.updateCanvas(canvasId, updates),
+    onMutate: async ({ canvasId, updates }) => {
+      // Mark as editing to pause real-time updates
+      setIsEditing(true);
+      if (editingTimerRef.current) clearTimeout(editingTimerRef.current);
+      
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.canvas(user!.id) });
+      
+      const previousCanvas = queryClient.getQueryData<Canvas[]>(QUERY_KEYS.canvas(user!.id));
+      
+      // Optimistically update
+      queryClient.setQueryData<Canvas[]>(
+        QUERY_KEYS.canvas(user!.id),
+        (old = []) => old.map(c => c.id === canvasId ? { ...c, ...updates } : c)
+      );
+      
+      return { previousCanvas };
+    },
+    onError: (err, variables, context) => {
+      setIsEditing(false);
+      if (context?.previousCanvas) {
+        queryClient.setQueryData(QUERY_KEYS.canvas(user!.id), context.previousCanvas);
+      }
+    },
+    onSettled: () => {
+      // Resume updates after 2 seconds of no editing
+      editingTimerRef.current = setTimeout(() => {
+        setIsEditing(false);
+      }, 2000);
+    },
+  });
+
+  const deleteCanvasMutation = useMutation({
+    mutationFn: (canvasId: string) => workspaceAPI.deleteCanvas(canvasId),
+    onMutate: async (canvasId) => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.canvas(user!.id) });
+      
+      const previousCanvas = queryClient.getQueryData<Canvas[]>(QUERY_KEYS.canvas(user!.id));
+      
+      // Optimistically remove
+      queryClient.setQueryData<Canvas[]>(
+        QUERY_KEYS.canvas(user!.id),
+        (old = []) => old.filter(c => c.id !== canvasId)
+      );
+      
+      return { previousCanvas };
+    },
+    onError: (err, canvasId, context) => {
+      if (context?.previousCanvas) {
+        queryClient.setQueryData(QUERY_KEYS.canvas(user!.id), context.previousCanvas);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user!.id) });
+    },
+  });
+
+  const moveCanvasMutation = useMutation({
+    mutationFn: ({ canvasId, folderId }: { canvasId: string; folderId: string | null }) =>
+      workspaceAPI.updateCanvas(canvasId, { folder_id: folderId || undefined }),
+    onMutate: async ({ canvasId, folderId }) => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.canvas(user!.id) });
+      
+      const previousCanvas = queryClient.getQueryData<Canvas[]>(QUERY_KEYS.canvas(user!.id));
+      
+      // Optimistically update
+      queryClient.setQueryData<Canvas[]>(
+        QUERY_KEYS.canvas(user!.id),
+        (old = []) => old.map(c => 
+          c.id === canvasId ? { ...c, folder_id: folderId || undefined } : c
+        )
+      );
+      
+      return { previousCanvas };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousCanvas) {
+        queryClient.setQueryData(QUERY_KEYS.canvas(user!.id), context.previousCanvas);
+      }
+    },
+  });
+
+  // ============================================================================
   // PUBLIC API - Wrapper functions for mutations
   // ============================================================================
 
@@ -470,8 +606,147 @@ export function WorkspaceProvider({
     await movePageMutation.mutateAsync({ pageId, folderId });
   };
 
+  const createCanvas = async (
+    title: string,
+    folderId?: string,
+    icon?: string
+  ): Promise<Canvas> => {
+    if (!user) throw new Error('User not authenticated');
+    return createCanvasMutation.mutateAsync({ userId: user.id, title, folderId, icon });
+  };
+
+  const updateCanvas = async (canvasId: string, updates: Partial<Canvas>) => {
+    await updateCanvasMutation.mutateAsync({ canvasId, updates });
+  };
+
+  const deleteCanvas = async (canvasId: string) => {
+    await deleteCanvasMutation.mutateAsync(canvasId);
+  };
+
+  const moveCanvasToFolder = async (canvasId: string, folderId: string | null) => {
+    await moveCanvasMutation.mutateAsync({ canvasId, folderId });
+  };
+
   const moveFolderToFolder = async (folderId: string, targetFolderId: string | null) => {
     await moveFolderMutation.mutateAsync({ folderId, targetFolderId });
+  };
+
+  // ============================================================================
+  // PAPER MANAGEMENT FUNCTIONS
+  // ============================================================================
+
+  const createPaper = async (metadata: Record<string, unknown>, source: string, type: 'doi' | 'arxiv' | 'pdf', file?: File): Promise<Paper> => {
+    try {
+      if (!user) throw new Error('User not authenticated');
+      
+      const supabase = createClient();
+      
+      // 1. Upload PDF file if provided
+      let pdfPath: string | undefined;
+      if (file && type === 'pdf') {
+        const { uploadPDF } = await import('@/app/lib/api/paperStorage');
+        pdfPath = await uploadPDF(file, user.id, `temp-${Date.now()}`);
+      }
+      
+      // 2. Create paper record in database
+      const { data: paper, error: createError } = await supabase
+        .from('notebooks')
+        .insert({
+          user_id: user.id,
+          title: (metadata.title as string) || 'Untitled Paper',
+          content: { blocks: [] },
+          icon: '📄',
+          position: 0,
+          is_default: false,
+          is_favorited: false,
+          item_type: 'paper',
+          paper_metadata: metadata,
+          paper_source: source,
+          paper_status: 'queued',
+          pdf_path: pdfPath
+        })
+        .select()
+        .single();
+      
+      if (createError || !paper) {
+        console.error('Failed to create paper record:', createError); // Debug logging
+        throw new Error('Failed to create paper record');
+      }
+      
+      // 3. Call process API to start parsing
+      try {
+        await fetch('/api/papers/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type,
+            value: source,
+            paperId: paper.id
+          })
+        });
+      } catch (processError) {
+        console.error('Failed to start processing:', processError);
+        // Paper is created, but processing failed - will show error status
+      }
+      
+      // 4. Invalidate queries to refresh UI
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.pages(user.id) });
+      
+      return paper as Paper;
+    } catch (error) {
+      console.error('Failed to create paper:', error);
+      throw error;
+    }
+  };
+
+  const updatePaperStatus = async (paperId: string, status: string, data?: Record<string, unknown>) => {
+    try {
+      // TODO: Implement actual paper status update via API
+      console.log('Updating paper status:', { paperId, status, data });
+    } catch (error) {
+      console.error('Failed to update paper status:', error);
+      throw error;
+    }
+  };
+
+  const deletePaper = async (paperId: string) => {
+    try {
+      const response = await fetch(`/api/papers/${paperId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete paper');
+      }
+      
+      // Invalidate queries to refresh UI
+      if (user) {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.pages(user.id) });
+      }
+    } catch (error) {
+      console.error('Failed to delete paper:', error);
+      throw error;
+    }
+  };
+
+  const reparsePaper = async (paperId: string) => {
+    try {
+      const response = await fetch(`/api/papers/${paperId}/reparse`, {
+        method: 'POST'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to re-parse paper');
+      }
+      
+      // Invalidate queries to refresh UI
+      if (user) {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.pages(user.id) });
+      }
+    } catch (error) {
+      console.error('Failed to re-parse paper:', error);
+      throw error;
+    }
   };
 
   // ============================================================================
@@ -572,6 +847,7 @@ export function WorkspaceProvider({
     // Data from React Query
     folders,
     pages,
+    canvas,
     workspaceItems,
     currentFolder,
     currentPage,
@@ -594,6 +870,18 @@ export function WorkspaceProvider({
     updatePage,
     deletePage,
     movePageToFolder,
+    
+    // Actions - Canvas
+    createCanvas,
+    updateCanvas,
+    deleteCanvas,
+    moveCanvasToFolder,
+    
+    // Actions - Papers
+    createPaper,
+    updatePaperStatus,
+    deletePaper,
+    reparsePaper,
     
     // Drag & Drop
     moveFolderToFolder,

@@ -207,7 +207,14 @@ function EditableTitle({
 
   const handleSave = () => {
     if (editValue.trim() && editValue !== value) {
-      onChange?.(editValue.trim());
+      const trimmedValue = editValue.trim();
+      if (trimmedValue.length > 25) {
+        alert('Folder name must be 25 characters or less.');
+        setEditValue(value);
+        setIsEditing(false);
+        return;
+      }
+      onChange?.(trimmedValue);
     }
     setIsEditing(false);
   };
@@ -242,6 +249,7 @@ function EditableTitle({
         onChange={(e) => setEditValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
+        maxLength={25}
         className={`${className} bg-transparent border-none outline-none`}
         style={style}
       />

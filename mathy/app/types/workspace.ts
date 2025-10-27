@@ -47,6 +47,22 @@ export interface Page {
   thumbnail_path?: string;
 }
 
+export interface Canvas {
+  id: string;
+  user_id: string;
+  title: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  content: any; // tldraw JSON content
+  icon?: string;
+  cover_image?: string;
+  folder_id?: string;
+  position: number;
+  is_favorited: boolean;
+  created_at: string;
+  updated_at: string;
+  last_edited_at: string;
+}
+
 // Specialized interface for research papers
 export interface Paper extends Omit<Page, 'item_type'> {
   item_type: 'paper';
@@ -67,7 +83,7 @@ export interface Paper extends Omit<Page, 'item_type'> {
 }
 
 export interface WorkspaceItem {
-  item_type: 'folder' | 'page';
+  item_type: 'folder' | 'page' | 'canvas';
   id: string;
   name: string;
   icon?: string;
@@ -81,14 +97,14 @@ export type ViewMode = 'workspace' | 'folder' | 'editor';
 export interface BreadcrumbItem {
   id: string;
   name: string;
-  type: 'workspace' | 'folder' | 'page';
+  type: 'workspace' | 'folder' | 'page' | 'canvas';
   path: string;
 }
 
 // Drag and Drop types
 export interface DragItem {
   id: string;
-  type: 'folder' | 'page';
+  type: 'folder' | 'page' | 'canvas';
   parentId?: string;
   depth: number;
 }
