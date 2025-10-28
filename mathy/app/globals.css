@@ -67,6 +67,8 @@ math-field {
   line-height: 1;
   /* Completely disable virtual keyboard UI */
   --keyboard-zindex: -1;
+  /* Ensure transparent background to match page */
+  background-color: transparent !important;
 }
 
 /* Hide MathLive virtual keyboard icons completely */

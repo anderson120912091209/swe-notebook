@@ -37,6 +37,7 @@ const InlineMathContent: React.FC<{
           fontSize: 'inherit',
           minWidth: '20px',
           minHeight: '1.2em',
+          backgroundColor: 'transparent',
         }}
         mathVirtualKeyboardPolicy="off"
         virtualKeyboardMode="off"
@@ -311,6 +312,7 @@ const InlineMathRenderer: React.FC<{
                 border: '1px solid var(--border-color, #e5e7eb)',
                 borderRadius: '3px',
                 outline: 'none',
+                backgroundColor: 'transparent',
               }}
               mathVirtualKeyboardPolicy="off"
               smartMode={true}
