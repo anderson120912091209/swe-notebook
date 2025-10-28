@@ -383,7 +383,7 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
               <div className="h-full overflow-auto">
                 {/* Page Header with Title and Metadata */}
                 <div 
-                  className="px-8 pt-8 pb-4 relative group"
+                  className="px-4 sm:px-8 md:px-12 lg:px-16 pt-8 pb-4 relative group max-w-4xl mx-auto"
                   onMouseEnter={() => setShowAddTags(true)}
                   onMouseLeave={() => setShowAddTags(false)}
                 >
@@ -437,9 +437,9 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                 </div>
 
                 {/* Editor */}
-                <div className="px-8 pb-16">
+                <div className="pb-16">
                   <div 
-                    className="p-6"
+                    className="max-w-4xl mx-auto px-4 sm:px-8 md:px-12 lg:px-16"
                     style={{
                       minHeight: '500px',
                     }}
@@ -448,7 +448,7 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                       editor={editor}
                       theme={theme}
                       onChange={handleContentChange}
-                      className="font-[family-name:var(--font-geist-sans)] [&_.bn-editor]:!bg-transparent [&_.bn-container]:!bg-transparent"
+                      className="font-[family-name:var(--font-geist-sans)] [&_.bn-editor]:!bg-transparent [&_.bn-container]:!bg-transparent [&_.bn-editor]:!px-0"
                     >
                       {/* $ menu for inline math */}
                       {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}

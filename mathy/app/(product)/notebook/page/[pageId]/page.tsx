@@ -3,7 +3,7 @@
 import { use } from 'react';
 import dynamic from 'next/dynamic';
 
-const PageEditor = dynamic(() => import('@/app/components/workspace components/PageEditor'), {
+const PageEditor = dynamic(() => import('@/app/components/workspace components/Pages/PageEditor'), {
   ssr: false,
 });
 

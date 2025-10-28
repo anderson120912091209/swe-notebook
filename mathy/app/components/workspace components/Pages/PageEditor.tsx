@@ -11,7 +11,7 @@ import { useTheme } from '@/app/contexts/ThemeContext';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
-import WorkspaceLayout from './Workspace View/WorkspaceLayout';
+import WorkspaceLayout from '@/app/components/workspace components/Workspace View/WorkspaceLayout';
 import { getFolderBreadcrumbPath, generateFolderBreadcrumbJSX } from '@/app/lib/breadcrumbUtils';
 
 const FALLBACK_COLOR = '#9CC5FF';
@@ -332,7 +332,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
 
           {/* Page Header with Title and Metadata */}
           <div 
-            className="px-8 pt-4 pb-2 relative group"
+            className="px-4 sm:px-8 md:px-12 lg:px-16 pt-4 pb-2 relative group max-w-4xl mx-auto"
             onMouseEnter={() => setShowAddTags(true)}
             onMouseLeave={() => setShowAddTags(false)}
           >
@@ -407,9 +407,9 @@ export default function PageEditor({ pageId }: PageEditorProps) {
           </div>
 
           {/* Editor - scrollable content within container */}
-          <div className="flex-1 overflow-y-auto px-8 pb-8">
+          <div className="flex-1 overflow-y-auto pb-8">
             <div 
-              className="p-4"
+              className="max-w-4xl mx-auto px-4 sm:px-8 md:px-12 lg:px-16"
               style={{
                 minHeight: 'calc(100vh - 350px)',
               }}
@@ -418,7 +418,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
                 editor={editor}
                 theme={theme}
                 onChange={handleContentChange}
-                className="font-[family-name:var(--font-geist-sans)] [&_.bn-editor]:!bg-transparent [&_.bn-container]:!bg-transparent"
+                className="font-[family-name:var(--font-geist-sans)] [&_.bn-editor]:!bg-transparent [&_.bn-container]:!bg-transparent [&_.bn-editor]:!px-0"
               >
                 {/* $ menu for inline math */}
                 {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
