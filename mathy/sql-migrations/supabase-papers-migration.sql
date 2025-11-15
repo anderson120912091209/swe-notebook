@@ -10,7 +10,8 @@ ALTER TABLE public.notebooks
   ADD COLUMN IF NOT EXISTS paper_error_message TEXT, 
   ADD COLUMN IF NOT EXISTS parsed_html_path TEXT, -- HTML output location
   ADD COLUMN IF NOT EXISTS pdf_path TEXT, -- PDF storage path
-  ADD COLUMN IF NOT EXISTS thumbnail_path TEXT; -- paper preview
+  ADD COLUMN IF NOT EXISTS thumbnail_path TEXT, -- paper preview
+  ADD COLUMN IF NOT EXISTS paper_content TEXT; -- HTML content stored in database
 
 -- ============================================================================
 -- PART 2: CREATE STORAGE BUCKET

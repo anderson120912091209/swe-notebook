@@ -31,10 +31,12 @@ export function getMathMenuItems(editor: any) {
         ]);
         // Auto-focus the newly inserted math field
         setTimeout(() => {
-          const mathField = document.querySelector('math-field:not([readonly])') as any;
-          if (mathField) {
-            mathField.focus();
-            mathField.executeCommand('moveToMathfieldEnd');
+          type FocusableMathField = HTMLElement & { executeCommand?: (command: string) => void };
+          const mathFields = document.querySelectorAll<HTMLElement>('math-field:not([readonly])');
+          const lastMathField = (mathFields.item(mathFields.length - 1) || null) as FocusableMathField | null;
+          if (lastMathField) {
+            lastMathField.focus();
+            lastMathField.executeCommand?.('moveToMathfieldEnd');
           }
         }, 50);
       },

@@ -4,7 +4,7 @@ import { Suggestion } from './types';
 
 // Keyword dictionary
 const KEYWORDS: Suggestion[] = [
-  // Greek letters
+  // Greek letters (lowercase)
   { keyword: 'alpha', display: 'α', description: 'Greek letter alpha' },
   { keyword: 'beta', display: 'β', description: 'Greek letter beta' },
   { keyword: 'gamma', display: 'γ', description: 'Greek letter gamma' },
@@ -28,9 +28,35 @@ const KEYWORDS: Suggestion[] = [
   { keyword: 'chi', display: 'χ', description: 'Greek letter chi' },
   { keyword: 'psi', display: 'ψ', description: 'Greek letter psi' },
   { keyword: 'omega', display: 'ω', description: 'Greek letter omega' },
+
+  // Greek letters (uppercase)
+  { keyword: 'Alpha', display: 'Α', description: 'Greek letter Alpha' },
+  { keyword: 'Beta', display: 'Β', description: 'Greek letter Beta' },
+  { keyword: 'Gamma', display: 'Γ', description: 'Greek letter Gamma' },
+  { keyword: 'Delta', display: 'Δ', description: 'Greek letter Delta' },
+  { keyword: 'Epsilon', display: 'Ε', description: 'Greek letter Epsilon' },
+  { keyword: 'Zeta', display: 'Ζ', description: 'Greek letter Zeta' },
+  { keyword: 'Eta', display: 'Η', description: 'Greek letter Eta' },
+  { keyword: 'Theta', display: 'Θ', description: 'Greek letter Theta' },
+  { keyword: 'Iota', display: 'Ι', description: 'Greek letter Iota' },
+  { keyword: 'Kappa', display: 'Κ', description: 'Greek letter Kappa' },
+  { keyword: 'Lambda', display: 'Λ', description: 'Greek letter Lambda' },
+  { keyword: 'Mu', display: 'Μ', description: 'Greek letter Mu' },
+  { keyword: 'Nu', display: 'Ν', description: 'Greek letter Nu' },
+  { keyword: 'Xi', display: 'Ξ', description: 'Greek letter Xi' },
+  { keyword: 'Pi', display: 'Π', description: 'Greek letter Pi' },
+  { keyword: 'Rho', display: 'Ρ', description: 'Greek letter Rho' },
+  { keyword: 'Sigma', display: 'Σ', description: 'Greek letter Sigma' },
+  { keyword: 'Tau', display: 'Τ', description: 'Greek letter Tau' },
+  { keyword: 'Upsilon', display: 'Υ', description: 'Greek letter Upsilon' },
+  { keyword: 'Phi', display: 'Φ', description: 'Greek letter Phi' },
+  { keyword: 'Chi', display: 'Χ', description: 'Greek letter Chi' },
+  { keyword: 'Psi', display: 'Ψ', description: 'Greek letter Psi' },
+  { keyword: 'Omega', display: 'Ω', description: 'Greek letter Omega' },
   
-  // Functions
+  // Functions & templates
   { keyword: 'sqrt(x)', display: '√', description: 'Square root: sqrt(x)' },
+  { keyword: 'cbrt(x)', display: '∛', description: 'Cube root: cbrt(x)' },
   { keyword: 'frac(a,b)', display: 'a/b', description: 'Fraction: frac(a, b)' },
   { keyword: 'sin(x)', display: 'sin', description: 'Sine: sin(x)' },
   { keyword: 'cos(x)', display: 'cos', description: 'Cosine: cos(x)' },
@@ -40,8 +66,29 @@ const KEYWORDS: Suggestion[] = [
   { keyword: 'exp(x)', display: 'exp', description: 'Exponential: exp(x)' },
   { keyword: 'abs(x)', display: '|x|', description: 'Absolute value: abs(x)' },
   { keyword: 'sum(x)', display: '∑', description: 'Summation: sum(expr)' },
+  { keyword: 'prod(x)', display: '∏', description: 'Product: prod(expr)' },
   { keyword: 'int(x)', display: '∫', description: 'Integral: int(expr)' },
+  { keyword: 'int(a,b)', display: '∫ₐᵇ', description: 'Definite integral: int(lower, upper)' },
+  { keyword: 'iint(x)', display: '∬', description: 'Double integral: iint(expr)' },
+  { keyword: 'iiint(x)', display: '∭', description: 'Triple integral: iiint(expr)' },
+  { keyword: 'oint(x)', display: '∮', description: 'Contour integral: oint(expr)' },
   { keyword: 'lim(x)', display: 'lim', description: 'Limit: lim(expr)' },
+  { keyword: 'partial', display: '∂', description: 'Partial derivative symbol' },
+  { keyword: 'nabla', display: '∇', description: 'Nabla (del) operator' },
+  { keyword: 'grad', display: '∇', description: 'Gradient operator' },
+  { keyword: 'curl', display: '∇×', description: 'Curl operator' },
+  { keyword: 'div', display: '∇·', description: 'Divergence operator' },
+  { keyword: 'infty', display: '∞', description: 'Infinity symbol' },
+  { keyword: 'forall', display: '∀', description: 'For all symbol' },
+  { keyword: 'exists', display: '∃', description: 'There exists symbol' },
+  { keyword: 'therefore', display: '∴', description: 'Therefore symbol' },
+  { keyword: 'because', display: '∵', description: 'Because symbol' },
+  { keyword: 'approx', display: '≈', description: 'Approximately equal' },
+  { keyword: 'neq', display: '≠', description: 'Not equal' },
+  { keyword: 'leq', display: '≤', description: 'Less than or equal' },
+  { keyword: 'geq', display: '≥', description: 'Greater than or equal' },
+  { keyword: 'pm', display: '±', description: 'Plus-minus symbol' },
+  { keyword: 'mp', display: '∓', description: 'Minus-plus symbol' },
 ];
 
 /**
