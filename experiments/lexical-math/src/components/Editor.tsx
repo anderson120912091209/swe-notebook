@@ -32,7 +32,7 @@ export default function Editor() {
             <div className="relative min-h-[500px] w-full max-w-4xl rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                 <RichTextPlugin
                     contentEditable={
-                        <ContentEditable className="min-h-[400px] outline-none" />
+                        <ContentEditable className="min-h-[400px] outline-none" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#2b2b2b' }} />
                     }
                     placeholder={
                         <div className="pointer-events-none absolute top-4 left-4 text-gray-400">
