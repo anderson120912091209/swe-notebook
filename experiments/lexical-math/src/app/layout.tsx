@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Varela_Round } from "next/font/google";
 import "./globals.css";
 
 const sansStackText = Inter({
   variable: "--font-sans-stack-text",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 

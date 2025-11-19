@@ -161,7 +161,7 @@ function MathComponent({
 
 
     const Placeholder = ({ text }: { text: string }) => (
-        <div className="absolute top-0 left-0 text-gray-300 pointer-events-none text-[10px] p-0.5 whitespace-nowrap">
+        <div className="absolute top-0 left-0 text-gray-500 pointer-events-none text-[10px] p-0.5 whitespace-nowrap">
             {text}
         </div>
     );
@@ -178,9 +178,9 @@ function MathComponent({
         nextEditor?: LexicalEditor;
     }) => (
         <LexicalNestedComposer initialEditor={initialEditor}>
-            <div className={`relative border border-dotted border-gray-300 min-w-[20px] min-h-[20px] flex items-center ${className}`} style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal' }}>
+            <div className={`relative border border-dotted border-gray-700 min-w-[20px] min-h-[20px] flex items-center ${className}`} style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal' }}>
                 <RichTextPlugin
-                    contentEditable={<ContentEditable className="outline-none min-w-[20px] whitespace-nowrap px-1" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal' }} />}
+                    contentEditable={<ContentEditable className="outline-none min-w-[20px] whitespace-nowrap px-1 text-white" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#ffffff' }} />}
                     placeholder={placeholder ? <Placeholder text={placeholder} /> : null}
                     ErrorBoundary={LexicalErrorBoundary}
                 />
@@ -199,9 +199,9 @@ function MathComponent({
     return (
         <div
             ref={ref}
-            className={`inline-flex items-center p-1 rounded ${isSelected ? 'ring-2 ring-blue-200 bg-blue-50' : ''
+            className={`inline-flex items-center p-1 rounded ${isSelected ? 'ring-2 ring-gray-500 bg-gray-700/30' : ''
                 }`}
-            style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#2b2b2b' }}
+            style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#ffffff' }}
         >
             {mathType === 'sum' && (
                 <div className="flex flex-col items-center mr-1">
@@ -211,7 +211,7 @@ function MathComponent({
                         placeholder="n"
                         nextEditor={operand}
                     />
-                    <span className="text-2xl leading-none" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#2b2b2b' }}>Σ</span>
+                    <span className="text-2xl leading-none" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#ffffff' }}>Σ</span>
                     <NestedEditor
                         initialEditor={lowerLimit}
                         className="text-xs mt-0.5 text-center"
@@ -223,7 +223,7 @@ function MathComponent({
 
             {mathType === 'int' && (
                 <div className="flex items-center mr-1 relative">
-                    <span className="text-3xl italic mr-1" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#2b2b2b' }}>∫</span>
+                    <span className="text-3xl italic mr-1" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#ffffff' }}>∫</span>
                     <div className="flex flex-col -ml-2">
                         <NestedEditor
                             initialEditor={upperLimit}
@@ -245,7 +245,7 @@ function MathComponent({
                 <div className="flex flex-col items-center mx-1">
                     <NestedEditor
                         initialEditor={upperLimit}
-                        className="text-sm text-center border-b border-gray-800 px-1 min-w-[15px]"
+                        className="text-sm text-center border-b border-gray-400 px-1 min-w-[15px]"
                         placeholder="num"
                         nextEditor={lowerLimit}
                     />
@@ -259,8 +259,8 @@ function MathComponent({
 
             {mathType === 'sqrt' && (
                 <div className="flex items-center mx-1">
-                    <span className="text-2xl mr-0.5" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#2b2b2b' }}>√</span>
-                    <div className="border-t border-gray-800 pt-0.5 px-1">
+                    <span className="text-2xl mr-0.5" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#ffffff' }}>√</span>
+                    <div className="border-t border-gray-400 pt-0.5 px-1">
                         <NestedEditor
                             initialEditor={operand}
                             className="text-base"
