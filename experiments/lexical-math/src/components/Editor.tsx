@@ -35,7 +35,7 @@ export default function Editor() {
 
                     {/* Header / Title Area */}
                     <div className="mb-12">
-                        <h1 className="text-5xl font-bold tracking-tight mb-2">Getting Started</h1>
+                        <h1 className="text-5xl font-bold tracking-tight mb-2">Math Features Demo</h1>
                         <div className="text-gray-500 text-lg">Anderson Chen · @andersonchen_7</div>
                     </div>
 

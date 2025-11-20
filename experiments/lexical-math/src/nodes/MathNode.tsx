@@ -161,7 +161,8 @@ function MathComponent({
 
 
     const Placeholder = ({ text }: { text: string }) => (
-        <div className="absolute top-0 left-0 text-gray-500 pointer-events-none text-[10px] p-0.5 whitespace-nowrap">
+        <div className="absolute top-0 left-0 text-gray-500
+         pointer-events-none text-[10px] p-0.5 whitespace-nowrap">
             {text}
         </div>
     );
@@ -171,16 +172,30 @@ function MathComponent({
         className,
         placeholder,
         nextEditor,
+        showBorder = true,
+        purpleHighlight = false,
     }: {
         initialEditor: LexicalEditor;
         className?: string;
         placeholder?: string;
         nextEditor?: LexicalEditor;
+        showBorder?: boolean;
+        purpleHighlight?: boolean;
     }) => (
         <LexicalNestedComposer initialEditor={initialEditor}>
-            <div className={`relative border border-dotted border-gray-700 min-w-[20px] min-h-[20px] flex items-center ${className}`} style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal' }}>
+            <div
+                className={`relative min-w-[20px] min-h-[20px] flex items-center rounded ${className} ${showBorder ? 'border border-dotted border-gray-700' : ''
+                    } ${purpleHighlight ? 'bg-purple-700/30' : ''
+                    }`}
+                style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal' }}
+            >
                 <RichTextPlugin
-                    contentEditable={<ContentEditable className="outline-none min-w-[20px] whitespace-nowrap px-1 text-white" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#ffffff' }} />}
+                    contentEditable={
+                        <ContentEditable
+                            className="outline-none min-w-[5x] whitespace-nowrap px-1 text-white w-full"
+                            style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#ffffff' }}
+                        />
+                    }
                     placeholder={placeholder ? <Placeholder text={placeholder} /> : null}
                     ErrorBoundary={LexicalErrorBoundary}
                 />
@@ -199,24 +214,61 @@ function MathComponent({
     return (
         <div
             ref={ref}
-            className={`inline-flex items-center p-1 rounded ${isSelected ? 'ring-2 ring-gray-500 bg-gray-700/30' : ''
-                }`}
+            className={`inline-flex items-center ${isSelected ? 'ring-2 ring-purple-500' : ''}`}
             style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#ffffff' }}
         >
             {mathType === 'sum' && (
-                <div className="flex flex-col items-center mr-1">
+                <div className={`flex items-center gap-1 px-1 rounded-lg 
+                transition-colors ${isSelected ? 'bg-[#B4B4FF]/20' : ''}`}>
+                    {/* Sigma symbol on the left - using SVG */}
+                    <div className="flex items-center" style={{ height: 'fit-content' }}>
+                        <svg
+                            width="18"
+                            height="24"
+                            viewBox="0 0 20 27"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="flex-shrink-0"
+                        >
+                            <path
+                                d="M18.4482 5.51055V3C18.4482 1.89543 17.5528 1 16.4482 1H3.00489C1.44507 1 0.485618 2.70621 1.29597 4.03903L6.41651 12.461C6.80461 13.0993 6.80461 13.9007 6.41651 14.539L1.29597 22.961C0.485617 24.2938 1.44507 26 3.00489 26H16.4482C17.5528 26 18.4482 25.1046 18.4482 24V21.7485"
+                                stroke="white"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                    </div>
+
+                    {/* Limits stacked vertically to the right of Sigma */}
+                    <div className="flex flex-col gap-0.5 justify-center -ml-0.5">
+                        <NestedEditor
+                            initialEditor={upperLimit}
+                            className={`min-w-[3px] h-[3px] rounded flex items-center justify-center 
+                            text-[5px] px-0.5 ${isSelected ? 'bg-[#938AF5]/40' : ''}`}
+                            placeholder=" "
+                            nextEditor={lowerLimit}
+                            showBorder={false}
+                            purpleHighlight={false}
+                        />
+                        <NestedEditor
+                            initialEditor={lowerLimit}
+                            className={`min-w-[3px] h-[3px] rounded flex items-center 
+                            justify-center text-[5px] px-0.5 ${isSelected ? 'bg-[#938AF5]/40' : ''}`}
+                            placeholder=" "
+                            nextEditor={operand}
+                            showBorder={false}
+                            purpleHighlight={false}
+                        />
+                    </div>
+
+                    {/* Operand to the right of limits */}
                     <NestedEditor
-                        initialEditor={upperLimit}
-                        className="text-xs mb-0.5 text-center"
-                        placeholder="n"
-                        nextEditor={operand}
-                    />
-                    <span className="text-2xl leading-none" style={{ fontFamily: '"Stack Sans Text", sans-serif', fontOpticalSizing: 'auto', fontWeight: 400, fontStyle: 'normal', color: '#ffffff' }}>Σ</span>
-                    <NestedEditor
-                        initialEditor={lowerLimit}
-                        className="text-xs mt-0.5 text-center"
-                        placeholder="i=0"
-                        nextEditor={upperLimit}
+                        initialEditor={operand}
+                        className={`h-[32px] min-w-[24px] px-1 rounded flex items-center justify-center text-sm ml-1 ${isSelected ? 'bg-[#938AF5]/40' : ''}`}
+                        placeholder=" "
+                        showBorder={false}
+                        purpleHighlight={false}
                     />
                 </div>
             )}
@@ -280,8 +332,8 @@ function MathComponent({
                 </div>
             )}
 
-            {/* Operand for Sum/Int is rendered last but logically follows limits */}
-            {(mathType === 'sum' || mathType === 'int') && (
+            {/* Operand for Int is rendered separately */}
+            {mathType === 'int' && (
                 <NestedEditor
                     initialEditor={operand}
                     className="text-base ml-1"
