@@ -1,5 +1,5 @@
 import { use } from 'react';
-import FolderView from '@/app/components/workspace components/FolderView';
+import FolderView from '@/app/components/workspace components/Workspace View/FolderView';
 
 interface PageProps {
   params: Promise<{ folderId: string }>;

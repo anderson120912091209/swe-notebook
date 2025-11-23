@@ -3,10 +3,12 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
-import PageCard from './PageCard';
+import PageCard from '../Pages/PageCard';
+import CanvasCard from '../Canvas/CanvasCard';
 import WorkspaceLayout from './WorkspaceLayout';
-import SearchAndNewButtons from './SearchAndNewButtons';
-import FolderTag from './FolderTag';
+import SearchAndNewButtons from '../SearchAndNewButtons';
+import FolderTag from '../Folders/FolderTag';
+import CreateCanvasModal from '../Canvas/CreateCanvasModal';
 import { getFolderBreadcrumbPath, generateFolderBreadcrumbJSX } from '@/app/lib/breadcrumbUtils';
 
 interface FolderViewProps {
@@ -15,9 +17,10 @@ interface FolderViewProps {
 
 export default function FolderView({ folderId }: FolderViewProps) {
   const router = useRouter();
-  const { folders, pages, createPage, deletePage, loading } = useWorkspace();
+  const { folders, pages, canvas, createPage, createCanvas, deletePage, deleteCanvas, updateFolder, loading } = useWorkspace();
   const [folder, setFolder] = useState(folders.find(f => f.id === folderId));
   const [creatingPage, setCreatingPage] = useState(false);
+  const [creatingCanvas, setCreatingCanvas] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDescriptionField, setShowDescriptionField] = useState(false);
   const [folderDescription, setFolderDescription] = useState(folder?.description || '');
@@ -35,6 +38,7 @@ export default function FolderView({ folderId }: FolderViewProps) {
   // Get child folders and pages
   const childFolders = useMemo(() => folders.filter(f => f.parent_folder_id === folderId), [folders, folderId]);
   const folderPagesList = useMemo(() => pages.filter(p => p.folder_id === folderId), [pages, folderId]);
+  const folderCanvasList = useMemo(() => canvas.filter(c => c.folder_id === folderId), [canvas, folderId]);
 
   // Search filtering
   const filteredPages = useMemo(() => {
@@ -43,6 +47,13 @@ export default function FolderView({ folderId }: FolderViewProps) {
       page.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [folderPagesList, searchQuery]);
+
+  const filteredCanvas = useMemo(() => {
+    if (!searchQuery.trim()) return folderCanvasList;
+    return folderCanvasList.filter(canvas => 
+      canvas.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [folderCanvasList, searchQuery]);
 
   const filteredChildFolders = useMemo(() => {
     if (!searchQuery.trim()) return childFolders;
@@ -72,11 +83,25 @@ export default function FolderView({ folderId }: FolderViewProps) {
     router.push('/notebook');
   };
 
-  const handleTitleChange = useCallback((newTitle: string) => {
-    setFolderTitle(newTitle);
-    // TODO: Update folder name in database
-    console.log('Folder title changed to:', newTitle);
-  }, []);
+  const handleTitleChange = useCallback(async (newTitle: string) => {
+    if (!folder || newTitle.trim() === folder.name) return;
+    
+    const trimmedTitle = newTitle.trim();
+    if (trimmedTitle.length > 25) {
+      alert('Folder name must be 25 characters or less.');
+      return;
+    }
+    
+    try {
+      setFolderTitle(trimmedTitle);
+      await updateFolder(folderId, { name: trimmedTitle });
+      console.log('Folder title updated successfully:', trimmedTitle);
+    } catch (error) {
+      console.error('Failed to update folder title:', error);
+      // Revert the local state on error
+      setFolderTitle(folder.name);
+    }
+  }, [folder, folderId, updateFolder]);
 
   if (loading && !folder) {
     return (
@@ -119,6 +144,14 @@ export default function FolderView({ folderId }: FolderViewProps) {
   const rightHeaderContent = (
     <SearchAndNewButtons
       onNewClick={() => setCreatingPage(true)}
+      onNewFolder={() => {
+        // TODO: Implement folder creation within folder
+        console.log('Create folder in folder clicked');
+      }}
+      onNewPage={() => setCreatingPage(true)}
+      onNewCanvas={() => {
+        setCreatingCanvas(true);
+      }}
       newButtonDisabled={creatingPage}
       newButtonLoading={creatingPage}
       searchPlaceholder="Search pages..."
@@ -167,9 +200,16 @@ export default function FolderView({ folderId }: FolderViewProps) {
         />
       }
       description={folderDescription}
-      onDescriptionChange={(desc) => {
+      onDescriptionChange={async (desc) => {
         setFolderDescription(desc);
-        // TODO: Update folder description in database
+        try {
+          await updateFolder(folderId, { description: desc });
+          console.log('Folder description updated successfully:', desc);
+        } catch (error) {
+          console.error('Failed to update folder description:', error);
+          // Revert the local state on error
+          setFolderDescription(folder?.description || '');
+        }
       }}
       showDescriptionField={showDescriptionField}
       onToggleDescription={() => setShowDescriptionField(!showDescriptionField)}
@@ -257,8 +297,30 @@ export default function FolderView({ folderId }: FolderViewProps) {
           </div>
         )}
 
+        {/* Canvas Grid */}
+        {filteredCanvas.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
+              Canvas {searchQuery && `(${filteredCanvas.length} found)`}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredCanvas.map(canvasItem => (
+                <CanvasCard
+                  key={canvasItem.id}
+                  canvas={canvasItem}
+                  folderName={folder?.name}
+                  folderColor={folder?.color}
+                  onDelete={deleteCanvas}
+                  onEdit={() => {/* TODO: Implement edit modal */}}
+                  onMove={() => {/* TODO: Implement move functionality */}}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Search Results Empty State */}
-        {searchQuery && filteredPages.length === 0 && filteredChildFolders.length === 0 && (
+        {searchQuery && filteredPages.length === 0 && filteredChildFolders.length === 0 && filteredCanvas.length === 0 && (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
@@ -271,6 +333,13 @@ export default function FolderView({ folderId }: FolderViewProps) {
         )}
         </div>
       </div>
+
+      {/* Create Canvas Modal */}
+      <CreateCanvasModal
+        isOpen={creatingCanvas}
+        onClose={() => setCreatingCanvas(false)}
+        defaultFolderId={folderId}
+      />
     </WorkspaceLayout>
   );
 }

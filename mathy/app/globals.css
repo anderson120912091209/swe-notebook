@@ -3,6 +3,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Layout Colors - Light Mode */
+  --sidebar-bg: #F5F5F7;
+  --page-bg: #FFFFFF;
+  --outer-bg: #F5F5F7;
 }
 
 @theme inline {
@@ -10,12 +15,25 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Integrity-inspired Monochrome Palette */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F5F5F7;
+  --color-text-primary: #000000;
+  --color-text-secondary: #666666;
+  --color-border-subtle: #E5E5E5;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    /* Layout Colors - Dark Mode */
+    --sidebar-bg: #0a0a0a;
+    --page-bg: #171717;
+    /* Lighter than sidebar */
+    --outer-bg: #000000;
   }
 }
 
@@ -29,9 +47,9 @@ body {
 /* Simple and fast theme color transitions */
 /* Only transition colors, keep it minimal for smooth UX */
 * {
-  transition: background-color 0.2s ease, 
-              color 0.2s ease, 
-              border-color 0.2s ease;
+  transition: background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 /* Exclude elements with their own transitions */
@@ -67,6 +85,8 @@ math-field {
   line-height: 1;
   /* Completely disable virtual keyboard UI */
   --keyboard-zindex: -1;
+  /* Ensure transparent background to match page */
+  background-color: transparent !important;
 }
 
 /* Hide MathLive virtual keyboard icons completely */
@@ -124,19 +144,19 @@ math-field .ML__suggestion-panel {
   border: 1px solid var(--border-color, #e5e7eb);
   border-radius: 6px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  
+
   /* Typography matching your app */
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  
+
   /* Spacing and layout */
   padding: 4px 0;
   max-height: 240px;
   overflow-y: auto;
   min-width: 200px;
   max-width: 320px;
-  
+
   /* Smooth transitions */
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
@@ -231,6 +251,7 @@ math-field .ML__popover-item.selected .ML__popover-shortcut {
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
+
   math-field .ML__suggestion,
   math-field .ML__popover,
   math-field .ML__autocomplete,
@@ -239,23 +260,23 @@ math-field .ML__popover-item.selected .ML__popover-shortcut {
     border-color: var(--border-color, #374151);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
   }
-  
+
   math-field .ML__suggestion-item:hover,
   math-field .ML__popover-item:hover {
     background-color: var(--math-bg, #1f2937);
   }
-  
+
   math-field .ML__suggestion-item.selected,
   math-field .ML__popover-item.selected {
     background-color: var(--foreground, #ededed);
     color: var(--background, #0a0a0a);
   }
-  
+
   math-field .ML__suggestion-text,
   math-field .ML__popover-text {
     color: var(--foreground, #ededed);
   }
-  
+
   math-field .ML__suggestion-item.selected .ML__suggestion-text,
   math-field .ML__popover-item.selected .ML__popover-text {
     color: var(--background, #0a0a0a);

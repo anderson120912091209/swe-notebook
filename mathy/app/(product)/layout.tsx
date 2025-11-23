@@ -7,7 +7,7 @@ import { AuthProvider } from '@/app/contexts/AuthContext';
 import { WorkspaceProvider } from '@/app/contexts/WorkspaceContext';
 import ProtectedRoute from '@/app/components/auth components/ProtectedRoute';
 import QueryProvider from '@/app/lib/react-query/QueryProvider';
-import Sidebar from '@/app/components/workspace components/Sidebar';
+import Sidebar from '@/app/components/workspace components/Workspace View/Sidebar';
 
 function ProductLayoutContent({ children }: { children: React.ReactNode }) {
   const COLLAPSE_THRESHOLD = 1;
@@ -83,9 +83,9 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
         <PanelGroup direction="horizontal" className="h-screen">
           <Panel
             ref={sidebarPanelRef}
-            defaultSize={20}
-            minSize={sidebarOpen ? 20 : 0}
-            maxSize={40}
+            defaultSize={15}
+            minSize={sidebarOpen ? 15 : 0}
+            maxSize={25}
             onResize={(size) => {
               if (!suppressAnimationResetRef.current && shouldAnimateLayout) {
                 setShouldAnimateLayout(false);

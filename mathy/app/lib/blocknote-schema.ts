@@ -25,18 +25,10 @@ export function getMathMenuItems(editor: any) {
           {
             type: 'inlineMath',
             props: {
-              latex: '',
+              latex: ' ',
             },
           },
         ]);
-        // Auto-focus the newly inserted math field
-        setTimeout(() => {
-          const mathField = document.querySelector('math-field:not([readonly])') as any;
-          if (mathField) {
-            mathField.focus();
-            mathField.executeCommand('moveToMathfieldEnd');
-          }
-        }, 50);
       },
       aliases: ['math', 'latex', 'equation', 'formula', 'mathlive'],
       group: 'Math',

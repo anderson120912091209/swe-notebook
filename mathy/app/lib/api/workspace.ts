@@ -1,7 +1,7 @@
 // API utilities for workspace operations (folders and pages)
 
 import { createClient } from '@/app/lib/supabase/client';
-import type { Folder, Page, WorkspaceItem } from '@/app/types/workspace';
+import type { Folder, Page, Canvas, WorkspaceItem } from '@/app/types/workspace';
 
 const supabase = createClient();
 
@@ -28,6 +28,11 @@ export async function createFolder(
   description?: string,
   parentFolderId?: string
 ): Promise<Folder> {
+  // Validate folder name length
+  if (name.length > 25) {
+    throw new Error('Folder name must be 25 characters or less.');
+  }
+
   const { data, error } = await supabase
     .from('folders')
     .insert({
@@ -49,6 +54,11 @@ export async function updateFolder(
   folderId: string,
   updates: Partial<Omit<Folder, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'last_edited_at'>>
 ): Promise<Folder> {
+  // Validate folder name length if name is being updated
+  if (updates.name && updates.name.length > 25) {
+    throw new Error('Folder name must be 25 characters or less.');
+  }
+
   const { data, error } = await supabase
     .from('folders')
     .update(updates)
@@ -264,6 +274,138 @@ export function subscribePages(
         event: '*',
         schema: 'public',
         table: 'notebooks',
+        filter: `user_id=eq.${userId}`,
+      },
+      callback
+    )
+    .subscribe();
+}
+
+// ============================================================================
+// CANVAS OPERATIONS
+// ============================================================================
+
+export async function getCanvas(userId: string): Promise<Canvas[]> {
+  console.log('getCanvas called with userId:', userId);
+  
+  const { data, error } = await supabase
+    .from('canvas')
+    .select('*')
+    .eq('user_id', userId)
+    .order('position', { ascending: true });
+
+  console.log('getCanvas result:', { data, error });
+
+  if (error) {
+    console.error('getCanvas error details:', error);
+    throw error;
+  }
+  return data || [];
+}
+
+export async function createCanvas(
+  userId: string,
+  title: string,
+  icon?: string,
+  cover_image?: string,
+  folder_id?: string
+): Promise<Canvas> {
+  // Validate canvas title length
+  if (title.length > 100) {
+    throw new Error('Canvas title must be 100 characters or less.');
+  }
+
+  console.log('createCanvas called with:', { userId, title, icon, cover_image, folder_id });
+
+  const { data, error } = await supabase
+    .from('canvas')
+    .insert({
+      user_id: userId,
+      title,
+      icon,
+      cover_image,
+      folder_id,
+      content: JSON.stringify({ shapes: {}, bindings: {}, assets: {} }), // Default tldraw document as JSON string
+      position: 0,
+      is_favorited: false,
+    })
+    .select()
+    .single();
+
+  console.log('createCanvas result:', { data, error });
+
+  if (error) {
+    console.error('createCanvas error details:', error);
+    throw error;
+  }
+  return data;
+}
+
+export async function updateCanvas(
+  canvasId: string,
+  updates: Partial<Omit<Canvas, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'last_edited_at'>>
+): Promise<Canvas> {
+  // Validate canvas title length if title is being updated
+  if (updates.title && updates.title.length > 100) {
+    throw new Error('Canvas title must be 100 characters or less.');
+  }
+
+  console.log('updateCanvas called with:', { canvasId, updates });
+
+  // Convert content to JSON string if it's an object
+  const processedUpdates = { ...updates };
+  if (processedUpdates.content && typeof processedUpdates.content === 'object') {
+    processedUpdates.content = JSON.stringify(processedUpdates.content);
+  }
+
+  const { data, error } = await supabase
+    .from('canvas')
+    .update(processedUpdates)
+    .eq('id', canvasId)
+    .select()
+    .single();
+
+  console.log('updateCanvas result:', { data, error });
+
+  if (error) {
+    console.error('updateCanvas error details:', error);
+    throw error;
+  }
+  return data;
+}
+
+export async function deleteCanvas(canvasId: string): Promise<void> {
+  const { error } = await supabase
+    .from('canvas')
+    .delete()
+    .eq('id', canvasId);
+
+  if (error) throw error;
+}
+
+export async function getCanvasInFolder(folderId: string): Promise<Canvas[]> {
+  const { data, error } = await supabase
+    .from('canvas')
+    .select('*')
+    .eq('folder_id', folderId)
+    .order('position', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export function subscribeCanvas(
+  userId: string,
+  callback: () => void
+) {
+  return supabase
+    .channel('canvas-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'canvas',
         filter: `user_id=eq.${userId}`,
       },
       callback

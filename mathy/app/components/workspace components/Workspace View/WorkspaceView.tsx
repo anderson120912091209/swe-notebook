@@ -2,23 +2,27 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
-import FolderCard from './FolderCard';
-import PageCard from './PageCard';
+import FolderCard from '../Folders/FolderCard';
+import PageCard from '../Pages/PageCard';
+import CanvasCard from '../Canvas/CanvasCard';
 import WorkspaceLayout from './WorkspaceLayout';
-import SearchAndNewButtons from './SearchAndNewButtons';
+import SearchAndNewButtons from '../SearchAndNewButtons';
 import WorkspaceHeaderSwitch, { TabType } from './WorkspaceHeaderSwitch';
+import CreateCanvasModal from '../Canvas/CreateCanvasModal';
 
 
 export default function WorkspaceView() {
-  const { folders, pages, deleteFolder, deletePage, loading } = useWorkspace();
+  const { folders, pages, canvas, deleteFolder, deletePage, deleteCanvas, createCanvas, loading } = useWorkspace();
   const [activeTab, setActiveTab] = useState<TabType>('notebooks');
   const [searchQuery, setSearchQuery] = useState('');
   const [showDescriptionField, setShowDescriptionField] = useState(false);
   const [workspaceDescription, setWorkspaceDescription] = useState('');
+  const [creatingCanvas, setCreatingCanvas] = useState(false);
 
   // Get root-level folders and pages (memoized)
   const rootFolders = useMemo(() => folders.filter(f => !f.parent_folder_id), [folders]);
   const rootPages = useMemo(() => pages.filter(p => !p.folder_id), [pages]);
+  const rootCanvas = useMemo(() => canvas.filter(c => !c.folder_id), [canvas]);
   
   // Get recent pages (10 most recently edited pages across all folders)
   const recentPages = useMemo(() => {
@@ -47,6 +51,13 @@ export default function WorkspaceView() {
     );
   }, [rootPages, searchQuery]);
 
+  const filteredRootCanvas = useMemo(() => {
+    if (!searchQuery.trim()) return rootCanvas;
+    return rootCanvas.filter(canvas => 
+      canvas.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [rootCanvas, searchQuery]);
+
   // Search handler
   const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
@@ -65,7 +76,7 @@ export default function WorkspaceView() {
     );
   }
 
-  if (filteredRootFolders.length === 0 && filteredRootPages.length === 0 && !searchQuery) {
+  if (filteredRootFolders.length === 0 && filteredRootPages.length === 0 && filteredRootCanvas.length === 0 && !searchQuery) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center max-w-md">
@@ -91,7 +102,17 @@ export default function WorkspaceView() {
   const rightHeaderContent = (
     <SearchAndNewButtons
       onNewClick={() => {
-        // TODO: Implement new page/folder creation
+        // Default action - create page
+        setCreatingPage(true);
+      }}
+      onNewFolder={() => {
+        setCreatingFolder(true);
+      }}
+      onNewPage={() => {
+        setCreatingPage(true);
+      }}
+      onNewCanvas={() => {
+        setCreatingCanvas(true);
       }}
       newButtonDisabled={false}
       newButtonLoading={false}
@@ -373,19 +394,35 @@ export default function WorkspaceView() {
 
           {/* Canvases Section */}
           {activeTab === 'canvases' && (
-            <div className="text-center py-12">
-              <div className="text-4xl mb-4">🎨</div>
-              <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
-                Canvases
-              </h2>
-              <p style={{ color: 'var(--foreground-muted)' }}>
-                Visual canvas workspace coming soon...
-              </p>
+            <div className="space-y-8">
+              {filteredRootCanvas.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredRootCanvas.map(canvasItem => (
+                    <CanvasCard
+                      key={canvasItem.id}
+                      canvas={canvasItem}
+                      onDelete={deleteCanvas}
+                      onEdit={() => {/* TODO: Implement edit modal */}}
+                      onMove={() => {/* TODO: Implement move functionality */}}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4">🎨</div>
+                  <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+                    No canvases yet
+                  </h2>
+                  <p className="mb-6" style={{ color: 'var(--foreground-muted)' }}>
+                    Create your first canvas to start visualizing your ideas.
+                  </p>
+                </div>
+              )}
             </div>
-        )}
+          )}
 
         {/* Search Results Empty State */}
-        {searchQuery && filteredRootFolders.length === 0 && filteredRootPages.length === 0 && (
+        {searchQuery && filteredRootFolders.length === 0 && filteredRootPages.length === 0 && filteredRootCanvas.length === 0 && (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
@@ -398,6 +435,11 @@ export default function WorkspaceView() {
         )}
       </div>
 
+      {/* Create Canvas Modal */}
+      <CreateCanvasModal
+        isOpen={creatingCanvas}
+        onClose={() => setCreatingCanvas(false)}
+      />
     </WorkspaceLayout>
   );
 }

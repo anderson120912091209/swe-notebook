@@ -4,11 +4,23 @@ export function getOwnerName(user: User | null): string | null {
   if (!user) return null;
 
   const metadata = user.user_metadata ?? {};
+  
+  // Priority order: preferred_name -> first + last -> full_name -> name -> email
   const candidates: Array<unknown> = [
+    // Google's preferred name (highest priority)
+    metadata.preferred_name,
+    // First + Last name combination
+    metadata.given_name && metadata.family_name 
+      ? `${metadata.given_name} ${metadata.family_name}`.trim()
+      : null,
+    // Individual first or last name if only one is available
+    metadata.given_name || metadata.family_name,
+    // Full name alternatives
     metadata.full_name,
     metadata.name,
     metadata.displayName,
     metadata.username,
+    // Fallback to email username
     user.email?.split('@')[0],
   ];
 
