@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createReactInlineContentSpec } from '@blocknote/react';
-import 'mathlive';
+import MathLiveInput from '@/app/components/product components/MathLiveInput';
+import MathLiveDisplay from '@/app/components/product components/MathLiveDisplay';
 
 const InlineMathRenderer: React.FC<{
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -10,219 +11,85 @@ const InlineMathRenderer: React.FC<{
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateInlineContent: (content: any) => void;
 }> = (props) => {
-  const [currentLatex, setCurrentLatex] = useState(props.inlineContent.props.latex || '');
-  const [hasFocus, setHasFocus] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mathFieldRef = useRef<any>(null);
+  const [latex, setLatex] = useState(props.inlineContent.props.latex || '');
+  const [isEditing, setIsEditing] = useState(false);
 
+  // Sync local state with props
   useEffect(() => {
-    setCurrentLatex(props.inlineContent.props.latex || '');
+    const currentLatex = props.inlineContent.props.latex || '';
+    setLatex(currentLatex);
   }, [props.inlineContent.props.latex]);
 
+  // Auto-open editor if empty (newly inserted)
   useEffect(() => {
-    if (!currentLatex.trim()) {
-      setTimeout(() => {
-        mathFieldRef.current?.focus();
-        mathFieldRef.current?.executeCommand('moveToMathfieldEnd');
-      }, 0);
+    if (!props.inlineContent.props.latex || props.inlineContent.props.latex === ' ') {
+      setIsEditing(true);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [props.inlineContent.props.latex]);
 
-  useEffect(() => {
-    if (mathFieldRef.current) {
-      mathFieldRef.current.sound = 'off';
-      mathFieldRef.current.audioFeedback = 'off';
-      mathFieldRef.current.plonkSound = 'off';
-      mathFieldRef.current.keypressSound = 'off';
-      mathFieldRef.current.defaultMode = 'math';
-      if (mathFieldRef.current.playSound) {
-        mathFieldRef.current.playSound = () => {};
-      }
-      if (typeof window !== 'undefined') {
-        const mathLiveGlobal = (window as typeof window & { MathLive?: { sound: string; audioFeedback: string } }).MathLive;
-        if (mathLiveGlobal) {
-          mathLiveGlobal.sound = 'off';
-          mathLiveGlobal.audioFeedback = 'off';
-        }
-      }
+  const handleSave = () => {
+    console.log('[InlineMath] handleSave called, latex state:', latex);
+    const trimmed = latex.trim();
+
+    // Don't save if empty - this would cause the content to disappear
+    if (!trimmed) {
+      console.warn('[InlineMath] Attempted to save empty content, canceling instead');
+      handleCancel();
+      return;
     }
-  }, [hasFocus]);
 
-  const updateInlineMath = (latex: string) => {
-    setCurrentLatex(latex);
+    console.log('[InlineMath] Saving to BlockNote:', trimmed);
     props.updateInlineContent({
       type: 'inlineMath',
-      props: { latex },
+      props: { latex: trimmed },
     });
+    setIsEditing(false);
   };
 
-  const handleLatexChange = (newLatex: string) => {
-    updateInlineMath(newLatex);
+  const handleCancel = () => {
+    console.log('[InlineMath] handleCancel called');
+    // Revert to original value
+    setLatex(props.inlineContent.props.latex || '');
+    setIsEditing(false);
   };
 
-  const focusBlockNoteEditor = (position: 'before' | 'after' = 'after') => {
-    const bnEditor = document.querySelector('.bn-container [contenteditable="true"]') as HTMLElement | null;
-    const mathElement = mathFieldRef.current as HTMLElement | null;
-    if (!bnEditor || !mathElement) return;
-
-    const wrapper = mathElement.parentElement;
-    const range = document.createRange();
-    const selection = window.getSelection();
-
-    if (wrapper && wrapper.parentNode) {
-      if (position === 'after') {
-        range.setStartAfter(wrapper);
-        range.setEndAfter(wrapper);
-      } else {
-        range.setStartBefore(wrapper);
-        range.setEndBefore(wrapper);
-      }
-    } else {
-      range.selectNodeContents(bnEditor);
-      range.collapse(position === 'after');
-    }
-
-    selection?.removeAllRanges();
-    selection?.addRange(range);
-    bnEditor.focus();
-  };
-
-  const exitMathField = (direction: 'before' | 'after' = 'after') => {
-    mathFieldRef.current?.blur();
-    setHasFocus(false);
-    focusBlockNoteEditor(direction);
-  };
-
-  const hasActiveSuggestions = () => {
-    if (typeof document === 'undefined') return false;
-    const elements = document.querySelectorAll('[class*="ML__suggestion"], [class*="ML__popover"], [class*="ML__autocomplete"]');
-    return elements.length > 0;
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    e.stopPropagation();
-
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      exitMathField('after');
-      return;
-    }
-
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      updateInlineMath(props.inlineContent.props.latex || '');
-      exitMathField('after');
-      return;
-    }
-
-    if (e.key === 'Enter') {
-      if (!hasActiveSuggestions()) {
-        return;
-      }
-    }
-
-    if (e.key === 'ArrowRight') {
-      const mathField = mathFieldRef.current;
-      if (mathField) {
-        const selection = mathField.selection;
-        const value = mathField.value || '';
-        const selectionEnd = selection?.end ?? selection?.start ?? 0;
-        const isAtEnd = selectionEnd >= value.length;
-        if (isAtEnd && !hasActiveSuggestions()) {
-          e.preventDefault();
-          exitMathField('after');
-        }
-      }
-    }
-
-    if (e.key === 'ArrowLeft') {
-      const mathField = mathFieldRef.current;
-      if (mathField) {
-        const selection = mathField.selection;
-        const selectionStart = selection?.start ?? 0;
-        if (selectionStart <= 0 && !hasActiveSuggestions()) {
-          e.preventDefault();
-          exitMathField('before');
-        }
-      }
-    }
-  };
-
-  const handleBlur = (e: React.FocusEvent) => {
-    const relatedTarget = e.relatedTarget as HTMLElement;
-    if (!relatedTarget || !relatedTarget.closest('.bn-container')) {
-      setHasFocus(false);
-    }
-  };
-
-  const handleFocus = () => {
-    setHasFocus(true);
-  };
-
-  const showPlaceholder = !currentLatex.trim() && !hasFocus;
+  if (isEditing) {
+    return (
+      <span className="inline-math-editing" style={{ padding: '0 2px' }}>
+        <MathLiveInput
+          value={latex}
+          onChange={setLatex}
+          onFinish={handleSave}
+          onCancel={handleCancel}
+          autoFocus={true}
+        />
+      </span>
+    );
+  }
 
   return (
     <span
-      contentEditable={false}
+      className="inline-math-wrapper"
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        position: 'relative',
-        marginInline: '1px',
+        padding: '0 4px',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        border: '1px solid transparent',
+        minWidth: '20px',
+        minHeight: '24px',
+        verticalAlign: 'middle'
       }}
-      className="inline-math-wrapper"
+      onClick={() => setIsEditing(true)}
     >
-      {showPlaceholder && (
-        <span
-          style={{
-            position: 'absolute',
-            left: '8px',
-            color: 'var(--muted-text, #6b7280)',
-            fontSize: '0.85em',
-            pointerEvents: 'none',
-          }}
-        >
+      {latex.trim() ? (
+        <MathLiveDisplay value={latex} />
+      ) : (
+        <span style={{ color: 'var(--mantine-color-gray-5)', fontSize: '0.9em', fontFamily: 'monospace' }}>
           math
         </span>
       )}
-      {/* @ts-expect-error - MathLive math-field web component */}
-      <math-field
-        ref={mathFieldRef}
-        value={currentLatex}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onInput={(evt: any) => handleLatexChange(evt.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-        style={{
-          display: 'inline-block',
-          fontSize: '0.9em',
-          minWidth: '60px',
-          padding: '2px 6px',
-          border: 'none',
-          borderRadius: '0',
-          outline: 'none',
-          backgroundColor: 'transparent',
-        }}
-        mathVirtualKeyboardPolicy="off"
-        smartMode={true}
-        smartFence={true}
-        smartSuperscript={true}
-        smartSubscript={true}
-        smartFunction={true}
-        smartSpace={true}
-        defaultMode="math"
-        virtualKeyboardMode="off"
-        virtualKeyboards=""
-        virtualKeyboardToggle="off"
-        keypressVibration="off"
-        keypressSound="off"
-        plonkSound="off"
-        sound="off"
-        audioFeedback="off"
-        audioFeedbackEnabled="false"
-      />
-      <span style={{ userSelect: 'none' }}>{'\u200B'}</span>
     </span>
   );
 };

@@ -1,79 +1,68 @@
 'use client'
 
 import Image from "next/image";
-import WaitlistSmallBtn from "../components/marketing components/waitlist-small-btn";
-import ProductDemoWindow from "../components/marketing components/product-demo-window";
-import HeroVideoSection from "../components/marketing components/hero-video-section";
 import { useNamespaceTranslation } from "../lib/i18n/LanguageContext";
 import ClientOnly from "../components/ClientOnly";
+import FeatureGrid from "../components/marketing components/feature-grid";
 
 export default function LandingPage() {
   const { t: tMarketing } = useNamespaceTranslation('marketing');
 
   return (
-    // Landing Page Background Color Settings and Window 
-    <div className="min-h-screen bg-white pt-20">
-      {/* Responsive Margin for Content: 
-      這個 mx-6 非常重要因為他讓所有的內容全部都有一樣的 responsive margins, 在調整 window 大小
-      的時候可以確保我所有的內容的 margin 都是一樣的並且如果 text-left 的話也可以讓我的文字全部靠內容對齊*/}
-      <div className="mx-6">
-        <div className="relative mx-auto flex justify-center max-w-5xl">
-          <div className="w-full">
-            {/* Hero Section */}
-            <div className="relative z-10 mt-10 pt-12">
-              {/* Hero Section Rounded Button for Latest News/Versions/Updates */}
-              <div className="text-left">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full 
-                  bg-neutral-100 p-1 pr-2.75 border-1 border-neutral-300 
-                  text-sm text-neutral-950/60">
-                  <span className="flex items-center justify-center">
-                    <Image src="/logos/roundedlogo-gray-no-text.png" 
-                    alt="Clarity Logo" width={20} height={20} />
-                  </span>
-                  <ClientOnly fallback={<span>Beta version releasing on 2025.11.20</span>}>
-                    <span>{tMarketing('betaBadge')}</span>
-                  </ClientOnly>
-                </div>
-              </div>
-              {/* Hero Section Slogan */}
-              <div className="text-left">
-                <ClientOnly fallback={
-                  <h1 className="max-w-3xl text-5xl 
-                    leading-13 font-semibold tracking-tighter text-neutral-900">
-                    Write math and science notes
-                  </h1>
-                }>
-                  <h1 className="max-w-3xl text-5xl 
-                    leading-13 font-semibold tracking-tighter text-neutral-900">
-                    {tMarketing('heroTitle')}
-                  </h1>
-                </ClientOnly>
-                 <ClientOnly fallback={
-                   <h2 className="mt-1 text-2xl font-medium tracking-tight text-neutral-500">
-                     with a simpler, smoother and addictive  experience.
-                   </h2>
-                 }>
-                   <h2 className="mt-1 text-2xl font-medium tracking-tight text-neutral-500">
-                     {tMarketing('heroSubtitle')}
-                   </h2>
-                 </ClientOnly>
-                 
-                 {/* Waitlist Button */}
-                 <WaitlistSmallBtn />
-                 
-                 {/* Product Demo Window */}
-                 <ProductDemoWindow />
-                 
-                 {/* Hero Video Section */}
-                 <HeroVideoSection />
-                 
-                 
-                 </div>
-              </div>
-            </div>
-          </div>
+    // Integrity Style: Clean White Background, Centered Layout
+    <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-sans">
+
+      {/* Hero Section */}
+      <div className="pt-32 pb-20 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto text-center">
+
+        {/* Hero Title */}
+        <ClientOnly fallback={
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight mb-6 text-[var(--color-text-primary)]">
+            Write math and science notes.
+          </h1>
+        }>
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight mb-6 text-[var(--color-text-primary)]">
+            {tMarketing('heroTitle')}
+          </h1>
+        </ClientOnly>
+
+        {/* Hero Subtitle */}
+        <ClientOnly fallback={
+          <p className="text-xl md:text-2xl text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-10 leading-relaxed">
+            A simpler, smoother, and addictive experience for engineers and students.
+          </p>
+        }>
+          <p className="text-xl md:text-2xl text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-10 leading-relaxed">
+            {tMarketing('heroSubtitle')}
+          </p>
+        </ClientOnly>
+
+        {/* CTA Button */}
+        <div className="flex justify-center mb-20">
+          <button className="bg-[var(--color-text-primary)] text-[var(--color-bg-primary)] 
+            px-8 py-4 rounded-full text-lg font-medium hover:opacity-80 transition-opacity">
+            Get Started
+          </button>
+        </div>
+
+        {/* Hero Image / Visualization */}
+        <div className="relative w-full max-w-5xl mx-auto rounded-xl overflow-hidden shadow-2xl border border-[var(--color-border-subtle)]">
+          <Image
+            src="/herodemo.png"
+            alt="Clarity Demo"
+            width={1200}
+            height={675}
+            className="w-full h-auto"
+            priority
+          />
         </div>
       </div>
 
+      {/* Feature Section */}
+      <div className="py-24 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border-subtle)]">
+        <FeatureGrid />
+      </div>
+
+    </div>
   );
 }

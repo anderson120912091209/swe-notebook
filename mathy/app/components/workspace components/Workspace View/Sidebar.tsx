@@ -8,8 +8,6 @@ import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useTheme } from '@/app/contexts/ThemeContext';
 import { getWorkspaceTitle } from '@/app/lib/workspaceTitle';
-import CreateFolderModal from '../Folders/CreateFolderModal';
-import CreatePageModal from '../Pages/CreatePageModal';
 import DeleteConfirmationModal from '../DeleteConfirmationModal';
 import type { Folder, Page } from '@/app/types/workspace';
 
@@ -393,39 +391,42 @@ export default function Sidebar() {
     movePageToFolder,
     deleteFolder,
     deletePage,
-    canDropItem
+    canDropItem,
+    createFolder,
+    createPage
   } = useWorkspace();
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   const workspaceTitle = useMemo(() => getWorkspaceTitle(user), [user]);
   const accentBackground = '#68AAEC';
-  const [showNewFolderModal, setShowNewFolderModal] = useState(false);
-  const [showNewPageModal, setShowNewPageModal] = useState(false);
-  const [isCompressed, setIsCompressed] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
+  const createMenuRef = useRef<HTMLDivElement>(null);
+  const createButtonRef = useRef<HTMLButtonElement>(null);
   
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showProfileMenu) {
         const target = event.target as Element;
-        if (!target.closest('.profile-menu-container')) {
+      if (showProfileMenu && !target.closest('.profile-menu-container')) {
           setShowProfileMenu(false);
         }
+      if (showCreateMenu && !target.closest('.create-menu-container')) {
+        setShowCreateMenu(false);
       }
     };
 
-    if (showProfileMenu) {
+    if (showProfileMenu || showCreateMenu) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showProfileMenu]);
+  }, [showProfileMenu, showCreateMenu]);
   
   // Drag & Drop state
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -485,33 +486,6 @@ export default function Sidebar() {
     }
   }, [currentPage]);
 
-  // Monitor sidebar width to detect compression
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const handleResize = () => {
-      const sidebar = document.querySelector('aside');
-      if (sidebar) {
-        const width = sidebar.offsetWidth;
-        // Consider compressed if width is less than 280px (enough for icons + "Folder"/"Page" but not "New")
-        setIsCompressed(width < 280);
-      }
-    };
-
-    // Initial check
-    handleResize();
-
-    // Use ResizeObserver for efficient width monitoring
-    const resizeObserver = new ResizeObserver(handleResize);
-    const sidebar = document.querySelector('aside');
-    if (sidebar) {
-      resizeObserver.observe(sidebar);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [sidebarOpen]);
 
   // Toggle folder expanded state
   const toggleFolder = (folderId: string, e: React.MouseEvent) => {
@@ -568,6 +542,33 @@ export default function Sidebar() {
       console.error('Error signing out:', error);
     }
   }, [signOut]);
+
+  // ============================================================================
+  // CREATE HANDLERS - Immediate creation, no prompts
+  // ============================================================================
+
+  const handleCreateFolder = useCallback(async () => {
+    try {
+      // Create folder immediately with default values
+      const defaultColor = '#5A7FA3';
+      await createFolder('New Folder', undefined, defaultColor);
+      setShowCreateMenu(false);
+    } catch (error) {
+      console.error('Failed to create folder:', error);
+    }
+  }, [createFolder]);
+
+  const handleCreatePage = useCallback(async () => {
+    try {
+      // Create page immediately with default title
+      const newPage = await createPage('Untitled Page');
+      setShowCreateMenu(false);
+      // Navigate to the new page
+      router.push(`/notebook/page/${newPage.id}`);
+    } catch (error) {
+      console.error('Failed to create page:', error);
+    }
+  }, [createPage, router]);
 
   // ============================================================================
   // DELETE/TRASH HANDLERS
@@ -837,7 +838,7 @@ export default function Sidebar() {
         }}
       >
       {/* Header - Fixed height to match top header */}
-      <div className="h-16 flex items-center px-2" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '18px', paddingRight: '18px' }}>
+      <div className="h-16 flex items-center px-2 relative" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '18px', paddingRight: '18px' }}>
         <div className="flex items-center gap-1 w-full min-w-0">
           <button
             onClick={navigateToWorkspace}
@@ -866,45 +867,71 @@ export default function Sidebar() {
             </span>
           </button>
           
-          {/* Sidebar Toggle Button - Small */}
+          {/* Create Button - Small */}
+          <div className="relative create-menu-container">
           <button
+              ref={createButtonRef}
+              onClick={() => setShowCreateMenu(!showCreateMenu)}
+              className="flex h-6 w-6 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0 cursor-pointer"
+            style={{ color: 'var(--foreground-muted)' }}
+              title="Create new"
+          >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+            
+            {/* Dropdown Menu */}
+            {showCreateMenu && (
+              <div
+                ref={createMenuRef}
+                className="absolute top-8 right-0 rounded-lg shadow-lg border py-1 z-[9999] min-w-[160px]"
+                style={{ 
+                  background: 'var(--card-bg)',
+                  borderColor: 'var(--border-color)',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                }}
+              >
+                <button
+                  onClick={handleCreatePage}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>New Page</span>
+                </button>
+        <button
+          onClick={handleCreateFolder}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
+                  style={{ color: 'var(--foreground)' }}
+        >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+          </svg>
+                  <span>New Folder</span>
+        </button>
+              </div>
+            )}
+          </div>
+          
+          {/* Sidebar Toggle Button - Small */}
+        <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0 cursor-pointer"
             style={{ color: 'var(--foreground-muted)' }}
             title="Hide sidebar"
-          >
+        >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </button>
+          </svg>
+        </button>
         </div>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '16px', paddingRight: '16px' }}>
 
-      {/* Actions */}
-      <div className="mb-4 px-2 flex gap-2">
-        <button
-          onClick={() => setShowNewFolderModal(true)}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs hover:bg-[var(--hover-bg)] cursor-pointer"
-          style={{ color: 'var(--foreground)', border: '1px solid var(--border-color)' }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>{isCompressed ? 'Folder' : 'New Folder'}</span>
-        </button>
-        <button
-          onClick={() => setShowNewPageModal(true)}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs hover:bg-[var(--hover-bg)] cursor-pointer"
-          style={{ color: 'var(--foreground)', border: '1px solid var(--border-color)' }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>{isCompressed ? 'Page' : 'New Page'}</span>
-        </button>
-      </div>
 
       {/* Navigation Tree with Drag & Drop */}
       <DndContext
@@ -919,7 +946,7 @@ export default function Sidebar() {
           {/* Spaces Section Header */}
           {rootFolders.length > 0 && (
             <div className="px-3 py-1 text-xs font-medium" style={{ color: 'var(--foreground-muted)' }}>
-              Folders
+              Workspace
             </div>
           )}
           
@@ -985,18 +1012,6 @@ export default function Sidebar() {
       </DndContext>
 
       {/* Modals */}
-      {showNewFolderModal && (
-        <CreateFolderModal 
-          onClose={() => setShowNewFolderModal(false)}
-          onSuccess={(folderId) => {
-            setShowNewFolderModal(false);
-            router.push(`/notebook/folder/${folderId}`);
-          }}
-        />
-      )}
-      {showNewPageModal && (
-        <CreatePageModal onClose={() => setShowNewPageModal(false)} />
-      )}
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => {

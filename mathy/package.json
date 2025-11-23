@@ -5,6 +5,7 @@
   "main": "electron/main.js",
   "homepage": "./",
   "scripts": {
+    "postinstall": "node scripts/fix-mathlive-package.js",
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
@@ -16,11 +17,12 @@
     "electron-pack": "next build && next export && electron-builder --dir"
   },
   "dependencies": {
+    "@anderson120912091209/mathlive-custom": "^1.0.3",
+    "mathlive": "npm:@anderson120912091209/mathlive-custom@^1.0.3",
     "@blocknote/core": "^0.41.1",
     "@blocknote/mantine": "^0.41.1",
     "@blocknote/react": "^0.41.1",
     "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@heroui/modal": "^2.2.24",
     "@heroui/react": "^2.8.5",
@@ -53,7 +55,6 @@
     "katex": "^0.16.23",
     "lodash": "^4.17.21",
     "lucide-react": "^0.544.0",
-    "mathlive": "^0.107.1",
     "next": "15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",

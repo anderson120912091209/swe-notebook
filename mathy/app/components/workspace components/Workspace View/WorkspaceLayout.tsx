@@ -34,10 +34,10 @@ const BUTTON_STYLES = {
   color: 'var(--foreground-muted)'
 };
 
-export default function WorkspaceLayout({ 
-  children, 
-  header, 
-  rightHeader, 
+export default function WorkspaceLayout({
+  children,
+  header,
+  rightHeader,
   breadcrumb,
   title,
   customTagContent,
@@ -59,7 +59,7 @@ export default function WorkspaceLayout({
   return (
     <div className="h-screen overflow-hidden" style={{ background: 'var(--outer-bg)' }}>
       {/* Top Navigation Bar */}
-      <TopNavigationBar 
+      <TopNavigationBar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         breadcrumb={breadcrumb}
@@ -95,13 +95,13 @@ export default function WorkspaceLayout({
 }
 
 // Top Navigation Bar Component
-function TopNavigationBar({ 
-  sidebarOpen, 
-  setSidebarOpen, 
-  breadcrumb, 
-  onBack, 
-  onForward, 
-  onRefresh 
+function TopNavigationBar({
+  sidebarOpen,
+  setSidebarOpen,
+  breadcrumb,
+  onBack,
+  onForward,
+  onRefresh
 }: {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
@@ -117,31 +117,31 @@ function TopNavigationBar({
         {!sidebarOpen && (
           <NavButton onClick={() => setSidebarOpen(true)} title="Show sidebar">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <line x1="9" y1="3" x2="9" y2="21"/>
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="9" y1="3" x2="9" y2="21" />
             </svg>
           </NavButton>
         )}
-        
+
         {/* Navigation Buttons */}
         <NavButton onClick={onBack} title="Back">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </NavButton>
-        
+
         <NavButton onClick={onForward} title="Forward">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </NavButton>
-        
+
         <NavButton onClick={onRefresh} title="Refresh">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         </NavButton>
-        
+
         {/* Breadcrumb */}
         {breadcrumb && (
           <div className="ml-3">
@@ -149,7 +149,7 @@ function TopNavigationBar({
           </div>
         )}
       </div>
-      
+
       <div></div>
     </header>
   );
@@ -158,9 +158,9 @@ function TopNavigationBar({
 // Main Content Container Component
 function MainContentContainer({ children }: { children: React.ReactNode }) {
   return (
-    <div 
-      className="rounded-lg overflow-hidden"
-      style={{ 
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{
         height: 'calc(100vh - 4rem - 0.8em)',
         width: 'calc(100vw - 1rem)',
         maxWidth: 'calc(100% - 1rem)',
@@ -168,7 +168,7 @@ function MainContentContainer({ children }: { children: React.ReactNode }) {
         marginRight: '0.5rem',
         marginTop: '0.25rem',
         marginBottom: '0.75rem',
-        background: 'var(--background)',
+        background: 'var(--page-bg)',
         border: '1px solid var(--border-color)'
       }}
     >
@@ -180,16 +180,16 @@ function MainContentContainer({ children }: { children: React.ReactNode }) {
 }
 
 // Editable Title Component
-function EditableTitle({ 
-  value, 
-  onChange, 
-  className, 
-  style 
-}: { 
-  value: string; 
-  onChange?: (value: string) => void; 
-  className?: string; 
-  style?: React.CSSProperties; 
+function EditableTitle({
+  value,
+  onChange,
+  className,
+  style
+}: {
+  value: string;
+  onChange?: (value: string) => void;
+  className?: string;
+  style?: React.CSSProperties;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
@@ -257,7 +257,7 @@ function EditableTitle({
   }
 
   return (
-    <h1 
+    <h1
       className={`${className} cursor-text rounded px-1 py-0.5 transition-colors`}
       style={style}
       onDoubleClick={handleDoubleClick}
@@ -295,7 +295,7 @@ function PageHeader({
   rightHeader?: React.ReactNode;
 }) {
   return (
-    <header className={`${HEADER_SPACING.container} backdrop-blur`} style={{ background: 'var(--background)' }}>
+    <header className={`${HEADER_SPACING.container} backdrop-blur`} style={{ background: 'var(--page-bg)' }}>
       <div className="flex items-start justify-between">
         {/* Left Side */}
         <div className="flex-1">
@@ -314,7 +314,7 @@ function PageHeader({
               </h1>
             )
           )}
-          
+
           {/* Description Field - Below title, same alignment */}
           {showDescriptionField && (
             <div className="mb-3">
@@ -331,12 +331,12 @@ function PageHeader({
               />
             </div>
           )}
-          
+
           {/* Tag Content and Hamburger */}
           {customTagContent && (
             <div className={`flex items-center ${HEADER_SPACING.element} ${HEADER_SPACING.section}`}>
               {customTagContent}
-              
+
               {/* Hamburger Button - only show if enabled */}
               {showHamburgerButton && (
                 <button
@@ -352,7 +352,7 @@ function PageHeader({
               )}
             </div>
           )}
-          
+
           {/* Custom Header Content */}
           {header && (
             <div className={`flex items-center ${HEADER_SPACING.element}`}>
@@ -375,13 +375,13 @@ function PageHeader({
 }
 
 // Auto-sizing Input Component
-function AutoSizingInput({ 
-  value, 
-  onChange, 
-  placeholder, 
-  className, 
-  style, 
-  autoFocus 
+function AutoSizingInput({
+  value,
+  onChange,
+  placeholder,
+  className,
+  style,
+  autoFocus
 }: {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -402,11 +402,11 @@ function AutoSizingInput({
       span.style.fontSize = '14px'; // text-sm equivalent
       span.style.fontFamily = 'inherit';
       span.textContent = value || placeholder;
-      
+
       document.body.appendChild(span);
       const textWidth = span.offsetWidth;
       document.body.removeChild(span);
-      
+
       // Set width with some padding, minimum 200px
       setWidth(Math.max(textWidth + 20, 200));
     }
@@ -430,14 +430,14 @@ function AutoSizingInput({
 }
 
 // Reusable Navigation Button Component
-function NavButton({ 
-  onClick, 
-  title, 
-  children 
-}: { 
-  onClick: () => void; 
-  title: string; 
-  children: React.ReactNode; 
+function NavButton({
+  onClick,
+  title,
+  children
+}: {
+  onClick: () => void;
+  title: string;
+  children: React.ReactNode;
 }) {
   return (
     <button
