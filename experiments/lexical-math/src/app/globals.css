@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* KaTeX Fonts - Professional Math Typography */
+@import 'katex/dist/katex.min.css';
+
 :root {
   --background: #1a1a1a;
   --foreground: #ffffff;

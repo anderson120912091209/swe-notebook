@@ -25,8 +25,7 @@ class MathOption extends MenuOption {
         category: 'primary' | 'secondary' | 'symbol',
         symbol?: string,
         shortcut?: string,
-        keywords: string[] = []
-    ) {
+        keywords: string[] = []   ) {
         super(title);
         this.title = title;
         this.key = key;
@@ -197,14 +196,12 @@ export default function MathTypeaheadPlugin() {
                             {isGrid ? (
                                 <div className="flex flex-col items-center">
                                     <span className="text-lg text-white">{option.symbol}</span>
-                                    {option.shortcut && <span className="text-[9px] 
-                                    text-gray-400 absolute top-0.5 right-1">{option.shortcut}</span>}
+                                    {option.shortcut && <span className="text-[9px] text-gray-400 absolute top-0.5 right-1">{option.shortcut}</span>}
                                 </div>
                             ) : (
                                 <>
                                     <div className="flex items-center gap-3">
-                                        <div className={`flex items-center justify-center 
-                                            w-6 h-6 rounded ${option.category === 'primary' ? 'bg-purple-900 text-purple-300' : 'bg-green-900 text-green-300'}`}>
+                                        <div className={`flex items-center justify-center w-6 h-6 rounded ${option.category === 'primary' ? 'bg-purple-900 text-purple-300' : 'bg-green-900 text-green-300'}`}>
                                             {option.symbol || option.title[0]}
                                         </div>
                                         <div className="flex flex-col">

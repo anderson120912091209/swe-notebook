@@ -9,9 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@anderson120912091209/mathlive-custom": "^1.0.1",
+    "@blocknote/core": "^0.41.1",
+    "@blocknote/mantine": "^0.41.1",
+    "@blocknote/react": "^0.41.1",
     "@lexical/react": "^0.38.2",
     "@lexical/utils": "^0.38.2",
     "clsx": "^2.1.1",
+    "katex": "^0.16.25",
     "lexical": "^0.38.2",
     "lucide-react": "^0.554.0",
     "next": "16.0.3",
