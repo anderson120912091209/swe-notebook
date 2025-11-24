@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createReactInlineContentSpec } from '@blocknote/react';
 import MathLiveInput from '@/app/components/product components/MathLiveInput';
 import MathLiveDisplay from '@/app/components/product components/MathLiveDisplay';
@@ -13,6 +13,7 @@ const InlineMathRenderer: React.FC<{
 }> = (props) => {
   const [latex, setLatex] = useState(props.inlineContent.props.latex || '');
   const [isEditing, setIsEditing] = useState(false);
+  const mathWrapperRef = useRef<HTMLSpanElement>(null);
 
   // Sync local state with props
   useEffect(() => {
@@ -44,6 +45,50 @@ const InlineMathRenderer: React.FC<{
       props: { latex: trimmed },
     });
     setIsEditing(false);
+
+    // Position caret after the math block and focus the editor
+    // Use setTimeout to wait for DOM update after setIsEditing(false)
+    setTimeout(() => {
+      // Find the math wrapper element (either from ref or by class)
+      const mathElement = mathWrapperRef.current || 
+        document.querySelector('.inline-math-wrapper');
+      
+      if (mathElement) {
+        // Find the BlockNote editor contenteditable element
+        const editorElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+        
+        if (editorElement) {
+          // Create a range and position it right after the math block
+          const range = document.createRange();
+          const selection = window.getSelection();
+          
+          try {
+            // Set range to position after the math block
+            range.setStartAfter(mathElement);
+            range.collapse(true);
+            
+            // Apply the selection
+            if (selection) {
+              selection.removeAllRanges();
+              selection.addRange(range);
+            }
+            
+            // Focus the editor
+            editorElement.focus();
+            
+            console.log('[InlineMath] Caret positioned after math block');
+          } catch (error) {
+            console.warn('[InlineMath] Failed to position caret:', error);
+            // Fallback: just focus the editor
+            editorElement.focus();
+          }
+        } else {
+          console.warn('[InlineMath] Could not find BlockNote editor element');
+        }
+      } else {
+        console.warn('[InlineMath] Could not find math wrapper element');
+      }
+    }, 0);
   };
 
   const handleCancel = () => {
@@ -69,6 +114,7 @@ const InlineMathRenderer: React.FC<{
 
   return (
     <span
+      ref={mathWrapperRef}
       className="inline-math-wrapper"
       style={{
         display: 'inline-flex',

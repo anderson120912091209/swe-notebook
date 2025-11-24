@@ -130,8 +130,8 @@ export default function WorkspaceView() {
             <Image
                 src="/logos/claritylogo-notext.png"
                 alt="Clarity"
-                width={18}
-                height={18}
+                width={15}
+                height={15}
                 className="opacity-60"
             />
             <span>Workspace</span>

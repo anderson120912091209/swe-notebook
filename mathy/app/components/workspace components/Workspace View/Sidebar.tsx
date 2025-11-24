@@ -2,7 +2,19 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor, closestCorners, DragStartEvent, DragOverEvent, DragEndEvent } from '@dnd-kit/core';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCorners,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { Tooltip } from "@heroui/react";
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
@@ -52,7 +64,7 @@ function lightenHex(hex: string, amount: number): string {
 // ============================================================================
 // INDENTATION SYSTEM - Single source of truth for all objects
 // ============================================================================
-const INDENT_SIZE = 20; // Increased from 20px for better visual separation
+const INDENT_SIZE = 12; // Reduced for tighter nesting
 
 /**
  * Get consistent indentation style for any object (folder, page, future objects)
@@ -128,36 +140,60 @@ const DraggableFolder = React.memo(function DraggableFolder({
 
   return (
     <div>
-      <div className="flex items-center gap-1" style={getIndentStyle(depth, false)}>
-        {/* Chevron toggle */}
-        {pageCount > 0 && (
-          <button
-            onClick={onToggle}
-            className="flex items-center justify-center w-5 h-5
-             rounded hover:bg-[var(--hover-bg)] active:scale-90"
-            style={{ color: 'var(--foreground-muted)' }}
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{
-                transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
+      <div
+        className={`group flex items-center gap-3 pl-3 pr-2 py-1.5 rounded-md transition-colors
+          ${isActive ? 'bg-[var(--hover-bg)]' : 'hover:bg-[var(--hover-bg)]'}
+          ${isDropTarget && isOver ? 'bg-[var(--active-bg)]' : ''}`}
+        style={getIndentStyle(depth, false)}
+      >
+        {/* Toggle/Icon Button - Swaps between Folder and Chevron */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (pageCount > 0) onToggle(e);
+          }}
+          className={`flex items-center justify-center w-5 h-5 flex-shrink-0 rounded-md transition-colors
+            ${pageCount > 0 ? 'hover:bg-[var(--hover-bg)] cursor-pointer' : 'cursor-default'}`}
+          style={{ color: 'var(--foreground-muted)' }}
+        >
+          <div className="relative w-4 h-4 flex items-center justify-center">
+            {/* Folder Icon - Default visible, hidden on hover if expandable */}
+            <div
+              className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200
+              ${pageCount > 0 ? 'opacity-100 group-hover:opacity-0' : 'opacity-100'}`}
             >
-              <path d="M4 2L8 6L4 10" />
-            </svg>
-          </button>
-        )}
-        {pageCount === 0 && <div className="w-5" />}
+              <svg fill={folder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24" className="w-4 h-4">
+                <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+              </svg>
+            </div>
 
-        {/* Folder button - draggable and droppable */}
+            {/* Chevron - Default hidden, visible on hover if expandable */}
+            {pageCount > 0 && (
+              <div
+                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{
+                    transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s ease',
+                  }}
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </div>
+            )}
+          </div>
+        </button>
+
+        {/* Folder Name & Drag Handle */}
         <button
           ref={combinedRef}
           {...attributes}
@@ -166,22 +202,16 @@ const DraggableFolder = React.memo(function DraggableFolder({
             e.stopPropagation();
             onClick();
           }}
-          className={`flex-1 flex items-center gap-2 px-3 py-1.5 
-            rounded-md text-sm text-left 
-            hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
-            } ${isDropTarget && isOver ? 'bg-[var(--active-bg)]' : ''}`}
+          className={`flex-1 flex items-center gap-2 min-w-0 text-sm text-left
+            ${isActive ? 'font-medium' : ''}`}
           style={{
             ...style,
             color: 'var(--foreground)',
             cursor: isBeingDragged ? 'grabbing' : 'pointer',
-            ...getDepthStyle(depth),
-            width: `calc(100% - ${depth * INDENT_SIZE}px)`, // Constrain width to prevent overflow
+            // Removed width calc since flex-1 handles it, and padding is now on parent
           }}
         >
-          <svg className="w-4 h-4 flex-shrink-0" fill={folder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
-            <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-          </svg>
-          <span className="flex-1 truncate min-w-0" title={folder.name}>{folder.name}</span>
+          <span className="flex-1 truncate min-w-0 text-left" title={folder.name}>{folder.name}</span>
           <span className="text-xs" style={{ color: 'var(--foreground-muted)' }}>
             {pageCount}
           </span>
@@ -232,17 +262,19 @@ const DraggablePage = React.memo(function DraggablePage({ page, isActive, isBein
         e.preventDefault();
         onClick();
       }}
-      className={`w-full flex items-center gap-2 px-3 py-1 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
+      className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 transition-colors ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
         }`}
       style={{
         ...style,
         color: 'var(--foreground)',
       }}
     >
-      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-      <span className="flex-1 truncate min-w-0" title={page.title}>{page.title}</span>
+      <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <span className="flex-1 truncate min-w-0 text-left" title={page.title}>{page.title}</span>
     </button>
   );
 });
@@ -284,17 +316,19 @@ const RecentPage = React.memo(function RecentPage({ page, folder, isActive, isBe
         e.preventDefault();
         onClick();
       }}
-      className={`w-full flex items-center gap-2 px-3 py-1 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
+      className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 transition-colors ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
         }`}
       style={{
         ...style,
         color: 'var(--foreground)',
       }}
     >
-      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-      <span className="flex-1 truncate min-w-0" title={page.title}>{page.title}</span>
+      <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <span className="flex-1 truncate min-w-0 text-left" title={page.title}>{page.title}</span>
       {folder && (
         <span
           className="inline-flex items-center px-1.5 py-0.5 
@@ -835,12 +869,12 @@ export default function Sidebar() {
         }}
       >
         {/* Header - Fixed height to match top header */}
-        <div className="h-16 flex items-center px-2 relative" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '18px', paddingRight: '18px' }}>
-          <div className="flex items-center gap-1 w-full min-w-0">
+        <div className="h-16 flex items-center relative" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '16px', paddingRight: '16px' }}>
+          <div className="flex items-center gap-2 w-full min-w-0">
             <button
               onClick={navigateToWorkspace}
-              className="flex-1 flex items-center gap-2 px-2 py-2 
-            rounded-lg hover:bg-[var(--hover-bg)] text-left min-w-0 cursor-pointer"
+              className="flex-1 flex items-center gap-2 px-3 py-1.5 
+            rounded-md hover:bg-[var(--hover-bg)] text-left min-w-0 cursor-pointer transition-colors"
               style={{ color: 'var(--foreground)' }}
             >
               {sidebarOpen && (
@@ -859,23 +893,37 @@ export default function Sidebar() {
                   />
                 )
               )}
-              <span className="font-semibold text-sm truncate min-w-0" title={workspaceTitle}>
+              <span className="font-semibold text-sm truncate min-w-0 text-left" title={workspaceTitle}>
                 {workspaceTitle}
               </span>
             </button>
 
-            {/* Create Button - Small */}
+            {/* Create Button - Prominent Design */}
             <div className="relative create-menu-container">
               <button
                 ref={createButtonRef}
                 onClick={() => setShowCreateMenu(!showCreateMenu)}
-                className="flex h-6 w-6 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0 cursor-pointer"
-                style={{ color: 'var(--foreground-muted)' }}
-                title="Create new"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-md 
+                transition-all flex-shrink-0 cursor-pointer font-medium text-sm shadow-sm hover:shadow-md"
+                style={{
+                  background: accentBackground,
+                  color: '#ffffff',
+                  border: 'none'
+                }}
+                title="Create new page or folder"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.9';
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
+                <span className="text-sm">New</span>
               </button>
 
               {/* Dropdown Menu */}
@@ -891,22 +939,26 @@ export default function Sidebar() {
                 >
                   <button
                     onClick={handleCreatePage}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
+                    className="w-full flex items-center gap-3 px-3 py-1.5 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
                     style={{ color: 'var(--foreground)' }}
                   >
-                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                    <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
                     <span>New Page</span>
                   </button>
                   <button
                     onClick={handleCreateFolder}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
+                    className="w-full flex items-center gap-3 px-3 py-1.5 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
                     style={{ color: 'var(--foreground)' }}
                   >
-                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" stroke="none" viewBox="0 0 24 24">
-                      <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
+                    <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                      <svg fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                        <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                      </svg>
+                    </div>
                     <span>New Folder</span>
                   </button>
                 </div>
@@ -940,9 +992,128 @@ export default function Sidebar() {
             onDragCancel={handleDragCancel}
           >
             <nav className="space-y-1 min-w-0">
+              {/* Top Navigation Items */}
+              <div className="space-y-0.5 mb-3">
+                {/* Home */}
+                <button
+                  onClick={() => router.push('/notebook')}
+                  className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors cursor-pointer text-left ${pathname === '/notebook' ? 'bg-[var(--hover-bg)]' : 'hover:bg-[var(--hover-bg)]'
+                    }`}
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ color: 'var(--foreground-muted)' }}
+                    >
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium">Home</span>
+                </button>
+
+                {/* Search */}
+                <Tooltip
+                  content="Find anything"
+                  placement="right"
+                  classNames={{
+                    content: "bg-zinc-900 text-zinc-100 text-xs px-2 py-1 rounded-md border border-zinc-800 shadow-xl",
+                  }}
+                  delay={0}
+                  closeDelay={0}
+                >
+                  <button
+                    onClick={() => {
+                      // You can implement search functionality here
+                      console.log('Search clicked');
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
+                    style={{ color: 'var(--foreground)' }}
+                  >
+                    <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{ color: 'var(--foreground-muted)' }}
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium">Search</span>
+                  </button>
+                </Tooltip>
+
+                {/* Community */}
+                <Tooltip
+                  content="Join communities and share notes"
+                  placement="right"
+                  classNames={{
+                    content: "bg-zinc-900 text-zinc-100 text-xs px-2 py-1 rounded-md border border-zinc-800 shadow-xl",
+                  }}
+                  delay={0}
+                  closeDelay={0}
+                >
+                  <button
+                    onClick={() => {
+                      // You can implement community functionality here
+                      console.log('Community clicked');
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
+                    style={{ color: 'var(--foreground)' }}
+                  >
+                    <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{ color: 'var(--foreground-muted)' }}
+                      >
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium">Community</span>
+                    <span
+                      className="px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wide"
+                      style={{
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)', // Slightly more visible background
+                        color: '#60a5fa', // Lighter blue for better contrast on dark
+                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                      }}
+                    >
+                      Building
+                    </span>
+                  </button>
+                </Tooltip>
+              </div>
+
+
+
               {/* Spaces Section Header */}
               {rootFolders.length > 0 && (
-                <div className="px-3 py-1 text-xs font-medium" style={{ color: 'var(--foreground-muted)' }}>
+                <div className="px-3 py-1.5 text-xs font-medium tracking-wide" style={{ color: 'var(--foreground-muted)' }}>
                   Workspace
                 </div>
               )}
@@ -954,7 +1125,7 @@ export default function Sidebar() {
               {recentPages.length > 0 && (
                 <div className="pt-2">
                   {rootFolders.length > 0 && (
-                    <div className="px-3 py-1 text-xs font-medium" style={{ color: 'var(--foreground-muted)' }}>
+                    <div className="px-3 py-1.5 text-xs font-medium tracking-wide" style={{ color: 'var(--foreground-muted)' }}>
                       Recents
                     </div>
                   )}
@@ -1032,10 +1203,10 @@ export default function Sidebar() {
                 // You can implement ask a question functionality here
                 console.log('Ask a question clicked');
               }}
-              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
+              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
               style={{ color: 'var(--foreground)' }}
             >
-              <div className="w-5 h-5 flex items-center justify-center">
+              <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                 <svg
                   width="16"
                   height="16"
@@ -1058,10 +1229,10 @@ export default function Sidebar() {
             {/* Academy */}
             <button
               onClick={() => window.open('https://academy.example.com', '_blank')}
-              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
+              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
               style={{ color: 'var(--foreground)' }}
             >
-              <div className="w-5 h-5 flex items-center justify-center">
+              <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                 <svg
                   width="16"
                   height="16"
@@ -1083,10 +1254,10 @@ export default function Sidebar() {
             {/* Documentation */}
             <button
               onClick={() => window.open('https://docs.example.com', '_blank')}
-              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
+              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
               style={{ color: 'var(--foreground)' }}
             >
-              <div className="w-5 h-5 flex items-center justify-center">
+              <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                 <svg
                   width="16"
                   height="16"
@@ -1122,10 +1293,10 @@ export default function Sidebar() {
             {/* Feedback */}
             <button
               onClick={() => window.open('https://feedback.example.com', '_blank')}
-              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
+              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
               style={{ color: 'var(--foreground)' }}
             >
-              <div className="w-5 h-5 flex items-center justify-center">
+              <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                 <svg
                   width="16"
                   height="16"
@@ -1335,6 +1506,6 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-    </aside>
+    </aside >
   );
 }

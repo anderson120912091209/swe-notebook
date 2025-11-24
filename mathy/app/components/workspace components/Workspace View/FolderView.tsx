@@ -166,8 +166,8 @@ export default function FolderView({ folderId }: FolderViewProps) {
       <Image
         src="/logos/claritylogo-notext.png"
         alt="Clarity"
-        width={18}
-        height={18}
+        width={15}
+        height={15}
         className="opacity-60"
       />
       {getFolderBreadcrumbPath(folderId, folders).length > 1

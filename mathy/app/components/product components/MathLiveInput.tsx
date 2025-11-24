@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-
+//I am using DOM capture as the main way to prevent conflicting enter key issues. 
+//I think this is a technical debt we gotta fix in the future.
 // Local type definition for MathfieldElement to avoid build-time import issues
 interface MathfieldElement extends HTMLElement {
   value: string;
@@ -10,7 +11,6 @@ interface MathfieldElement extends HTMLElement {
   mathVirtualKeyboardPolicy?: 'auto' | 'manual' | 'sandboxed';
   focus?: () => void;
   blur?: () => void;
-  isSuggestionMenuVisible?: boolean;
 }
 
 interface MathLiveInputProps {
@@ -91,15 +91,25 @@ const MathLiveInput: React.FC<MathLiveInputProps> = ({
         });
 
         mf.addEventListener('keydown', (evt) => {
-            // Check if MathLive's autocomplete/suggestion menu is open using the new API
-            // Using type assertion since this property exists at runtime but may not be in types
-            const mfWithMenu = mf as MathfieldElement & { isSuggestionMenuVisible?: boolean };
+            // Helper function to check if MathLive's suggestion popover is visible
+            // Uses the same DOM-based check that MathLive uses internally
+            const isPopoverVisible = (): boolean => {
+                const panel = document.getElementById('mathlive-suggestion-popover');
+                return panel?.classList.contains('is-visible') ?? false;
+            };
             
             if (evt.key === 'Enter' || evt.key === 'Tab') {
-                // If menu is open, let MathLive handle the selection
-                if (mfWithMenu.isSuggestionMenuVisible) {
-                    console.log('[MathLiveInput] Menu open, letting MathLive handle Enter/Tab');
+                // Check if popover is visible using DOM (same as MathLive)
+                const popoverVisible = isPopoverVisible();
+                
+                if (popoverVisible) {
+                    console.log('[MathLiveInput] Popover visible, letting MathLive handle Enter/Tab');
                     return; // Don't intercept - let MathLive handle menu selection
+                }
+                
+                // Additional safety check: if event was already prevented, don't handle
+                if (evt.defaultPrevented) {
+                    return;
                 }
 
                 // Menu is closed, so exit the math block
@@ -107,10 +117,17 @@ const MathLiveInput: React.FC<MathLiveInputProps> = ({
                 console.log('[MathLiveInput] Enter/Tab pressed, calling onFinish');
                 onFinishRef.current?.();
             } else if (evt.key === 'Escape') {
-                // If menu is open, close it first; otherwise cancel the edit
-                if (mfWithMenu.isSuggestionMenuVisible) {
-                    console.log('[MathLiveInput] Menu open, letting MathLive handle Escape');
+                // Check if popover is visible
+                const popoverVisible = isPopoverVisible();
+                
+                if (popoverVisible) {
+                    console.log('[MathLiveInput] Popover visible, letting MathLive handle Escape');
                     return; // Let MathLive close the menu first
+                }
+                
+                // Additional safety check
+                if (evt.defaultPrevented) {
+                    return;
                 }
 
                 evt.preventDefault();
@@ -132,8 +149,11 @@ const MathLiveInput: React.FC<MathLiveInputProps> = ({
         }
 
         return () => {
-            if (containerRef.current) {
-                containerRef.current.innerHTML = '';
+            // Capture container reference at cleanup time
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            const container = containerRef.current;
+            if (container) {
+                container.innerHTML = '';
             }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
