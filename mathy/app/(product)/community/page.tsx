@@ -14,58 +14,11 @@ interface Community {
     isJoined?: boolean;
 }
 
-// Mock community data
-const MOCK_COMMUNITIES: Community[] = [
-    {
-        id: '1',
-        name: 'Claremont McKenna College',
-        description: 'The official community for CMC. Find the best study resources',
-        coverImage: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=450&fit=crop',
-        icon: '🏫',
-        memberCount: 2,
-    },
-    {
-        id: '2',
-        name: 'Computer Science Students',
-        description: 'A place for all CS Students on Opennote to collaborate',
-        coverImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=450&fit=crop',
-        icon: '💻',
-        memberCount: 7,
-    },
-    {
-        id: '3',
-        name: 'Data Structures & Algorithms',
-        description: 'Learn DSA on Opennote with study groups',
-        coverImage: 'https://images.unsplash.com/photo-1509966756634-9c23dd6e6815?w=800&h=450&fit=crop',
-        icon: '📊',
-        memberCount: 120,
-    },
-    {
-        id: '4',
-        name: 'McGill University',
-        description: 'The official community for McGill. Connect with fellow students',
-        coverImage: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&h=450&fit=crop',
-        icon: '🎓',
-        memberCount: 1,
-    },
-    {
-        id: '5',
-        name: 'New Uzbekistan University',
-        description: 'The official community for NUU. Share and learn together',
-        coverImage: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=450&fit=crop',
-        icon: '🏛️',
-        memberCount: 2,
-    },
-];
-
 export default function CommunityPage() {
     const [activeTab, setActiveTab] = useState<'discover' | 'joined'>('discover');
     const [searchQuery, setSearchQuery] = useState('');
 
-    const filteredCommunities = MOCK_COMMUNITIES.filter(community =>
-        community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        community.description.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredCommunities: Community[] = [];
 
     const breadcrumb = (
         <nav className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
