@@ -99,7 +99,7 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
   const cardBackground = lightenHex(baseColor, lightenAmount);
   const chipBackground = lightenHex(baseColor, theme === 'dark' ? 0.35 : 0.58);
   // Use a more appropriate border color for dark mode
-  const borderColor = theme === 'dark' 
+  const borderColor = theme === 'dark'
     ? darkenHex(cardBackground, 0.4) // Darker border in dark mode for better contrast
     : darkenHex(cardBackground, 0.2); // Original border for light mode
   const textColor = '#ffffff'; // White text for better readability on light backgrounds
@@ -132,7 +132,7 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
           zIndex: 0,
         }}
       />
-      
+
       {/* Top layer - folder card that MOVES */}
       <div
         id="folder-card"
@@ -169,96 +169,96 @@ const FolderCard = React.memo(function FolderCard({ folder, pageCount = 0, onDel
           target.style.filter = 'brightness(1)';
         }}
       >
-      
 
-      {/* Content - stays stable during hover */}
-      <div
-        className="relative flex flex-1 flex-col p-6 transition-transform duration-[220ms] ease-out
+
+        {/* Content - stays stable during hover */}
+        <div
+          className="relative flex flex-1 flex-col p-6 transition-transform duration-[220ms] ease-out
         group-hover:translate-y-0"
-        style={{ gap: '18px' }}
-      >
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
-          <span
-            className="rounded-md px-3 py-1"
+          style={{ gap: '18px' }}
+        >
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+            <span
+              className="rounded-md px-3 py-1"
+              style={{
+                background: chipBackground,
+                color: 'white',
+                letterSpacing: '0.06em',
+              }}
+            >
+              {createdYear}
+            </span>
+          </div>
+
+          {/* Title */}
+          <div className="mt-4 flex items-start gap-3">
+            <h3
+              className="flex-1 text-lg font-semibold leading-snug line-clamp-3"
+              style={{ color: textColor }}
+            >
+              {folder.name || 'Untitled Folder'}
+            </h3>
+          </div>
+
+          {/* Description */}
+          <p
+            className="mt-3 text-sm leading-relaxed line-clamp-3"
+            style={{ color: mutedTextColor }}
+          >
+            {description}
+          </p>
+
+          {/* Footer */}
+          <div className="mt-auto flex flex-col gap-4 pt-8 text-xs font-medium">
+            <span className="flex items-center gap-2" style={{ color: mutedTextColor }}>
+              {pageCount} {pageCount === 1 ? 'page' : 'pages'}
+            </span>
+            <span style={{ color: mutedTextColor }}>Created {createdLabel}</span>
+          </div>
+        </div>
+
+        {/* Hover Actions */}
+        <div className="absolute top-3 right-3 flex gap-2 opacity-0 
+      cursor-pointer transition-opacity duration-200 group-hover:opacity-100">
+          <button
+            onClick={handleEdit}
+            className="rounded-full p-1.5 transition-colors"
+            title="Rename"
             style={{
-              background: chipBackground,
-              color: 'white',
-              letterSpacing: '0.06em',
+              background: controlBackground,
+              color: controlIconColor,
+            }}
+            onMouseEnter={(event) => {
+              event.currentTarget.style.background = controlHoverBackground;
+            }}
+            onMouseLeave={(event) => {
+              event.currentTarget.style.background = controlBackground;
             }}
           >
-            {createdYear}
-          </span>
-        </div>
-
-        {/* Title */}
-        <div className="mt-4 flex items-start gap-3">
-          <h3
-            className="flex-1 text-lg font-semibold leading-snug line-clamp-3"
-            style={{ color: textColor }}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </button>
+          <button
+            onClick={handleDelete}
+            className="rounded-full p-1.5 transition-colors"
+            title="Delete"
+            style={{
+              background: controlBackground,
+              color: controlIconColor,
+            }}
+            onMouseEnter={(event) => {
+              event.currentTarget.style.background = controlHoverBackground;
+            }}
+            onMouseLeave={(event) => {
+              event.currentTarget.style.background = controlBackground;
+            }}
           >
-            {folder.name || 'Untitled Folder'}
-          </h3>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
         </div>
-
-        {/* Description */}
-        <p
-          className="mt-3 text-sm leading-relaxed line-clamp-3"
-          style={{ color: mutedTextColor }}
-        >
-          {description}
-        </p>
-
-        {/* Footer */}
-        <div className="mt-auto flex flex-col gap-4 pt-8 text-xs font-medium">
-          <span className="flex items-center gap-2" style={{ color: mutedTextColor }}>
-            {pageCount} {pageCount === 1 ? 'page' : 'pages'}
-          </span>
-          <span style={{ color: mutedTextColor }}>Created {createdLabel}</span>
-        </div>
-      </div>
-
-      {/* Hover Actions */}
-      <div className="absolute top-3 right-3 flex gap-2 opacity-0 
-      cursor-pointer transition-opacity duration-200 group-hover:opacity-100">
-        <button
-          onClick={handleEdit}
-          className="rounded-full p-1.5 transition-colors"
-          title="Rename"
-          style={{
-            background: controlBackground,
-            color: controlIconColor,
-          }}
-          onMouseEnter={(event) => {
-            event.currentTarget.style.background = controlHoverBackground;
-          }}
-          onMouseLeave={(event) => {
-            event.currentTarget.style.background = controlBackground;
-          }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-        </button>
-        <button
-          onClick={handleDelete}
-          className="rounded-full p-1.5 transition-colors"
-          title="Delete"
-          style={{
-            background: controlBackground,
-            color: controlIconColor,
-          }}
-          onMouseEnter={(event) => {
-            event.currentTarget.style.background = controlHoverBackground;
-          }}
-          onMouseLeave={(event) => {
-            event.currentTarget.style.background = controlBackground;
-          }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
-      </div>
       </div>
     </div>
   );

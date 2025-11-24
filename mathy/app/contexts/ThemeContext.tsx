@@ -32,12 +32,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (!mounted) return;
 
     const root = document.documentElement;
-    
+
     // Simpler, faster transition for theme switching
     root.style.transition = 'background-color 0.15s ease, color 0.15s ease';
-    
+
     if (theme === 'dark') {
-      root.style.setProperty('--background', '#0f0f0f');
+      root.style.setProperty('--background', '#0b0b0bff');
       root.style.setProperty('--foreground', '#ffffff');
       root.style.setProperty('--foreground-muted', '#999999');
       root.style.setProperty('--sidebar-bg', '#1a1a1a');
@@ -51,7 +51,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--input-border', '#4a4a4a');
       root.style.setProperty('--math-bg', '#2a2a2a');
       root.style.setProperty('--math-border', '#444444');
-      root.style.setProperty('--outer-bg', '#050505');
+      root.style.setProperty('--outer-bg', '#111111ff');
     } else {
       // Warm, cream-based light theme inspired by the reference
       root.style.setProperty('--background', '#f9f5f2'); // Very light warm cream

@@ -42,10 +42,10 @@ function parseHex(color?: string | null) {
 function lightenHex(hex: string, amount: number): string {
   const parsed = parseHex(hex);
   if (!parsed) return hex;
-  
+
   const { r, g, b } = parsed;
   const lighten = (channel: number) => Math.min(255, Math.round(channel + (255 - channel) * amount));
-  
+
   return `rgb(${lighten(r)}, ${lighten(g)}, ${lighten(b)})`;
 }
 
@@ -168,9 +168,8 @@ const DraggableFolder = React.memo(function DraggableFolder({
           }}
           className={`flex-1 flex items-center gap-2 px-3 py-1.5 
             rounded-md text-sm text-left 
-            hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${
-            isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
-          } ${isDropTarget && isOver ? 'bg-[var(--active-bg)]' : ''}`}
+            hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
+            } ${isDropTarget && isOver ? 'bg-[var(--active-bg)]' : ''}`}
           style={{
             ...style,
             color: 'var(--foreground)',
@@ -233,9 +232,8 @@ const DraggablePage = React.memo(function DraggablePage({ page, isActive, isBein
         e.preventDefault();
         onClick();
       }}
-      className={`w-full flex items-center gap-2 px-3 py-1 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${
-        isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
-      }`}
+      className={`w-full flex items-center gap-2 px-3 py-1 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
+        }`}
       style={{
         ...style,
         color: 'var(--foreground)',
@@ -286,9 +284,8 @@ const RecentPage = React.memo(function RecentPage({ page, folder, isActive, isBe
         e.preventDefault();
         onClick();
       }}
-      className={`w-full flex items-center gap-2 px-3 py-1 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${
-        isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
-      }`}
+      className={`w-full flex items-center gap-2 px-3 py-1 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
+        }`}
       style={{
         ...style,
         color: 'var(--foreground)',
@@ -299,12 +296,12 @@ const RecentPage = React.memo(function RecentPage({ page, folder, isActive, isBe
       </svg>
       <span className="flex-1 truncate min-w-0" title={page.title}>{page.title}</span>
       {folder && (
-        <span 
+        <span
           className="inline-flex items-center px-1.5 py-0.5 
           rounded-md text-xs font-medium flex-shrink-0 w-16
            hover:w-auto hover:max-w-none transition-all 
-           duration-200 ease-out group" 
-          style={{ 
+           duration-200 ease-out group"
+          style={{
             background: mutedFolderColor,
             color: '#374151'
           }}
@@ -336,7 +333,7 @@ const TrashButton = React.memo(function TrashButton() {
         console.log('Trash clicked');
       }}
       className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
-      style={{ 
+      style={{
         color: 'var(--foreground)',
         background: isOver ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
         border: isOver ? '2px dashed #ef4444' : 'none',
@@ -352,18 +349,18 @@ const TrashButton = React.memo(function TrashButton() {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ 
+          style={{
             color: isOver ? '#ef4444' : 'var(--foreground-muted)',
             transform: isOver ? 'scale(1.1)' : 'scale(1)',
             transition: 'color 0.2s ease, transform 0.2s ease',
           }}
         >
-          <path d="M3 6h18"/>
-          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+          <path d="M3 6h18" />
+          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
         </svg>
       </div>
-      <span 
+      <span
         className="text-sm font-medium"
         style={{ color: isOver ? '#ef4444' : 'var(--foreground)' }}
       >
@@ -380,12 +377,12 @@ const TrashButton = React.memo(function TrashButton() {
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { 
-    folders, 
-    pages, 
-    sidebarOpen, 
+  const {
+    folders,
+    pages,
+    sidebarOpen,
     setSidebarOpen,
-    currentFolder, 
+    currentFolder,
     currentPage,
     moveFolderToFolder,
     movePageToFolder,
@@ -406,14 +403,14 @@ export default function Sidebar() {
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const createMenuRef = useRef<HTMLDivElement>(null);
   const createButtonRef = useRef<HTMLButtonElement>(null);
-  
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-        const target = event.target as Element;
+      const target = event.target as Element;
       if (showProfileMenu && !target.closest('.profile-menu-container')) {
-          setShowProfileMenu(false);
-        }
+        setShowProfileMenu(false);
+      }
       if (showCreateMenu && !target.closest('.create-menu-container')) {
         setShowCreateMenu(false);
       }
@@ -427,15 +424,15 @@ export default function Sidebar() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showProfileMenu, showCreateMenu]);
-  
+
   // Drag & Drop state
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
-  
+
   // Delete/Trash state
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: 'folder' | 'page' } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
+
   // Configure sensors for drag detection
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -444,7 +441,7 @@ export default function Sidebar() {
       },
     })
   );
-  
+
   // Initialize expanded folders from localStorage
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => {
     if (typeof window !== 'undefined') {
@@ -462,7 +459,7 @@ export default function Sidebar() {
 
   // Get root-level folders (memoized to prevent recalculation)
   const rootFolders = useMemo(() => folders.filter(f => !f.parent_folder_id), [folders]);
-  
+
   // Get recent pages (5 most recently edited pages across all folders)
   const recentPages = useMemo(() => {
     return [...pages]
@@ -581,7 +578,7 @@ export default function Sidebar() {
 
   const handleDeleteConfirm = async () => {
     if (!selectedItem) return;
-    
+
     try {
       if (selectedItem.type === 'folder') {
         await deleteFolder(selectedItem.id);
@@ -596,7 +593,7 @@ export default function Sidebar() {
 
   const getItemName = () => {
     if (!selectedItem) return '';
-    
+
     if (selectedItem.type === 'folder') {
       const folder = folders.find(f => f.id === selectedItem.id);
       return folder?.name || 'Untitled Folder';
@@ -608,7 +605,7 @@ export default function Sidebar() {
 
   const hasChildren = () => {
     if (!selectedItem || selectedItem.type !== 'folder') return false;
-    
+
     const folderPages = getFolderPages(selectedItem.id);
     const childFolders = getChildFolders(selectedItem.id);
     return folderPages.length > 0 || childFolders.length > 0;
@@ -620,7 +617,7 @@ export default function Sidebar() {
       // Delete or Backspace key
       if ((e.key === 'Delete' || e.key === 'Backspace') && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        
+
         // Check if we have a currently viewed item
         if (currentPage) {
           handleDeleteRequest(currentPage.id, 'page');
@@ -648,23 +645,23 @@ export default function Sidebar() {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     setActiveId(null);
     setOverId(null);
-    
+
     if (!over || active.id === over.id) return;
-    
+
     // Extract type and id from the drag/drop ids
     // Format is "context-type-uuid", but UUIDs contain dashes, so we need to be careful
     const activeIdStr = active.id.toString();
     const overIdStr = over.id.toString();
-    
+
     // Check if dropped on trash
     if (overIdStr === 'trash-button') {
       // Handle different ID formats: folder-*, folder-page-*, recent-page-*
       let dragType: 'folder' | 'page';
       let dragId: string;
-      
+
       if (activeIdStr.startsWith('folder-page-')) {
         dragType = 'page';
         dragId = activeIdStr.substring('folder-page-'.length);
@@ -679,16 +676,16 @@ export default function Sidebar() {
         dragType = activeIdStr.split('-')[0] as 'folder' | 'page';
         dragId = activeIdStr.substring(dragType.length + 1);
       }
-      
+
       // Trigger delete confirmation
       handleDeleteRequest(dragId, dragType);
       return;
     }
-    
+
     // Parse drag item type and ID
     let dragType: 'folder' | 'page';
     let dragId: string;
-    
+
     if (activeIdStr.startsWith('folder-page-')) {
       dragType = 'page';
       dragId = activeIdStr.substring('folder-page-'.length);
@@ -703,16 +700,16 @@ export default function Sidebar() {
       dragType = activeIdStr.split('-')[0] as 'folder' | 'page';
       dragId = activeIdStr.substring(dragType.length + 1);
     }
-    
+
     const targetType = overIdStr.split('-')[0] as 'folder' | 'page';
     const targetId = overIdStr.substring(targetType.length + 1); // Get everything after "type-"
-    
+
     // Validate the drop
     if (!canDropItem(dragType, dragId, targetType, targetId)) {
       console.log('Invalid drop - validation failed');
       return;
     }
-    
+
     try {
       if (dragType === 'folder') {
         await moveFolderToFolder(dragId, targetId);
@@ -732,10 +729,10 @@ export default function Sidebar() {
   // Get the active drag item for overlay
   const getActiveItem = () => {
     if (!activeId) return null;
-    
+
     let type: string;
     let id: string;
-    
+
     if (activeId.startsWith('folder-page-')) {
       type = 'page';
       id = activeId.substring('folder-page-'.length);
@@ -750,7 +747,7 @@ export default function Sidebar() {
       type = activeId.split('-')[0];
       id = activeId.substring(type.length + 1);
     }
-    
+
     if (type === 'folder') {
       return folders.find(f => f.id === id);
     } else {
@@ -761,7 +758,7 @@ export default function Sidebar() {
   // ============================================================================
   // RECURSIVE FOLDER RENDERING - DEPTH MANAGEMENT
   // ============================================================================
-  
+
   /**
    * Recursively renders folders with proper depth management
    * - Root folders start at depth 0
@@ -778,8 +775,8 @@ export default function Sidebar() {
     const isExpanded = expandedFolders.has(folder.id);
     const isBeingDragged = activeId === `folder-${folder.id}`;
     const isDropTarget = overId === `folder-${folder.id}`;
-    
-    
+
+
     return (
       <DraggableFolder
         key={folder.id}
@@ -798,7 +795,7 @@ export default function Sidebar() {
           <div className="mt-0.5 space-y-0.5">
             {/* Render child folders recursively at depth + 1 */}
             {childFolders.map(childFolder => renderFolder(childFolder, depth + 1))}
-            
+
             {/* Render pages in this folder at depth + 1 */}
             {folderPages.map(page => (
               <DraggablePage
@@ -837,506 +834,506 @@ export default function Sidebar() {
           minWidth: '180px', // Minimum usable width
         }}
       >
-      {/* Header - Fixed height to match top header */}
-      <div className="h-16 flex items-center px-2 relative" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '18px', paddingRight: '18px' }}>
-        <div className="flex items-center gap-1 w-full min-w-0">
-          <button
-            onClick={navigateToWorkspace}
-            className="flex-1 flex items-center gap-2 px-2 py-2 
-            rounded-lg hover:bg-[var(--hover-bg)] text-left min-w-0 cursor-pointer"
-            style={{ color: 'var(--foreground)' }}
-          >
-            {sidebarOpen && (
-              user?.user_metadata?.avatar_url ? (
-                <img
-                  src={user.user_metadata.avatar_url}
-                  alt="Profile"
-                  className="h-5 w-5 rounded-md flex-shrink-0 
-                  border-1 border-white/50 object-cover"
-                />
-              ) : (
-                <span
-                  className="h-2 w-2 rounded-full flex-shrink-0"
-                  aria-hidden="true"
-                  style={{ background: accentBackground }}
-                />
-              )
-            )}
-            <span className="font-semibold text-sm truncate min-w-0" title={workspaceTitle}>
-              {workspaceTitle}
-            </span>
-          </button>
-          
-          {/* Create Button - Small */}
-          <div className="relative create-menu-container">
-          <button
-              ref={createButtonRef}
-              onClick={() => setShowCreateMenu(!showCreateMenu)}
-              className="flex h-6 w-6 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0 cursor-pointer"
-            style={{ color: 'var(--foreground-muted)' }}
-              title="Create new"
-          >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
-            
-            {/* Dropdown Menu */}
-            {showCreateMenu && (
-              <div
-                ref={createMenuRef}
-                className="absolute top-8 right-0 rounded-lg shadow-lg border py-1 z-[9999] min-w-[160px]"
-                style={{ 
-                  background: 'var(--card-bg)',
-                  borderColor: 'var(--border-color)',
-                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-                }}
-              >
-                <button
-                  onClick={handleCreatePage}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>New Page</span>
-                </button>
-        <button
-          onClick={handleCreateFolder}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
-                  style={{ color: 'var(--foreground)' }}
-        >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" stroke="none" viewBox="0 0 24 24">
-                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-          </svg>
-                  <span>New Folder</span>
-        </button>
-              </div>
-            )}
-          </div>
-          
-          {/* Sidebar Toggle Button - Small */}
-        <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0 cursor-pointer"
-            style={{ color: 'var(--foreground-muted)' }}
-            title="Hide sidebar"
-        >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
-          </svg>
-        </button>
-        </div>
-      </div>
-
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '16px', paddingRight: '16px' }}>
-
-
-      {/* Navigation Tree with Drag & Drop */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-      >
-        <nav className="space-y-1 min-w-0">
-          {/* Spaces Section Header */}
-          {rootFolders.length > 0 && (
-            <div className="px-3 py-1 text-xs font-medium" style={{ color: 'var(--foreground-muted)' }}>
-              Workspace
-            </div>
-          )}
-          
-          {/* Root Folders - Rendered recursively with nested folders */}
-          {rootFolders.map(folder => renderFolder(folder, 0))}
-
-        {/* Recent Pages - 5 most recently edited pages */}
-        {recentPages.length > 0 && (
-          <div className="pt-2">
-            {rootFolders.length > 0 && (
-              <div className="px-3 py-1 text-xs font-medium" style={{ color: 'var(--foreground-muted)' }}>
-                Recents
-              </div>
-            )}
-            <div className="space-y-0.5">
-              {recentPages.map(page => {
-                const folder = page.folder_id ? folders.find(f => f.id === page.folder_id) : null;
-                return (
-                  <RecentPage
-                    key={page.id}
-                    page={page}
-                    folder={folder}
-                    isActive={isActive(page.id, 'page')}
-                    isBeingDragged={activeId === `recent-page-${page.id}`}
-                    onClick={() => navigateToPage(page.id)}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        )}
-        </nav>
-
-
-        {/* Drag Overlay - shows dragged item */}
-        <DragOverlay>
-          {activeId ? (
-            <div
-              className="px-3 py-1.5 rounded-md text-sm"
-              style={{
-                background: 'var(--hover-bg)',
-                color: 'var(--foreground)',
-                border: '1px solid var(--border-color)',
-                opacity: 0.8,
-                cursor: 'grabbing',
-              }}
-            >
-              {(() => {
-                const item = getActiveItem();
-                if (!item) return null;
-                const icon = 'icon' in item ? item.icon : '📄';
-                const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
-                return (
-                  <div className="flex items-center gap-2">
-                    <span>{icon}</span>
-                    <span className="truncate">{name}</span>
-                  </div>
-                );
-              })()}
-            </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
-
-      {/* Modals */}
-      <DeleteConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setSelectedItem(null);
-        }}
-        onConfirm={handleDeleteConfirm}
-        itemType={selectedItem?.type || 'page'}
-        itemName={getItemName()}
-        hasChildren={hasChildren()}
-      />
-      </div>
-
-      {/* Bottom Menu Items */}
-      <div className="pt-2 mt-auto pb-2">
-        {/* Main Menu Items */}
-        <div className="space-y-0.5 mb-3">
-          {/* Ask a Question */}
-          <button
-            onClick={() => {
-              // You can implement ask a question functionality here
-              console.log('Ask a question clicked');
-            }}
-            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
-            style={{ color: 'var(--foreground)' }}
-          >
-            <div className="w-5 h-5 flex items-center justify-center">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: 'var(--foreground-muted)' }}
-              >
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </div>
-            <span className="text-sm font-medium">Ask a question</span>
-          </button>
-
-          {/* Academy */}
-          <button
-            onClick={() => window.open('https://academy.example.com', '_blank')}
-            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
-            style={{ color: 'var(--foreground)' }}
-          >
-            <div className="w-5 h-5 flex items-center justify-center">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: 'var(--foreground-muted)' }}
-              >
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-              </svg>
-            </div>
-            <span className="text-sm font-medium">Academy</span>
-          </button>
-
-          {/* Documentation */}
-          <button
-            onClick={() => window.open('https://docs.example.com', '_blank')}
-            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
-            style={{ color: 'var(--foreground)' }}
-          >
-            <div className="w-5 h-5 flex items-center justify-center">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: 'var(--foreground-muted)' }}
-              >
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-              </svg>
-            </div>
-            <span className="text-sm font-medium">Documentation</span>
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ color: 'var(--foreground-muted)', marginLeft: 'auto' }}
-            >
-              <path d="M7 17L17 7"/>
-              <path d="M7 7h10v10"/>
-            </svg>
-          </button>
-
-          {/* Feedback */}
-          <button
-            onClick={() => window.open('https://feedback.example.com', '_blank')}
-            className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
-            style={{ color: 'var(--foreground)' }}
-          >
-            <div className="w-5 h-5 flex items-center justify-center">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: 'var(--foreground-muted)' }}
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21,15 16,10 5,21"/>
-              </svg>
-            </div>
-            <span className="text-sm font-medium">Feedback</span>
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ color: 'var(--foreground-muted)', marginLeft: 'auto' }}
-            >
-              <path d="M7 17L17 7"/>
-              <path d="M7 7h10v10"/>
-            </svg>
-          </button>
-
-          {/* Trash - Droppable for deletion */}
-          <TrashButton />
-        </div>
-
-        {/* Bottom Icon Row */}
-        <div className="flex items-center justify-start gap-4 px-3">
-          {/* Home */}
-          <button
-            onClick={navigateToWorkspace}
-            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
-            title="Home"
-            aria-label="Home"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ color: 'var(--foreground-muted)' }}
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9,22 9,12 15,12 15,22"/>
-            </svg>
-          </button>
-
-          {/* Settings */}
-          <button
-            onClick={() => {
-              // You can implement settings functionality here
-              console.log('Settings clicked');
-            }}
-            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
-            title="Settings"
-            aria-label="Settings"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ color: 'var(--foreground-muted)' }}
-            >
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-          </button>
-
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
-            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-            aria-label="Toggle theme"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{
-                color: 'var(--foreground-muted)',
-                transform: theme === 'light' ? 'rotate(0deg)' : 'rotate(180deg)',
-                transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease',
-              }}
-            >
-              {theme === 'light' ? (
-                // Sun icon for light mode
-                <>
-                  <circle cx="12" cy="12" r="4"/>
-                  <line x1="12" y1="1" x2="12" y2="3"/>
-                  <line x1="12" y1="21" x2="12" y2="23"/>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                  <line x1="1" y1="12" x2="3" y2="12"/>
-                  <line x1="21" y1="12" x2="23" y2="12"/>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </>
-              ) : (
-                // Moon icon for dark mode
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              )}
-            </svg>
-          </button>
-
-          {/* User Profile */}
-          <div className="relative profile-menu-container">
+        {/* Header - Fixed height to match top header */}
+        <div className="h-16 flex items-center px-2 relative" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '18px', paddingRight: '18px' }}>
+          <div className="flex items-center gap-1 w-full min-w-0">
             <button
-              ref={profileButtonRef}
-              onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
-              title="User Profile"
-              aria-label="User Profile"
+              onClick={navigateToWorkspace}
+              className="flex-1 flex items-center gap-2 px-2 py-2 
+            rounded-lg hover:bg-[var(--hover-bg)] text-left min-w-0 cursor-pointer"
+              style={{ color: 'var(--foreground)' }}
             >
+              {sidebarOpen && (
+                user?.user_metadata?.avatar_url ? (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt="Profile"
+                    className="h-5 w-5 rounded-md flex-shrink-0 
+                  border-1 border-white/50 object-cover"
+                  />
+                ) : (
+                  <span
+                    className="h-2 w-2 rounded-full flex-shrink-0"
+                    aria-hidden="true"
+                    style={{ background: accentBackground }}
+                  />
+                )
+              )}
+              <span className="font-semibold text-sm truncate min-w-0" title={workspaceTitle}>
+                {workspaceTitle}
+              </span>
+            </button>
+
+            {/* Create Button - Small */}
+            <div className="relative create-menu-container">
+              <button
+                ref={createButtonRef}
+                onClick={() => setShowCreateMenu(!showCreateMenu)}
+                className="flex h-6 w-6 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0 cursor-pointer"
+                style={{ color: 'var(--foreground-muted)' }}
+                title="Create new"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+
+              {/* Dropdown Menu */}
+              {showCreateMenu && (
+                <div
+                  ref={createMenuRef}
+                  className="absolute top-8 right-0 rounded-lg shadow-lg border py-1 z-[9999] min-w-[160px]"
+                  style={{
+                    background: 'var(--card-bg)',
+                    borderColor: 'var(--border-color)',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                  }}
+                >
+                  <button
+                    onClick={handleCreatePage}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
+                    style={{ color: 'var(--foreground)' }}
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>New Page</span>
+                  </button>
+                  <button
+                    onClick={handleCreateFolder}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
+                    style={{ color: 'var(--foreground)' }}
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                      <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    <span>New Folder</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar Toggle Button - Small */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0 cursor-pointer"
+              style={{ color: 'var(--foreground-muted)' }}
+              title="Hide sidebar"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden" style={{ marginLeft: '-16px', marginRight: '-16px', paddingLeft: '16px', paddingRight: '16px' }}>
+
+
+          {/* Navigation Tree with Drag & Drop */}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            <nav className="space-y-1 min-w-0">
+              {/* Spaces Section Header */}
+              {rootFolders.length > 0 && (
+                <div className="px-3 py-1 text-xs font-medium" style={{ color: 'var(--foreground-muted)' }}>
+                  Workspace
+                </div>
+              )}
+
+              {/* Root Folders - Rendered recursively with nested folders */}
+              {rootFolders.map(folder => renderFolder(folder, 0))}
+
+              {/* Recent Pages - 5 most recently edited pages */}
+              {recentPages.length > 0 && (
+                <div className="pt-2">
+                  {rootFolders.length > 0 && (
+                    <div className="px-3 py-1 text-xs font-medium" style={{ color: 'var(--foreground-muted)' }}>
+                      Recents
+                    </div>
+                  )}
+                  <div className="space-y-0.5">
+                    {recentPages.map(page => {
+                      const folder = page.folder_id ? folders.find(f => f.id === page.folder_id) : null;
+                      return (
+                        <RecentPage
+                          key={page.id}
+                          page={page}
+                          folder={folder}
+                          isActive={isActive(page.id, 'page')}
+                          isBeingDragged={activeId === `recent-page-${page.id}`}
+                          onClick={() => navigateToPage(page.id)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </nav>
+
+
+            {/* Drag Overlay - shows dragged item */}
+            <DragOverlay>
+              {activeId ? (
+                <div
+                  className="px-3 py-1.5 rounded-md text-sm"
+                  style={{
+                    background: 'var(--hover-bg)',
+                    color: 'var(--foreground)',
+                    border: '1px solid var(--border-color)',
+                    opacity: 0.8,
+                    cursor: 'grabbing',
+                  }}
+                >
+                  {(() => {
+                    const item = getActiveItem();
+                    if (!item) return null;
+                    const icon = 'icon' in item ? item.icon : '📄';
+                    const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
+                    return (
+                      <div className="flex items-center gap-2">
+                        <span>{icon}</span>
+                        <span className="truncate">{name}</span>
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+
+          {/* Modals */}
+          <DeleteConfirmationModal
+            isOpen={showDeleteModal}
+            onClose={() => {
+              setShowDeleteModal(false);
+              setSelectedItem(null);
+            }}
+            onConfirm={handleDeleteConfirm}
+            itemType={selectedItem?.type || 'page'}
+            itemName={getItemName()}
+            hasChildren={hasChildren()}
+          />
+        </div>
+
+        {/* Bottom Menu Items */}
+        <div className="pt-2 mt-auto pb-2">
+          {/* Main Menu Items */}
+          <div className="space-y-0.5 mb-3">
+            {/* Ask a Question */}
+            <button
+              onClick={() => {
+                // You can implement ask a question functionality here
+                console.log('Ask a question clicked');
+              }}
+              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
+              style={{ color: 'var(--foreground)' }}
+            >
+              <div className="w-5 h-5 flex items-center justify-center">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ color: 'var(--foreground-muted)' }}
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">Ask a question</span>
+            </button>
+
+            {/* Academy */}
+            <button
+              onClick={() => window.open('https://academy.example.com', '_blank')}
+              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
+              style={{ color: 'var(--foreground)' }}
+            >
+              <div className="w-5 h-5 flex items-center justify-center">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ color: 'var(--foreground-muted)' }}
+                >
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                  <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">Academy</span>
+            </button>
+
+            {/* Documentation */}
+            <button
+              onClick={() => window.open('https://docs.example.com', '_blank')}
+              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
+              style={{ color: 'var(--foreground)' }}
+            >
+              <div className="w-5 h-5 flex items-center justify-center">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ color: 'var(--foreground-muted)' }}
+                >
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">Documentation</span>
               <svg
-                width="16"
-                height="16"
+                width="12"
+                height="12"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ color: 'var(--foreground-muted)' }}
+                style={{ color: 'var(--foreground-muted)', marginLeft: 'auto' }}
               >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
+                <path d="M7 17L17 7" />
+                <path d="M7 7h10v10" />
               </svg>
             </button>
 
-            {/* Profile Dropdown Menu */}
-            {showProfileMenu && (
-              <div 
-                ref={profileMenuRef}
-                className="fixed bottom-16 left-4 w-48 rounded-lg shadow-lg border py-1 z-[9999]"
-                style={{ 
-                  background: 'var(--card-bg)',
-                  borderColor: 'var(--border-color)',
-                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-                }}>
-                <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--border-color)' }}>
-                  <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
-                    {user?.user_metadata?.preferred_name || 
-                     user?.user_metadata?.given_name || 
-                     user?.email?.split('@')[0] || 
-                     'User'}
-                  </p>
-                  <p className="text-xs truncate" style={{ color: 'var(--foreground-muted)' }}>
-                    {user?.email}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowProfileMenu(false);
-                    handleLogout();
-                  }}
-                  className="w-full px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
-                  style={{ color: 'var(--foreground)' }}
+            {/* Feedback */}
+            <button
+              onClick={() => window.open('https://feedback.example.com', '_blank')}
+              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
+              style={{ color: 'var(--foreground)' }}
+            >
+              <div className="w-5 h-5 flex items-center justify-center">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ color: 'var(--foreground-muted)' }}
                 >
-                  <div className="flex items-center gap-2">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      style={{ color: 'var(--foreground-muted)' }}
-                    >
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                      <polyline points="16,17 21,12 16,7"/>
-                      <line x1="21" y1="12" x2="9" y2="12"/>
-                    </svg>
-                    Sign Out
-                  </div>
-                </button>
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21,15 16,10 5,21" />
+                </svg>
               </div>
-            )}
+              <span className="text-sm font-medium">Feedback</span>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: 'var(--foreground-muted)', marginLeft: 'auto' }}
+              >
+                <path d="M7 17L17 7" />
+                <path d="M7 7h10v10" />
+              </svg>
+            </button>
+
+            {/* Trash - Droppable for deletion */}
+            <TrashButton />
+          </div>
+
+          {/* Bottom Icon Row */}
+          <div className="flex items-center justify-start gap-4 px-3">
+            {/* Home */}
+            <button
+              onClick={navigateToWorkspace}
+              className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
+              title="Home"
+              aria-label="Home"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: 'var(--foreground-muted)' }}
+              >
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9,22 9,12 15,12 15,22" />
+              </svg>
+            </button>
+
+            {/* Settings */}
+            <button
+              onClick={() => {
+                // You can implement settings functionality here
+                console.log('Settings clicked');
+              }}
+              className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
+              title="Settings"
+              aria-label="Settings"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: 'var(--foreground-muted)' }}
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </button>
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
+              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              aria-label="Toggle theme"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  color: 'var(--foreground-muted)',
+                  transform: theme === 'light' ? 'rotate(0deg)' : 'rotate(180deg)',
+                  transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease',
+                }}
+              >
+                {theme === 'light' ? (
+                  // Sun icon for light mode
+                  <>
+                    <circle cx="12" cy="12" r="4" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </>
+                ) : (
+                  // Moon icon for dark mode
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                )}
+              </svg>
+            </button>
+
+            {/* User Profile */}
+            <div className="relative profile-menu-container">
+              <button
+                ref={profileButtonRef}
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="w-6 h-6 flex items-center justify-center transition-colors hover:bg-[var(--hover-bg)] rounded cursor-pointer"
+                title="User Profile"
+                aria-label="User Profile"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ color: 'var(--foreground-muted)' }}
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              {showProfileMenu && (
+                <div
+                  ref={profileMenuRef}
+                  className="fixed bottom-16 left-4 w-48 rounded-lg shadow-lg border py-1 z-[9999]"
+                  style={{
+                    background: 'var(--card-bg)',
+                    borderColor: 'var(--border-color)',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                  }}>
+                  <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--border-color)' }}>
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
+                      {user?.user_metadata?.preferred_name ||
+                        user?.user_metadata?.given_name ||
+                        user?.email?.split('@')[0] ||
+                        'User'}
+                    </p>
+                    <p className="text-xs truncate" style={{ color: 'var(--foreground-muted)' }}>
+                      {user?.email}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      handleLogout();
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm transition-colors cursor-pointer hover:bg-[var(--hover-bg)]"
+                    style={{ color: 'var(--foreground)' }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{ color: 'var(--foreground-muted)' }}
+                      >
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16,17 21,12 16,7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                      Sign Out
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </aside>
   );
