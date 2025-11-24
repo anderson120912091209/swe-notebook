@@ -42,6 +42,7 @@ export async function createFolder(
       color: color || '#6B7280',
       description,
       parent_folder_id: parentFolderId,
+      position: 0, // New folders appear first
     })
     .select()
     .single();
@@ -144,9 +145,10 @@ export async function createPage(
       title: title || 'Untitled Page',
       folder_id: folderId,
       icon: icon || '📝',
-      content: { 
+      content: {
         blocks: [] // Start with empty blocks - BlockNote will create default content
       },
+      position: 0, // New pages appear first
     })
     .select()
     .single();
@@ -287,7 +289,7 @@ export function subscribePages(
 
 export async function getCanvas(userId: string): Promise<Canvas[]> {
   console.log('getCanvas called with userId:', userId);
-  
+
   const { data, error } = await supabase
     .from('canvas')
     .select('*')

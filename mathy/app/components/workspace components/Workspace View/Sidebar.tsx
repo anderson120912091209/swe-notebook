@@ -1021,46 +1021,38 @@ export default function Sidebar() {
                 </button>
 
                 {/* Search */}
-                <Tooltip
-                  content="Find anything"
-                  placement="right"
-                  classNames={{
-                    content: "bg-zinc-900 text-zinc-100 text-xs px-2 py-1 rounded-md border border-zinc-800 shadow-xl",
+
+                <button
+                  onClick={() => {
+                    // You can implement search functionality here
+                    console.log('Search clicked');
                   }}
-                  delay={0}
-                  closeDelay={0}
+                  className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
+                  style={{ color: 'var(--foreground)' }}
                 >
-                  <button
-                    onClick={() => {
-                      // You can implement search functionality here
-                      console.log('Search clicked');
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        style={{ color: 'var(--foreground-muted)' }}
-                      >
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="m21 21-4.35-4.35" />
-                      </svg>
-                    </div>
-                    <span className="text-sm font-medium">Search</span>
-                  </button>
-                </Tooltip>
+                  <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ color: 'var(--foreground-muted)' }}
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.35-4.35" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium">Search</span>
+                </button>
+
 
                 {/* Community */}
                 <Tooltip
-                  content="Join communities and share notes"
+                  content="Public learning space (coming soon)"
                   placement="right"
                   classNames={{
                     content: "bg-zinc-900 text-zinc-100 text-xs px-2 py-1 rounded-md border border-zinc-800 shadow-xl",
@@ -1069,10 +1061,7 @@ export default function Sidebar() {
                   closeDelay={0}
                 >
                   <button
-                    onClick={() => {
-                      // You can implement community functionality here
-                      console.log('Community clicked');
-                    }}
+                    onClick={() => router.push('/community')}
                     className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
                     style={{ color: 'var(--foreground)' }}
                   >

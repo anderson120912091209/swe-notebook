@@ -18,7 +18,7 @@ interface FolderViewProps {
 
 export default function FolderView({ folderId }: FolderViewProps) {
   const router = useRouter();
-  const { folders, pages, canvas, createPage, createCanvas, deletePage, deleteCanvas, updateFolder, loading } = useWorkspace();
+  const { folders, pages, canvas, createPage, createFolder, createCanvas, deletePage, deleteCanvas, updateFolder, loading } = useWorkspace();
   const [folder, setFolder] = useState(folders.find(f => f.id === folderId));
   const [creatingPage, setCreatingPage] = useState(false);
   const [creatingCanvas, setCreatingCanvas] = useState(false);
@@ -77,6 +77,23 @@ export default function FolderView({ folderId }: FolderViewProps) {
       console.error('Failed to create page:', error);
     } finally {
       setCreatingPage(false);
+    }
+  };
+
+  const handleCreateFolder = async () => {
+    try {
+      const newFolder = await createFolder('Untitled Folder', undefined, '#6B7280', '', folderId);
+      console.log('Folder created successfully:', newFolder);
+      // Navigate to the new folder for a smooth transition
+      router.push(`/notebook/folder/${newFolder.id}`);
+    } catch (error) {
+      console.error('Failed to create folder:', error);
+      // Log more details about the error
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
     }
   };
 
@@ -233,28 +250,48 @@ export default function FolderView({ folderId }: FolderViewProps) {
                 Folders {searchQuery && `(${filteredChildFolders.length} found)`}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {/* Create Folder Card - Dashed */}
+                <div
+                  onClick={handleCreateFolder}
+                  className="p-4 rounded-xl border-2 border-dashed cursor-pointer hover:bg-[var(--hover-bg)] transition-all group flex flex-col justify-between h-[120px]"
+                  style={{ borderColor: 'var(--border-color)' }}
+                >
+                  <svg
+                    className="w-8 h-8 text-[var(--foreground-muted)] group-hover:text-[var(--foreground)] transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                  </svg>
+                  <span className="font-medium text-sm" style={{ color: 'var(--foreground-muted)' }}>
+                    Create folder
+                  </span>
+                </div>
+
                 {filteredChildFolders.map(childFolder => (
                   <div
                     key={childFolder.id}
                     onClick={() => router.push(`/notebook/folder/${childFolder.id}`)}
-                    className="p-4 rounded-lg border cursor-pointer hover:bg-[var(--hover-bg)] transition-colors"
-                    style={{ borderColor: 'var(--border-color)' }}
+                    className="p-4 rounded-xl border cursor-pointer hover:shadow-sm hover:border-[var(--foreground-muted)] transition-all flex flex-col justify-between h-[120px]"
+                    style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)' }}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start justify-between">
                       <div
-                        className="w-8 h-8 rounded flex items-center justify-center text-lg"
-                        style={{ backgroundColor: childFolder.color || '#6B7280' }}
+                        className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
+                        style={{ backgroundColor: `${childFolder.color}20`, color: childFolder.color || '#6B7280' }}
                       >
                         {childFolder.icon || '📁'}
                       </div>
-                      <div>
-                        <h4 className="font-medium" style={{ color: 'var(--foreground)' }}>
-                          {childFolder.name}
-                        </h4>
-                        <p className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                          {pages.filter(p => p.folder_id === childFolder.id).length} pages
-                        </p>
-                      </div>
+                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-[var(--hover-bg)]" style={{ color: 'var(--foreground-muted)' }}>
+                        {pages.filter(p => p.folder_id === childFolder.id).length}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium truncate" style={{ color: 'var(--foreground)' }}>
+                        {childFolder.name}
+                      </h4>
                     </div>
                   </div>
                 ))}
@@ -269,6 +306,26 @@ export default function FolderView({ folderId }: FolderViewProps) {
                 Pages {searchQuery && `(${filteredPages.length} found)`}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {/* Create Page Card - Dashed */}
+                <div
+                  onClick={handleCreatePage}
+                  className="p-4 rounded-xl border-2 border-dashed cursor-pointer hover:bg-[var(--hover-bg)] transition-all group flex flex-col justify-between h-[160px]"
+                  style={{ borderColor: 'var(--border-color)' }}
+                >
+                  <svg
+                    className="w-8 h-8 text-[var(--foreground-muted)] group-hover:text-[var(--foreground)] transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                  </svg>
+                  <span className="font-medium text-sm" style={{ color: 'var(--foreground-muted)' }}>
+                    Create page
+                  </span>
+                </div>
+
                 {filteredPages.map(page => (
                   <PageCard
                     key={page.id}

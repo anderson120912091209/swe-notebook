@@ -93,10 +93,10 @@ export default function SearchAndNewButtons({
             onBlur={handleSearchBlur}
             placeholder={searchPlaceholder}
             className="w-full px-3 py-1.5 text-sm rounded-md border-none outline-none bg-transparent"
-            style={{ 
-              color: 'var(--foreground)', 
-              background: 'var(--input-bg)', 
-              border: '1px solid var(--border-color)' 
+            style={{
+              color: 'var(--foreground)',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)'
             }}
             autoFocus
           />
@@ -119,48 +119,48 @@ export default function SearchAndNewButtons({
         <span>Search</span>
       </button>
 
-      {/* New Button with Dropdown */}
+      {/* New Button with Dropdown - Sidebar Style */}
       <div className="relative" ref={dropdownRef}>
-        <div className="flex items-center rounded-xl" style={{ border: '1px solid var(--border-color)', background: 'var(--card-bg)' }}>
-          <button
-            onClick={onNewClick}
-            disabled={newButtonDisabled}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-l-xl hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            style={{ 
-              color: 'var(--foreground)',
-              background: newButtonLoading ? 'var(--hover-bg)' : 'transparent'
-            }}
-          >
-            {newButtonLoading ? (
-              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            )}
-            <span>New</span>
-          </button>
-          
-          <div className="w-px" style={{ background: 'var(--border-color)' }} />
-          
-          <button
-            onClick={handleDropdownToggle}
-            disabled={newButtonDisabled}
-            className="px-3 py-2 text-sm hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-r-xl cursor-pointer"
-            style={{ color: 'var(--foreground-muted)' }}
-          >
-            <svg className={`w-3 h-3 transition-transform ${showDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <button
+          onClick={handleDropdownToggle}
+          disabled={newButtonDisabled}
+          className="flex items-center gap-1 px-2 py-0.5 rounded-md transition-all flex-shrink-0 cursor-pointer font-medium text-sm shadow-sm hover:shadow-md"
+          style={{
+            background: '#68AAEC', // Match Sidebar accent color
+            color: '#ffffff',
+            border: 'none',
+            opacity: newButtonDisabled ? 0.5 : 1,
+            cursor: newButtonDisabled ? 'not-allowed' : 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            if (!newButtonDisabled) {
+              e.currentTarget.style.opacity = '0.9';
+              e.currentTarget.style.transform = 'scale(1.02)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!newButtonDisabled) {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.transform = 'scale(1)';
+            }
+          }}
+        >
+          {newButtonLoading ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-          </button>
-        </div>
+          )}
+          <span className="text-sm">New</span>
+        </button>
 
         {/* Dropdown Menu */}
         {showDropdown && (
-          <div 
+          <div
             className="absolute top-full right-0 mt-1 w-48 rounded-lg shadow-lg border z-50"
-            style={{ 
-              background: 'var(--card-bg)', 
+            style={{
+              background: 'var(--card-bg)',
               borderColor: 'var(--border-color)',
               boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
             }}
