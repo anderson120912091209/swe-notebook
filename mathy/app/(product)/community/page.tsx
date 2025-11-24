@@ -111,8 +111,7 @@ export default function CommunityPage() {
             <div className="flex gap-2">
                 <button
                     onClick={() => setActiveTab('discover')}
-                    className={`px-4 py-1.5 text-sm rounded-lg font-medium transition-all ${activeTab === 'discover' ? 'shadow-sm' : 'hover:bg-[var(--hover-bg)]'
-                        }`}
+                    className="px-4 py-1.5 text-sm rounded-lg font-medium"
                     style={
                         activeTab === 'discover'
                             ? { background: '#68AAEC', color: 'white' }
@@ -123,8 +122,7 @@ export default function CommunityPage() {
                 </button>
                 <button
                     onClick={() => setActiveTab('joined')}
-                    className={`px-4 py-1.5 text-sm rounded-lg font-medium transition-all ${activeTab === 'joined' ? 'shadow-sm' : 'hover:bg-[var(--hover-bg)]'
-                        }`}
+                    className="px-4 py-1.5 text-sm rounded-lg font-medium"
                     style={
                         activeTab === 'joined'
                             ? { background: '#68AAEC', color: 'white' }
@@ -145,31 +143,28 @@ export default function CommunityPage() {
             title="Communities"
             showHamburgerButton={true}
         >
-            <div className="p-8">
-                <div className="max-w-7xl mx-auto">
-                    {/* Informational Banner */}
-                    <div
-                        className="mb-8 p-6 rounded-xl border-2 transition-all hover:border-[#68AAEC]/30"
-                        style={{
-                            background: 'var(--card-bg)',
-                            borderColor: 'var(--border-color)',
-                        }}
-                    >
-                        <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#68AAEC20' }}>
-                                <svg className="w-6 h-6" fill="none" stroke="#68AAEC" viewBox="0 0 24 24" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h2 className="text-lg font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
-                                    What is Community?
-                                </h2>
-                                <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
-                                    Community is a public learning space where users can join different school or course groups to share science notes and learning resources to learn together.
-                                </p>
-                            </div>
-                        </div>
+            <div className="px-12 pt-6 pb-12">
+                <div className="max-w-[1400px] mx-auto">
+                    {/* Informational Section */}
+                    <div className="mb-10">
+                        <h2 className="text-xl font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+                            <span>What is Community ?</span>
+                            <span
+                                className="px-2 py-0.5 rounded-full text-xs font-medium"
+                                style={{
+                                    backgroundColor: 'rgba(104, 170, 236, 0.15)',
+                                    color: '#68AAEC',
+                                    border: '1px solid rgba(104, 170, 236, 0.25)',
+                                }}
+                            >
+                                Coming soon
+                            </span>
+                        </h2>
+                        
+                        <p className="text-base leading-relaxed max-w-3xl" style={{ color: 'var(--foreground-muted)' }}>
+                            Community allows you to browse open notes and learning resources shared by other users. 
+                            Find your school or specific courses and collaborate with others to learn together. 
+                        </p>
                     </div>
 
                     {/* Communities Grid */}
@@ -186,7 +181,7 @@ export default function CommunityPage() {
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {/* Create Community Card */}
                             <div
                                 className="p-6 rounded-xl border-2 border-dashed cursor-pointer hover:bg-[var(--hover-bg)] hover:border-[#68AAEC]/50 transition-all group flex flex-col justify-between h-[280px]"
@@ -210,19 +205,19 @@ export default function CommunityPage() {
                             {filteredCommunities.map((community) => (
                                 <div
                                     key={community.id}
-                                    className="rounded-xl border hover:shadow-md hover:border-[#68AAEC]/30 transition-all duration-200 cursor-pointer group overflow-hidden"
+                                    className="rounded-xl border cursor-pointer overflow-hidden flex flex-col h-[280px]"
                                     style={{ borderColor: 'var(--border-color)', background: 'var(--card-bg)' }}
                                 >
                                     {/* Cover Image */}
-                                    <div className="relative h-36 overflow-hidden">
+                                    <div className="relative h-36 overflow-hidden flex-shrink-0">
                                         <img
                                             src={community.coverImage}
                                             alt={community.name}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            className="w-full h-full object-cover"
                                         />
                                         {/* Icon Overlay */}
                                         <div
-                                            className="absolute bottom-3 left-3 w-14 h-14 rounded-xl flex items-center justify-center text-2xl shadow-lg"
+                                            className="absolute bottom-3 left-3 w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
                                             style={{ background: 'var(--card-bg)', border: '2px solid var(--border-color)' }}
                                         >
                                             {community.icon}
@@ -230,16 +225,16 @@ export default function CommunityPage() {
                                     </div>
 
                                     {/* Content */}
-                                    <div className="p-4">
+                                    <div className="p-4 flex flex-col flex-1">
                                         <h4 className="font-semibold text-base mb-1.5 truncate" style={{ color: 'var(--foreground)' }}>
                                             {community.name}
                                         </h4>
-                                        <p className="text-sm mb-4 line-clamp-2 leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
+                                        <p className="text-sm mb-4 line-clamp-2 leading-relaxed flex-1" style={{ color: 'var(--foreground-muted)' }}>
                                             {community.description}
                                         </p>
 
                                         {/* Footer */}
-                                        <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: 'var(--border-color)' }}>
+                                        <div className="flex items-center justify-between pt-2 border-t mt-auto" style={{ borderColor: 'var(--border-color)' }}>
                                             <div className="flex items-center gap-1.5">
                                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--foreground-muted)' }}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -249,16 +244,10 @@ export default function CommunityPage() {
                                                 </span>
                                             </div>
                                             <button
-                                                className="px-4 py-1.5 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md active:scale-95"
+                                                className="px-4 py-1.5 rounded-lg text-sm font-semibold"
                                                 style={{
                                                     background: '#68AAEC',
                                                     color: 'white',
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.background = '#5a9de0';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.background = '#68AAEC';
                                                 }}
                                             >
                                                 Join
