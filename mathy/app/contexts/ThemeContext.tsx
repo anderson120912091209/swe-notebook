@@ -42,7 +42,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--foreground-muted', '#999999');
       root.style.setProperty('--sidebar-bg', '#1a1a1a');
       root.style.setProperty('--card-bg', '#1f1f1f');
-      root.style.setProperty('--border-color', '#333333');
+      root.style.setProperty('--card-preview-bg', '#191919ff');
+      root.style.setProperty('--border-color', '#282828ff');
       root.style.setProperty('--muted-text', '#a0a0a0');
       root.style.setProperty('--hover-bg', '#2a2a2a');
       root.style.setProperty('--active-bg', '#2d2d2d');
@@ -59,6 +60,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--foreground-muted', '#666666'); // Muted grey for secondary text
       root.style.setProperty('--sidebar-bg', '#f3ede9'); // Slightly darker warm beige
       root.style.setProperty('--card-bg', '#ffffff'); // Pure white for cards
+      root.style.setProperty('--card-preview-bg', '#f5f5f5'); // Slightly darker for preview areas
       root.style.setProperty('--border-color', '#e0d0c0'); // Subtle warm border
       root.style.setProperty('--muted-text', '#6b7280'); // Standard muted text
       root.style.setProperty('--hover-bg', '#f0e0e0'); // Light pinkish hover

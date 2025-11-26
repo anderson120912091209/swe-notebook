@@ -210,14 +210,20 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
 
         {/* Content Preview */}
         <div className="px-5 flex-1 overflow-hidden relative mb-4">
-          <div className="h-full w-full opacity-80 scale-90 origin-top-left w-[111%]">
+          <div
+            className="h-full opacity-80 scale-90 origin-top-left rounded-lg overflow-hidden"
+            style={{
+              background: 'var(--card-preview-bg)',
+              width: 'calc(100% / 0.9)'
+            }}
+          >
             <PageCardPreview content={page.content} />
           </div>
-          {/* Fade out mask */}
+          {/* Fade out mask that overlays the Content Preview Snippet */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background: 'linear-gradient(to bottom, transparent 50%, var(--card-bg) 100%)'
+              background: 'linear-gradient(to bottom, transparent 60%, var(--card-bg) 100%)'
             }}
           />
         </div>
