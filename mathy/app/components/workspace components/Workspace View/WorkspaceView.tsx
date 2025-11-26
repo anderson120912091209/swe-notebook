@@ -376,7 +376,7 @@ export default function WorkspaceView() {
                                         {recentPages.map(page => {
                                             const folder = page.folder_id ? folders.find(f => f.id === page.folder_id) : null;
                                             return (
-                                                <div key={page.id} className="flex-shrink-0 w-48 h-80">
+                                                <div key={page.id} className="flex-shrink-0 w-64 h-80">
                                                     <PageCard
                                                         page={page}
                                                         folderName={folder?.name}

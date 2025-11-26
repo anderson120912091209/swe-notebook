@@ -309,7 +309,7 @@ export default function FolderView({ folderId }: FolderViewProps) {
                 {/* Create Page Card - Dashed */}
                 <div
                   onClick={handleCreatePage}
-                  className="p-4 rounded-xl border-2 border-dashed cursor-pointer hover:bg-[var(--hover-bg)] transition-all group flex flex-col justify-between h-[160px]"
+                  className="p-4 rounded-xl border-2 border-dashed cursor-pointer hover:bg-[var(--hover-bg)] transition-all group flex flex-col justify-between h-[320px]"
                   style={{ borderColor: 'var(--border-color)' }}
                 >
                   <svg
