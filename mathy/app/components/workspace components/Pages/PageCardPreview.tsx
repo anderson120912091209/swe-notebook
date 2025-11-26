@@ -48,11 +48,11 @@ const PageCardPreview = React.memo(function PageCardPreview({ content }: PageCar
     }
 
     return (
-        <div className="page-card-preview h-full w-full pointer-events-none select-none">
+        <div className="page-card-preview h-full w-full pointer-events-none select-none px-4">
             <BlockNoteView
                 editor={editor}
                 theme={theme}
-                editable={false} // Explicitly set read-only if supported, otherwise pointer-events-none handles it
+                editable={false}
                 className="font-[family-name:var(--font-geist-sans)] [&_.bn-editor]:!bg-transparent [&_.bn-container]:!bg-transparent [&_.bn-editor]:!px-0 [&_.bn-editor]:!py-0"
             />
         </div>

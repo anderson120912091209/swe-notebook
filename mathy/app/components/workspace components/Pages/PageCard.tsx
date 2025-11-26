@@ -123,21 +123,81 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
           background: 'var(--card-bg)',
         }}
       >
-        {/* Header: Page Badge & Menu */}
-        <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-          <div
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border"
-            style={{
-              background: 'rgba(59, 130, 246, 0.1)',
-              color: '#60A5FA',
-              borderColor: 'rgba(59, 130, 246, 0.2)'
-            }}
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Page
-          </div>
+        {/* Header: Folder Badge (Folder tags) & Menu */}
+        <div className="px-5 pt-3 pb-2 flex items-center justify-between">
+          {folderName ? (
+            <span
+              className="inline-flex items-center px-2 py-1 rounded-md
+              border-[#6b7280]/20 border-[0.7px] text-xs font-medium transition-colors hover:bg-[var(--hover-bg)]"
+              style={{
+                background: 'var(--hover-bg)',
+                color: 'var(--foreground-muted)'
+              }}
+            >
+              <svg className="w-3.5 h-3.5 mr-2" fill={folderColor || '#6b7280'} stroke="none" viewBox="0 0 24 24">
+                <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+              </svg>
+              {folderName}
+            </span>
+          ) : (
+            <div className="relative" ref={folderDropdownRef}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowFolderDropdown(!showFolderDropdown);
+                }}
+                className="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-medium border border-dashed transition-colors hover:bg-[var(--hover-bg)]"
+                style={{
+                  color: 'var(--foreground-muted)',
+                  borderColor: 'var(--border-color)'
+                }}
+              >
+                <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add to folder
+              </button>
+
+              {/* Folder Dropdown */}
+              {showFolderDropdown && (
+                <div
+                  className="absolute bottom-full left-0 mb-1 w-48 rounded-lg shadow-lg border z-20"
+                  style={{
+                    background: 'var(--card-bg)',
+                    borderColor: 'var(--border-color)'
+                  }}
+                >
+                  <div className="py-1">
+                    {folders.length > 0 ? (
+                      folders.map((folder) => (
+                        <button
+                          key={folder.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onMove) {
+                              onMove(page.id, folder.id);
+                            }
+                            setShowFolderDropdown(false);
+                          }}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-2"
+                          style={{ color: 'var(--foreground)' }}
+                        >
+                          <svg className="w-4 h-4" fill={folder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
+                            <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                          </svg>
+                          {folder.name}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
+                        No folders available
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Overflow Menu */}
           <div className="relative" ref={menuRef}>
@@ -211,10 +271,10 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
         {/* Content Preview */}
         <div className="px-5 flex-1 overflow-hidden relative mb-4">
           <div
-            className="h-full opacity-80 scale-90 origin-top-left rounded-lg overflow-hidden"
+            className="h-full w-full rounded-lg overflow-hidden"
             style={{
               background: 'var(--card-preview-bg)',
-              width: 'calc(100% / 0.9)'
+              zoom: 0.5
             }}
           >
             <PageCardPreview content={page.content} />
@@ -228,83 +288,8 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
           />
         </div>
 
-        {/* Footer: Folder & Tags */}
-        <div className="px-5 pb-5 mt-auto space-y-3">
-          {/* Folder Badge */}
-          <div>
-            {folderName ? (
-              <span
-                className="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-[var(--hover-bg)]"
-                style={{
-                  background: 'var(--hover-bg)',
-                  color: 'var(--foreground-muted)'
-                }}
-              >
-                <svg className="w-3.5 h-3.5 mr-2" fill={folderColor || '#6b7280'} stroke="none" viewBox="0 0 24 24">
-                  <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                </svg>
-                {folderName}
-              </span>
-            ) : (
-              <div className="relative" ref={folderDropdownRef}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowFolderDropdown(!showFolderDropdown);
-                  }}
-                  className="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-medium border border-dashed transition-colors hover:bg-[var(--hover-bg)]"
-                  style={{
-                    color: 'var(--foreground-muted)',
-                    borderColor: 'var(--border-color)'
-                  }}
-                >
-                  <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Add to folder
-                </button>
-
-                {/* Folder Dropdown */}
-                {showFolderDropdown && (
-                  <div
-                    className="absolute bottom-full left-0 mb-1 w-48 rounded-lg shadow-lg border z-20"
-                    style={{
-                      background: 'var(--card-bg)',
-                      borderColor: 'var(--border-color)'
-                    }}
-                  >
-                    <div className="py-1">
-                      {folders.length > 0 ? (
-                        folders.map((folder) => (
-                          <button
-                            key={folder.id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (onMove) {
-                                onMove(page.id, folder.id);
-                              }
-                              setShowFolderDropdown(false);
-                            }}
-                            className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-2"
-                            style={{ color: 'var(--foreground)' }}
-                          >
-                            <svg className="w-4 h-4" fill={folder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
-                              <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                            </svg>
-                            {folder.name}
-                          </button>
-                        ))
-                      ) : (
-                        <div className="px-3 py-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                          No folders available
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+        {/* Footer: Tags */}
+        <div className="px-5 pb-5 mt-auto">
 
           {/* Tags */}
           <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--foreground-muted)' }}>
