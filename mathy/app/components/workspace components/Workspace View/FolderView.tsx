@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import PageCard from '../Pages/PageCard';
 import CanvasCard from '../Canvas/CanvasCard';
+import FolderCard from '../Folders/FolderCard';
 import WorkspaceLayout from './WorkspaceLayout';
 import SearchAndNewButtons from '../SearchAndNewButtons';
 import FolderTag from '../Folders/FolderTag';
@@ -26,6 +27,7 @@ export default function FolderView({ folderId }: FolderViewProps) {
   const [showDescriptionField, setShowDescriptionField] = useState(false);
   const [folderDescription, setFolderDescription] = useState(folder?.description || '');
   const [folderTitle, setFolderTitle] = useState(folder?.name || '');
+  const [activeFolderMenuId, setActiveFolderMenuId] = useState<string | null>(null);
 
   useEffect(() => {
     const currentFolder = folders.find(f => f.id === folderId);
@@ -271,29 +273,13 @@ export default function FolderView({ folderId }: FolderViewProps) {
                 </div>
 
                 {filteredChildFolders.map(childFolder => (
-                  <div
+                  <FolderCard
                     key={childFolder.id}
-                    onClick={() => router.push(`/notebook/folder/${childFolder.id}`)}
-                    className="p-4 rounded-xl border cursor-pointer hover:shadow-sm hover:border-[var(--foreground-muted)] transition-all flex flex-col justify-between h-[120px]"
-                    style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)' }}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-                        style={{ backgroundColor: `${childFolder.color}20`, color: childFolder.color || '#6B7280' }}
-                      >
-                        {childFolder.icon || '📁'}
-                      </div>
-                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-[var(--hover-bg)]" style={{ color: 'var(--foreground-muted)' }}>
-                        {pages.filter(p => p.folder_id === childFolder.id).length}
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium truncate" style={{ color: 'var(--foreground)' }}>
-                        {childFolder.name}
-                      </h4>
-                    </div>
-                  </div>
+                    folder={childFolder}
+                    pageCount={pages.filter(p => p.folder_id === childFolder.id).length}
+                    isOpen={activeFolderMenuId === childFolder.id}
+                    onToggle={(open) => setActiveFolderMenuId(open ? childFolder.id : null)}
+                  />
                 ))}
               </div>
             </div>

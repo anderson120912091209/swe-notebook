@@ -134,7 +134,7 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
                 color: 'var(--foreground-muted)'
               }}
             >
-              <svg className="w-3.5 h-3.5 mr-2" fill={folderColor || '#6b7280'} stroke="none" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 mr-2" fill={folderColor || '#6b7280'} stroke="none" viewBox="0 0 24 24" style={{ filter: 'none' }}>
                 <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
               </svg>
               {folderName}
@@ -271,7 +271,8 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
         {/* Content Preview */}
         <div className="px-5 flex-1 overflow-hidden relative mb-4">
           <div
-            className="h-full w-full rounded-lg overflow-hidden"
+            className="h-full w-full border-[var(--border-color)]
+            border-1 rounded-lg overflow-hidden"
             style={{
               background: 'var(--card-preview-bg)',
               zoom: 0.5

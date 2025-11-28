@@ -459,6 +459,29 @@ export default function Sidebar() {
     };
   }, [showProfileMenu, showCreateMenu]);
 
+  // Responsive auto-collapse: Close sidebar on narrow screens, open on wide screens
+  useEffect(() => {
+    const handleResize = () => {
+      const isNarrow = window.innerWidth < 1024;
+
+      if (isNarrow && sidebarOpen) {
+        // Auto-collapse on narrow screens
+        setSidebarOpen(false);
+      } else if (!isNarrow && !sidebarOpen) {
+        // Auto-open on wide screens
+        setSidebarOpen(true);
+      }
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Listen to resize events
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, [sidebarOpen, setSidebarOpen]);
+
   // Drag & Drop state
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);

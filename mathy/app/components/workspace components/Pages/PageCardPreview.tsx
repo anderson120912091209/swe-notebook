@@ -48,7 +48,8 @@ const PageCardPreview = React.memo(function PageCardPreview({ content }: PageCar
     }
 
     return (
-        <div className="page-card-preview h-full w-full pointer-events-none select-none px-4">
+        <div className="page-card-preview h-full w-full 
+        pointer-events-none select-none px-4 pt-3">
             <BlockNoteView
                 editor={editor}
                 theme={theme}
