@@ -1,8 +1,15 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import Devtools only in development to avoid including it in production bundle
+const ReactQueryDevtools = process.env.NODE_ENV === 'development'
+  ? dynamic(() => import('@tanstack/react-query-devtools').then((mod) => ({ default: mod.ReactQueryDevtools })), {
+      ssr: false,
+    })
+  : () => null;
 
 export default function QueryProvider({ children }: { children: React.ReactNode }) {
   // Create a client instance per component mount (Next.js best practice)
@@ -35,10 +42,8 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {/* Only show devtools in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
+      {/* Devtools are only loaded in development via dynamic import */}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }
