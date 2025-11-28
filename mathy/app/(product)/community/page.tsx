@@ -104,7 +104,7 @@ export default function CommunityPage() {
                             <span>What is Community ?</span>
                             <span
                                 className="px-2 py-0.5 rounded-full text-xs font-medium"
-                                style={{
+                        style={{
                                     backgroundColor: 'rgba(104, 170, 236, 0.15)',
                                     color: '#68AAEC',
                                     border: '1px solid rgba(104, 170, 236, 0.25)',
@@ -112,12 +112,12 @@ export default function CommunityPage() {
                             >
                                 Coming soon
                             </span>
-                        </h2>
+                                </h2>
                         
                         <p className="text-base leading-relaxed max-w-3xl" style={{ color: 'var(--foreground-muted)' }}>
                             Community allows you to browse open notes and learning resources shared by other users. 
                             Find your school or specific courses and collaborate with others to learn together. 
-                        </p>
+                                </p>
                     </div>
 
                     {/* Communities Grid */}

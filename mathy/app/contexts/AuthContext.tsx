@@ -42,10 +42,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase.auth]);
 
   const signInWithGoogle = async () => {
+    // Get the current origin - this should be the Vercel URL in production
+    // or localhost in development
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const redirectTo = `${origin}/auth/callback`;
+    
+    // Debug: Log the redirect URL to help diagnose issues
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Auth] Signing in with Google, redirectTo:', redirectTo);
+      console.log('[Auth] Current origin:', origin);
+    }
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo,
       },
     });
     if (error) {
@@ -55,10 +66,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithApple = async () => {
+    // Get the current origin - this should be the Vercel URL in production
+    // or localhost in development
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const redirectTo = `${origin}/auth/callback`;
+    
+    // Debug: Log the redirect URL to help diagnose issues
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Auth] Signing in with Apple, redirectTo:', redirectTo);
+      console.log('[Auth] Current origin:', origin);
+    }
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'apple',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo,
       },
     });
     if (error) {
