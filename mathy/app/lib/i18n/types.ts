@@ -221,18 +221,6 @@ export interface TranslationConfig {
 }
 
 // Re-export commonly used types
-export type {
-  Language,
-  TranslationNamespace,
-  TranslationKeys,
-  TranslationValue,
-  TranslationFunction,
-  NamespaceTranslationFunction,
-  LanguageContextType,
-  LanguageOption,
-  UseTranslationReturn,
-  UseNamespaceTranslationReturn,
-  LanguageProviderProps,
-  LanguageSwitcherProps,
-  TranslationConfig,
-};
+// Note: Most types are already exported above with 'export type' or 'export interface'
+// This section is kept for backward compatibility but doesn't re-export already exported types
+// All types are available for import from this module

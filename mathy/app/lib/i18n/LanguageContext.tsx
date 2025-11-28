@@ -93,7 +93,10 @@ export function LanguageProvider({ children, defaultLanguage }: LanguageProvider
     namespace: T,
     key: keyof typeof translations[T][Language]
   ): string => {
-    const translation = translations[namespace][language][key];
+    // Type assertion needed because TypeScript can't infer the nested index type
+    const namespaceTranslations = translations[namespace] as Record<Language, Record<string, unknown>>;
+    const languageTranslations = namespaceTranslations[language] as Record<string, unknown>;
+    const translation = languageTranslations[key as string];
     return typeof translation === 'string' ? translation : String(translation);
   };
 

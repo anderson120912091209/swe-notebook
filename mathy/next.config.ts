@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
 import path from "path";
-import path from "path";
 
 const nextConfig: NextConfig = {
   // Enable static export for Electron

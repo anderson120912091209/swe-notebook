@@ -152,7 +152,7 @@ export const math = {
     
     // Brackets and parentheses
     parentheses: "Parentheses",
-    brackets: "Brackets",
+    squareBrackets: "Square Brackets",
     braces: "Braces",
     angleBrackets: "Angle Brackets",
     floor: "Floor",
@@ -324,7 +324,7 @@ export const math = {
     
     // Brackets and parentheses
     parentheses: "圓括號",
-    brackets: "方括號",
+    squareBrackets: "方括號",
     braces: "大括號",
     angleBrackets: "角括號",
     floor: "下取整",
