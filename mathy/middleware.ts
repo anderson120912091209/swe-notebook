@@ -59,23 +59,9 @@ export async function middleware(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Protected routes that require authentication
-  const protectedPaths = ['/notebook'];
-  const isProtectedPath = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
-
-  // Redirect to login if accessing protected route without session
-  if (isProtectedPath && !session) {
-    const redirectUrl = new URL('/login', request.url);
-    redirectUrl.searchParams.set('redirectedFrom', request.nextUrl.pathname);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  // Redirect to notebook if accessing login with active session
-  if (request.nextUrl.pathname === '/login' && session) {
-    return NextResponse.redirect(new URL('/notebook', request.url));
-  }
+  // Allow access to /notebook without authentication
+  // Users can use the app without logging in, but need to login to save their work
+  // No protected routes - all routes are accessible without authentication
 
   return response;
 }

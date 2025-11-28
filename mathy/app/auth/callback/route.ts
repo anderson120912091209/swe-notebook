@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     
     if (error) {
       console.error('Error exchanging code for session:', error);
-      return NextResponse.redirect(`${origin}/login?error=${error.message}`);
+      return NextResponse.redirect(`${origin}/notebook?error=${error.message}`);
     }
   }
 

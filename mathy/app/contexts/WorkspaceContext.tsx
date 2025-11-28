@@ -6,6 +6,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 import type { Folder, Page, Canvas, WorkspaceItem, ViewMode, Paper } from '@/app/types/workspace';
 import * as workspaceAPI from '@/app/lib/api/workspace';
 import { createClient } from '@/app/lib/supabase/client';
+import { foldersCache, pagesCache, canvasCache, pendingSync, generateTempId, isTempId, clearAllCache } from '@/app/lib/cache/localStorageCache';
 
 interface WorkspaceContextType {
   // Data
@@ -97,9 +98,23 @@ export function WorkspaceProvider({
   // REACT QUERY HOOKS - Smart caching and automatic deduplication
   // ============================================================================
 
-  // Fetch folders with React Query
+  // Local cache state for guest users
+  const [localFolders, setLocalFolders] = useState<Folder[]>(() => foldersCache.get());
+  const [localPages, setLocalPages] = useState<Page[]>(() => pagesCache.get());
+  const [localCanvas, setLocalCanvas] = useState<Canvas[]>(() => canvasCache.get());
+
+  // Sync local cache to state when it changes
+  useEffect(() => {
+    if (!user) {
+      setLocalFolders(foldersCache.get());
+      setLocalPages(pagesCache.get());
+      setLocalCanvas(canvasCache.get());
+    }
+  }, [user]);
+
+  // Fetch folders with React Query (only when user is logged in)
   const { 
-    data: folders = [], 
+    data: serverFolders = [], 
     isLoading: foldersLoading,
     error: foldersError 
   } = useQuery({
@@ -108,9 +123,9 @@ export function WorkspaceProvider({
     enabled: !!user,
   });
 
-  // Fetch pages with React Query
+  // Fetch pages with React Query (only when user is logged in)
   const { 
-    data: pages = [], 
+    data: serverPages = [], 
     isLoading: pagesLoading,
     error: pagesError 
   } = useQuery({
@@ -119,9 +134,9 @@ export function WorkspaceProvider({
     enabled: !!user,
   });
 
-  // Fetch canvas with React Query
+  // Fetch canvas with React Query (only when user is logged in)
   const { 
-    data: canvas = [], 
+    data: serverCanvas = [], 
     isLoading: canvasLoading,
     error: canvasError 
   } = useQuery({
@@ -129,6 +144,21 @@ export function WorkspaceProvider({
     queryFn: () => workspaceAPI.getCanvas(user!.id),
     enabled: !!user,
   });
+
+  // Merge server data with local cache
+  // When logged in: show server data + any unsynced local items
+  // When not logged in: show only local cache
+  const folders = user 
+    ? [...serverFolders, ...localFolders.filter(f => isTempId(f.id))]
+    : localFolders;
+  
+  const pages = user
+    ? [...serverPages, ...localPages.filter(p => isTempId(p.id))]
+    : localPages;
+  
+  const canvas = user
+    ? [...serverCanvas, ...localCanvas.filter(c => isTempId(c.id))]
+    : localCanvas;
 
   // Fetch workspace items with React Query
   const { 
@@ -573,15 +603,82 @@ export function WorkspaceProvider({
     description?: string,
     parentId?: string
   ): Promise<Folder> => {
-    if (!user) throw new Error('User not authenticated');
+    if (!user) {
+      // Guest user: save to local cache
+      const tempId = generateTempId();
+      const newFolder: Folder = {
+        id: tempId,
+        user_id: '',
+        name,
+        icon: icon || '📁',
+        color: color || '#6B7280',
+        description: description || '',
+        parent_folder_id: parentId,
+        position: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        last_edited_at: new Date().toISOString(),
+      };
+      
+      foldersCache.add(newFolder);
+      setLocalFolders(foldersCache.get());
+      pendingSync.add({
+        type: 'create',
+        entityType: 'folder',
+        entityId: tempId,
+        data: newFolder,
+        timestamp: Date.now(),
+      });
+      
+      return newFolder;
+    }
+    
     return createFolderMutation.mutateAsync({ userId: user.id, name, icon, color, description, parentId });
   };
 
   const updateFolder = async (folderId: string, updates: Partial<Folder>) => {
+    if (!user || isTempId(folderId)) {
+      // Guest user or updating local item: save to cache
+      const cachedFolders = foldersCache.get();
+      const folderIndex = cachedFolders.findIndex(f => f.id === folderId);
+      if (folderIndex !== -1) {
+        const updatedFolder = { ...cachedFolders[folderIndex], ...updates, updated_at: new Date().toISOString(), last_edited_at: new Date().toISOString() };
+        foldersCache.update(folderId, updatedFolder);
+        setLocalFolders(foldersCache.get());
+        
+        if (!user) {
+          pendingSync.add({
+            type: 'update',
+            entityType: 'folder',
+            entityId: folderId,
+            data: updatedFolder,
+            timestamp: Date.now(),
+          });
+        }
+      }
+      return;
+    }
+    
     await updateFolderMutation.mutateAsync({ folderId, updates });
   };
 
   const deleteFolder = async (folderId: string) => {
+    if (!user || isTempId(folderId)) {
+      // Guest user or deleting local item: remove from cache
+      foldersCache.remove(folderId);
+      setLocalFolders(foldersCache.get());
+      
+      if (!user) {
+        pendingSync.add({
+          type: 'delete',
+          entityType: 'folder',
+          entityId: folderId,
+          timestamp: Date.now(),
+        });
+      }
+      return;
+    }
+    
     await deleteFolderMutation.mutateAsync(folderId);
   };
 
@@ -590,15 +687,83 @@ export function WorkspaceProvider({
     folderId?: string,
     icon?: string
   ): Promise<Page> => {
-    if (!user) throw new Error('User not authenticated');
+    if (!user) {
+      // Guest user: save to local cache
+      const tempId = generateTempId();
+      const newPage: Page = {
+        id: tempId,
+        user_id: '',
+        title: title || 'Untitled Page',
+        icon: icon || '📝',
+        folder_id: folderId,
+        content: { blocks: [] },
+        position: 0,
+        is_default: false,
+        is_favorited: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        last_edited_at: new Date().toISOString(),
+      };
+      
+      pagesCache.add(newPage);
+      setLocalPages(pagesCache.get());
+      pendingSync.add({
+        type: 'create',
+        entityType: 'page',
+        entityId: tempId,
+        data: newPage,
+        timestamp: Date.now(),
+      });
+      
+      return newPage;
+    }
+    
     return createPageMutation.mutateAsync({ userId: user.id, title, folderId, icon });
   };
 
   const updatePage = async (pageId: string, updates: Partial<Page>) => {
+    if (!user || isTempId(pageId)) {
+      // Guest user or updating local item: save to cache
+      const cachedPages = pagesCache.get();
+      const pageIndex = cachedPages.findIndex(p => p.id === pageId);
+      if (pageIndex !== -1) {
+        const updatedPage = { ...cachedPages[pageIndex], ...updates, updated_at: new Date().toISOString(), last_edited_at: new Date().toISOString() };
+        pagesCache.update(pageId, updatedPage);
+        setLocalPages(pagesCache.get());
+        
+        if (!user) {
+          pendingSync.add({
+            type: 'update',
+            entityType: 'page',
+            entityId: pageId,
+            data: updatedPage,
+            timestamp: Date.now(),
+          });
+        }
+      }
+      return;
+    }
+    
     await updatePageMutation.mutateAsync({ pageId, updates });
   };
 
   const deletePage = async (pageId: string) => {
+    if (!user || isTempId(pageId)) {
+      // Guest user or deleting local item: remove from cache
+      pagesCache.remove(pageId);
+      setLocalPages(pagesCache.get());
+      
+      if (!user) {
+        pendingSync.add({
+          type: 'delete',
+          entityType: 'page',
+          entityId: pageId,
+          timestamp: Date.now(),
+        });
+      }
+      return;
+    }
+    
     await deletePageMutation.mutateAsync(pageId);
   };
 
@@ -845,6 +1010,66 @@ export function WorkspaceProvider({
     setCurrentPage(null);
     setViewMode('workspace');
   };
+
+  // ============================================================================
+  // SYNC LOCAL CACHE TO SERVER WHEN USER LOGS IN
+  // ============================================================================
+
+  useEffect(() => {
+    if (!user) return;
+
+    const syncLocalDataToServer = async () => {
+      const pendingItems = pendingSync.get();
+      if (pendingItems.length === 0) return;
+
+      try {
+        // Process pending sync items in order
+        for (const item of pendingItems) {
+          try {
+            if (item.type === 'create' && item.data) {
+              if (item.entityType === 'folder') {
+                const folder = item.data as Folder;
+                await createFolderMutation.mutateAsync({
+                  userId: user.id,
+                  name: folder.name,
+                  icon: folder.icon,
+                  color: folder.color,
+                  description: folder.description,
+                  parentId: folder.parent_folder_id ?? undefined,
+                });
+              } else if (item.entityType === 'page') {
+                const page = item.data as Page;
+                await createPageMutation.mutateAsync({
+                  userId: user.id,
+                  title: page.title,
+                  folderId: page.folder_id ?? undefined,
+                  icon: page.icon,
+                });
+              }
+            }
+            // Remove from pending queue after successful sync
+            pendingSync.remove(item.entityId);
+          } catch (error) {
+            console.error(`Failed to sync ${item.entityType} ${item.entityId}:`, error);
+            // Keep in queue to retry later
+          }
+        }
+
+        // Clear local cache after successful sync
+        if (pendingSync.get().length === 0) {
+          clearAllCache();
+          setLocalFolders([]);
+          setLocalPages([]);
+          setLocalCanvas([]);
+        }
+      } catch (error) {
+        console.error('Failed to sync local data:', error);
+      }
+    };
+
+    syncLocalDataToServer();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]); // Only run when user.id changes (user logs in)
 
   // ============================================================================
   // CONTEXT VALUE

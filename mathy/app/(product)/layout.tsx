@@ -5,7 +5,6 @@ import { Panel, PanelGroup, PanelResizeHandle, type ImperativePanelHandle } from
 import { ThemeProvider } from '@/app/contexts/ThemeContext';
 import { AuthProvider } from '@/app/contexts/AuthContext';
 import { WorkspaceProvider } from '@/app/contexts/WorkspaceContext';
-import ProtectedRoute from '@/app/components/auth components/ProtectedRoute';
 import QueryProvider from '@/app/lib/react-query/QueryProvider';
 import Sidebar from '@/app/components/workspace components/Workspace View/Sidebar';
 
@@ -146,9 +145,7 @@ export default function ProductLayout({
     <QueryProvider>
       <AuthProvider>
         <ThemeProvider>
-          <ProtectedRoute>
-            <ProductLayoutContent>{children}</ProductLayoutContent>
-          </ProtectedRoute>
+          <ProductLayoutContent>{children}</ProductLayoutContent>
         </ThemeProvider>
       </AuthProvider>
     </QueryProvider>

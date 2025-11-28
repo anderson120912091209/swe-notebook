@@ -9,7 +9,6 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
-  signInWithApple: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -42,49 +41,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase.auth]);
 
   const signInWithGoogle = async () => {
-    // Get the current origin - this should be the Vercel URL in production
-    // or localhost in development
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const redirectTo = `${origin}/auth/callback`;
-    
-    // Debug: Log the redirect URL to help diagnose issues
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Auth] Signing in with Google, redirectTo:', redirectTo);
-      console.log('[Auth] Current origin:', origin);
-    }
-    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (error) {
       console.error('Error signing in with Google:', error);
-      throw error;
-    }
-  };
-
-  const signInWithApple = async () => {
-    // Get the current origin - this should be the Vercel URL in production
-    // or localhost in development
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const redirectTo = `${origin}/auth/callback`;
-    
-    // Debug: Log the redirect URL to help diagnose issues
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Auth] Signing in with Apple, redirectTo:', redirectTo);
-      console.log('[Auth] Current origin:', origin);
-    }
-    
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'apple',
-      options: {
-        redirectTo,
-      },
-    });
-    if (error) {
-      console.error('Error signing in with Apple:', error);
       throw error;
     }
   };
@@ -95,8 +59,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error signing out:', error);
       throw error;
     }
-    // Redirect to home page after sign out
-    window.location.href = '/';
+    // Redirect to notebook after sign out
+    window.location.href = '/notebook';
   };
 
   const value = {
@@ -104,7 +68,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     signInWithGoogle,
-    signInWithApple,
     signOut,
   };
 
