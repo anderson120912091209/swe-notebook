@@ -33,6 +33,7 @@
     "@tldraw/tldraw": "^4.1.1",
     "@types/katex": "^0.16.7",
     "@types/lodash": "^4.17.20",
+    "@vercel/analytics": "^1.5.0",
     "@yoopta/action-menu-list": "^4.9.9",
     "@yoopta/blockquote": "^4.9.9",
     "@yoopta/callout": "^4.9.9",
