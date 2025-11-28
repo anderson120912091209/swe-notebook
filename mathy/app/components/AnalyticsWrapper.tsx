@@ -1,6 +1,6 @@
 'use client';
 
-import { Analytics } from '@vercel/analytics/react';
+import { Analytics } from '@vercel/analytics/next';
 
 export default function AnalyticsWrapper() {
   // Only load Analytics in production and not in Electron builds

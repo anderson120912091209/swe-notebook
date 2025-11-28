@@ -183,7 +183,12 @@ export default function WorkspaceView() {
                                     </h3>
                                 </div>
 
-                                <div className="flex flex-wrap gap-4">
+                                <div 
+                                    className="flex flex-wrap gap-4"
+                                    style={{
+                                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                                    }}
+                                >
                                     {filteredRootFolders.map(folder => (
                                         <FolderCard
                                             key={folder.id}

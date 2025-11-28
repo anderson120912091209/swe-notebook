@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useCreateBlockNote } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
@@ -38,6 +38,28 @@ const PageCardPreview = React.memo(function PageCardPreview({ content }: PageCar
         schema: customSchema,
         initialContent: initialContent,
     });
+
+    // Update editor content when initialContent changes
+    useEffect(() => {
+        if (editor && initialContent) {
+            try {
+                // Replace all blocks with new content when content prop changes
+                // This ensures the preview updates automatically after page edits
+                const currentBlocks = editor.document;
+                const newBlocks = initialContent;
+                
+                // Only update if content actually changed (prevent unnecessary updates)
+                const currentContentStr = JSON.stringify(currentBlocks);
+                const newContentStr = JSON.stringify(newBlocks);
+                
+                if (currentContentStr !== newContentStr) {
+                    editor.replaceBlocks(editor.document, newBlocks);
+                }
+            } catch (error) {
+                console.error('Error updating preview content:', error);
+            }
+        }
+    }, [editor, initialContent]);
 
     if (!initialContent) {
         return (

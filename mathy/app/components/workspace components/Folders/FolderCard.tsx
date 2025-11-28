@@ -134,9 +134,10 @@ const FolderCard = React.memo(function FolderCard({
     >
       {/* Subtle gradient overlay on hover */}
       <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-xl"
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none rounded-xl"
         style={{
-          background: `radial-gradient(circle at top right, ${baseColor}15 0%, transparent 70%)`
+          background: `radial-gradient(circle at top right, ${baseColor}15 0%, transparent 70%)`,
+          transition: 'opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
       />
 

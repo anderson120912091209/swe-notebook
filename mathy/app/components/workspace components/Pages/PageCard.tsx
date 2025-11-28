@@ -266,7 +266,7 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
               zoom: 0.5
             }}
           >
-            <PageCardPreview content={page.content} />
+            <PageCardPreview key={`${page.id}-${page.updated_at}`} content={page.content} />
           </div>
           {/* Fade out mask that overlays the Content Preview Snippet */}
           <div
