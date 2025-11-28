@@ -53,6 +53,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--math-bg', '#2a2a2a');
       root.style.setProperty('--math-border', '#444444');
       root.style.setProperty('--outer-bg', '#111111ff');
+      root.style.setProperty('--page-bg', '#171717'); // Dark grey for page containers
     } else {
       // Warm, cream-based light theme inspired by the reference
       root.style.setProperty('--background', '#f9f5f2'); // Very light warm cream
@@ -71,7 +72,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--math-bg', '#f5f5f5'); // Light grey for content snippets
       root.style.setProperty('--math-border', '#e0d0c0'); // Warm math border
       root.style.setProperty('--outer-bg', '#f0ebe7'); // Slightly darker warm background
+      root.style.setProperty('--page-bg', '#ffffff'); // White for page containers
     }
+    
+    // Also update body background to ensure it matches
+    document.body.style.backgroundColor = root.style.getPropertyValue('--background');
 
     localStorage.setItem('theme', theme);
   }, [theme, mounted]);

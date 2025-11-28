@@ -24,18 +24,8 @@
   --color-border-subtle: #E5E5E5;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-
-    /* Layout Colors - Dark Mode */
-    --sidebar-bg: #0a0a0a;
-    --page-bg: #171717;
-    /* Lighter than sidebar */
-    --outer-bg: #000000;
-  }
-}
+/* Dark mode media query removed - theme is now controlled by ThemeContext */
+/* This prevents CSS from overriding JavaScript theme settings */
 
 body {
   background: var(--background);
