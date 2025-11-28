@@ -9,7 +9,7 @@ import { getSuggestions, getCurrentToken, applySuggestion } from '@/app/lib/math
 import SuggestionPopup from './SuggestionPopup';
 
 interface MathEditorProps {
-  initialSrc: string;
+  initialSrc?: string;  // 可選，因為組件有默認值 ''
   onSave: (src: string) => void;
   onCancel: () => void;
   autoFocus?: boolean;

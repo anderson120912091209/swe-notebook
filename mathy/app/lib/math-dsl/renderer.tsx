@@ -10,20 +10,6 @@ interface MathExpressionProps {
 }
 
 /**
- * Main renderer component for AST nodes
- */
-const MathExpressionComponent: React.FC<MathExpressionProps> = ({ node, theme = 'light' }) => {
-  return (
-    <span 
-      data-ast-node-id={node.id}
-      style={{ display: 'inline-block' }}
-    >
-      {renderNode(node, theme)}
-    </span>
-  );
-});
-
-/**
  * Render a single AST node
  */
 function renderNode(node: ASTNode, theme: 'light' | 'dark'): React.ReactNode {
@@ -181,6 +167,20 @@ function renderFunction(node: ASTNode, theme: 'light' | 'dark'): React.ReactNode
           {i < args.length - 1 && ', '}
         </React.Fragment>
       ))})
+    </span>
+  );
+}
+
+/**
+ * Main renderer component for AST nodes
+ */
+const MathExpressionComponent: React.FC<MathExpressionProps> = ({ node, theme = 'light' }) => {
+  return (
+    <span 
+      data-ast-node-id={node.id}
+      style={{ display: 'inline-block' }}
+    >
+      {renderNode(node, theme)}
     </span>
   );
 };

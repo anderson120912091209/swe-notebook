@@ -6,8 +6,7 @@ import React, { useEffect, useRef, useState } from 'react';
 interface MathfieldElement extends HTMLElement {
   value: string;
   readOnly?: boolean;
-  focus?: () => void;
-  blur?: () => void;
+  // focus() and blur() are already defined in HTMLElement, no need to redeclare
 }
 
 interface MathLiveDisplayProps {

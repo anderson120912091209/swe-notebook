@@ -16,7 +16,7 @@ export function getFolderBreadcrumbPath(folderId: string, folders: Folder[]): Fo
   // Build path by traversing up the hierarchy
   while (currentFolder) {
     path.unshift(currentFolder); // Add to beginning of array
-    currentFolder = currentFolder.parent_folder_id ? folderMap.get(currentFolder.parent_folder_id) : null;
+    currentFolder = currentFolder.parent_folder_id ? folderMap.get(currentFolder.parent_folder_id) : undefined;
   }
   
   return path;

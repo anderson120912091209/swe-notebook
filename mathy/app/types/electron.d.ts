@@ -3,11 +3,11 @@ declare global {
   interface Window {
     electronAPI: {
       // Menu actions
-      onMenuAction: (callback: (action: string, data?: any) => void) => void;
+      onMenuAction: (callback: (action: string, data?: Record<string, unknown>) => void) => void;
       
       // File operations
-      showOpenDialog: () => Promise<any>;
-      showSaveDialog: () => Promise<any>;
+      showOpenDialog: () => Promise<{ canceled: boolean; filePaths?: string[] }>;
+      showSaveDialog: () => Promise<{ canceled: boolean; filePath?: string }>;
       
       // App info
       getVersion: () => Promise<string>;

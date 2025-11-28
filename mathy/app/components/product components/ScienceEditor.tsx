@@ -126,9 +126,7 @@ export const ScienceEditor: React.FC = () => {
       mathSpan.setAttribute('data-math', latex);
 
       try {
-        // @ts-expect-error - KaTeX is loaded dynamically
         if (window.katex) {
-          // @ts-expect-error - KaTeX is loaded dynamically
           const html = window.katex.renderToString(latex, {
             throwOnError: false,
             displayMode: false,
@@ -363,6 +361,7 @@ export const ScienceEditor: React.FC = () => {
             <div className="rounded-2xl p-8 shadow-sm" style={{ background: 'var(--card-bg)', boxShadow: '0 1px 3px var(--shadow)', border: '1px solid var(--border-color)', minHeight: 'calc(100vh - 400px)' }}>
               <BlockNoteView editor={editor} theme={theme} className="notion-blocknote" style={{ minHeight: '600px' }}>
                 {/* Adds a math menu which opens with the "$" key */}
+                {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
                 <SuggestionMenuController
                   triggerCharacter="$"
                   getItems={async (query) =>

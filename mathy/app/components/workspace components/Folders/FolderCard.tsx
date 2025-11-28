@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import type { Folder } from '@/app/types/workspace';
 import { useTheme } from '@/app/contexts/ThemeContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { CardMenu, ThreeDotButton } from '../Shared/CardMenu';
 
 interface FolderCardProps {
   folder: Folder;
@@ -74,96 +74,6 @@ function darkenHex(hex: string, amount: number) {
 }
 
 
-interface FolderMenuProps {
-  folder: Folder;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
-  onClose: () => void;
-}
-
-function FolderMenu({ folder, onEdit, onDelete, onClose }: FolderMenuProps) {
-  const menuRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose]);
-
-  return (
-    <motion.div
-      ref={menuRef}
-      initial={{ opacity: 0, scale: 0.95, y: -5 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95, y: -5 }}
-      transition={{ duration: 0.12, ease: "easeOut" }}
-      className="absolute right-0 top-full mt-2 rounded-lg border py-1.5 z-[9999] min-w-[180px] origin-top-right"
-      style={{
-        background: 'var(--card-bg)',
-        borderColor: 'var(--border-color)',
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-      }}
-      onClick={(e: React.MouseEvent) => e.stopPropagation()}
-    >
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-          onEdit?.(folder.id);
-        }}
-        className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-3 cursor-pointer"
-        style={{ color: 'var(--foreground)' }}
-      >
-        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-        </div>
-        <span>Rename</span>
-      </button>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-          // TODO: Implement move functionality
-          console.log('Move folder');
-        }}
-        className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-3 cursor-pointer"
-        style={{ color: 'var(--foreground)' }}
-      >
-        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-          </svg>
-        </div>
-        <span>Move</span>
-      </button>
-      <div className="h-px my-1.5" style={{ background: 'var(--border-color)' }} />
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-          if (onDelete && confirm(`Delete folder "${folder.name}" and all its pages?`)) {
-            onDelete(folder.id);
-          }
-        }}
-        className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-3 cursor-pointer"
-        style={{ color: '#ef4444' }}
-      >
-        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </div>
-        <span>Delete</span>
-      </button>
-    </motion.div>
-  );
-}
 
 const FolderCard = React.memo(function FolderCard({
   folder,
@@ -257,31 +167,55 @@ const FolderCard = React.memo(function FolderCard({
           </span>
 
           {/* Menu Button - Hidden by default, visible on hover */}
-          <div className={`absolute right-0 top-1/2 -translate-y-1/2 transition-opacity duration-200 ${isMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-            <button
+          <div className="relative">
+            <ThreeDotButton
               onClick={(e) => {
                 e.stopPropagation();
                 handleToggle(!isMenuOpen);
               }}
-              className="p-1 rounded-md hover:bg-[var(--hover-bg)] transition-colors cursor-pointer"
-              style={{ color: 'var(--foreground-muted)' }}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-              </svg>
-            </button>
-
-            {/* Dropdown menu */}
-            <AnimatePresence>
-              {isMenuOpen && (
-                <FolderMenu
-                  folder={folder}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onClose={() => handleToggle(false)}
-                />
-              )}
-            </AnimatePresence>
+              isVisible={isMenuOpen}
+            />
+            <CardMenu
+              isOpen={isMenuOpen}
+              onClose={() => handleToggle(false)}
+              items={[
+                {
+                  label: 'Rename',
+                  icon: (
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  ),
+                  onClick: () => onEdit?.(folder.id),
+                },
+                {
+                  label: 'Move',
+                  icon: (
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                  ),
+                  onClick: () => {
+                    // TODO: Implement move functionality
+                    console.log('Move folder');
+                  },
+                },
+                {
+                  label: 'Delete',
+                  icon: (
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  ),
+                  onClick: () => {
+                    if (onDelete && confirm(`Delete folder "${folder.name}" and all its pages?`)) {
+                      onDelete(folder.id);
+                    }
+                  },
+                  destructive: true,
+                },
+              ]}
+            />
           </div>
         </div>
       </div>

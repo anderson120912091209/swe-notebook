@@ -778,14 +778,16 @@ export function WorkspaceProvider({
   };
 
   const canDropItem = (
-    dragType: 'folder' | 'page',
+    dragType: 'folder' | 'page' | 'canvas',
     dragId: string,
-    targetType: 'folder' | 'page',
+    targetType: 'folder' | 'page' | 'canvas',
     targetId: string
   ): boolean => {
     if (dragId === targetId) return false;
     if (dragType === 'page' && targetType === 'page') return false;
+    if (dragType === 'canvas' && targetType === 'canvas') return false;
     if (targetType === 'page') return false;
+    if (targetType === 'canvas') return false;
     
     if (dragType === 'folder') {
       let checkId: string | undefined = targetId;
@@ -797,6 +799,11 @@ export function WorkspaceProvider({
       
       const newDepth = calculateFolderDepth(dragId, targetId);
       if (newDepth >= 3) return false;
+    }
+    
+    // Canvas and page can be dropped into folders
+    if ((dragType === 'canvas' || dragType === 'page') && targetType === 'folder') {
+      return true;
     }
     
     return true;

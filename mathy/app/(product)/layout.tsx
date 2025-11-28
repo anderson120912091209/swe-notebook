@@ -117,10 +117,10 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
               transition: shouldAnimateLayout ? 'width 0.3s ease, background-color 0.2s ease' : 'background-color 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--border-color)';
+              (e.currentTarget as unknown as HTMLElement).style.backgroundColor = 'var(--border-color)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              (e.currentTarget as unknown as HTMLElement).style.backgroundColor = 'transparent';
             }}
           />
           <Panel
