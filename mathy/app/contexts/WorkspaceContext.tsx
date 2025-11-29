@@ -98,14 +98,50 @@ export function WorkspaceProvider({
   // REACT QUERY HOOKS - Smart caching and automatic deduplication
   // ============================================================================
 
-  // Local cache state for guest users
-  const [localFolders, setLocalFolders] = useState<Folder[]>(() => foldersCache.get());
-  const [localPages, setLocalPages] = useState<Page[]>(() => pagesCache.get());
-  const [localCanvas, setLocalCanvas] = useState<Canvas[]>(() => canvasCache.get());
+  // Track if local cache has been checked (to prevent showing welcome message before cache is loaded)
+  const [isCacheChecked, setIsCacheChecked] = useState(false);
 
-  // Sync local cache to state when it changes
+  // Local cache state for guest users
+  const [localFolders, setLocalFolders] = useState<Folder[]>(() => {
+    // Synchronously read from localStorage on initial render
+    if (typeof window !== 'undefined') {
+      return foldersCache.get();
+    }
+    return [];
+  });
+  const [localPages, setLocalPages] = useState<Page[]>(() => {
+    if (typeof window !== 'undefined') {
+      return pagesCache.get();
+    }
+    return [];
+  });
+  const [localCanvas, setLocalCanvas] = useState<Canvas[]>(() => {
+    if (typeof window !== 'undefined') {
+      return canvasCache.get();
+    }
+    return [];
+  });
+
+  // Check local cache on mount and mark as checked
   useEffect(() => {
-    if (!user) {
+    if (typeof window !== 'undefined') {
+      // Re-read cache to ensure we have the latest data
+      setLocalFolders(foldersCache.get());
+      setLocalPages(pagesCache.get());
+      setLocalCanvas(canvasCache.get());
+      // Mark cache as checked after a microtask to ensure state is updated
+      Promise.resolve().then(() => {
+        setIsCacheChecked(true);
+      });
+    } else {
+      // On server, mark as checked immediately (no cache to check)
+      setIsCacheChecked(true);
+    }
+  }, []);
+
+  // Sync local cache to state when user changes
+  useEffect(() => {
+    if (!user && typeof window !== 'undefined') {
       setLocalFolders(foldersCache.get());
       setLocalPages(pagesCache.get());
       setLocalCanvas(canvasCache.get());
@@ -172,7 +208,8 @@ export function WorkspaceProvider({
   });
 
   // Combined loading and error states
-  const loading = foldersLoading || pagesLoading || canvasLoading || workspaceItemsLoading;
+  // For guest users, also wait for cache to be checked before showing content
+  const loading = foldersLoading || pagesLoading || canvasLoading || workspaceItemsLoading || (!user && !isCacheChecked);
   const error = foldersError || pagesError || canvasError || workspaceItemsError 
     ? 'Failed to load workspace data' 
     : null;

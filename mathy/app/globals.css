@@ -34,23 +34,25 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Simple and fast theme color transitions */
-/* Only transition colors, keep it minimal for smooth UX */
-* {
-  transition: background-color 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease;
+/* Optimized theme color transitions - only apply to elements that use CSS variables */
+/* Using :where() for zero specificity to allow easy overrides */
+:where(html, body, [style*="--background"], [style*="--foreground"], [style*="--card-bg"], [style*="--border-color"]) {
+  transition: background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
-/* Exclude elements with their own transitions */
-*[class*="transition"],
-*[style*="transition"],
+/* Exclude elements that shouldn't transition or have their own transitions */
 math-field,
 math-field *,
 .inline-math-content,
 .inline-math-content *,
-[class*="theme-toggle"] {
-  transition: none;
+[class*="theme-toggle"],
+svg,
+img,
+canvas,
+video {
+  transition: none !important;
 }
 
 /* Define custom Alternate font family with fallbacks */

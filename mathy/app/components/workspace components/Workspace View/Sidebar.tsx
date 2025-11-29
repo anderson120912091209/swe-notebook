@@ -505,20 +505,21 @@ export default function Sidebar() {
     })
   );
 
-  // Initialize expanded folders from localStorage
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('expandedFolders');
-      if (saved) {
-        try {
-          return new Set(JSON.parse(saved));
-        } catch {
-          return new Set();
-        }
+  // Initialize expanded folders - always start with empty Set for consistent SSR
+  // Load from localStorage AFTER mount to prevent hydration mismatches
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  
+  // Load expanded folders from localStorage after mount
+  useEffect(() => {
+    const saved = localStorage.getItem('expandedFolders');
+    if (saved) {
+      try {
+        setExpandedFolders(new Set(JSON.parse(saved)));
+      } catch {
+        // Invalid data, keep empty Set
       }
     }
-    return new Set();
-  });
+  }, []);
 
   // Get root-level folders (memoized to prevent recalculation)
   const rootFolders = useMemo(() => folders.filter(f => !f.parent_folder_id), [folders]);
@@ -1166,7 +1167,7 @@ export default function Sidebar() {
               )}
 
               {/* Root Folders - Rendered recursively with nested folders */}
-              {rootFolders.map(folder => renderFolder(folder, 0))}
+              {isMounted && rootFolders.map(folder => renderFolder(folder, 0))}
 
               {/* Recent Pages - 5 most recently edited pages */}
               {isMounted && recentPages.length > 0 && (

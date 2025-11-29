@@ -111,7 +111,8 @@ function TopNavigationBar({
   onRefresh: () => void;
 }) {
   return (
-    <header className="flex h-12 items-center justify-between px-4 backdrop-blur" style={{ background: 'var(--outer-bg)' }}>
+    <header className="flex h-12 items-center justify-between px-4 
+    backdrop-blur" style={{ background: 'var(--outer-bg)' }}>
       <div className="flex items-center gap-1">
         {/* Sidebar Toggle */}
         {!sidebarOpen && (
