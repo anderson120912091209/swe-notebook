@@ -6,7 +6,6 @@ interface SearchAndNewButtonsProps {
   onNewClick: () => void;
   onNewFolder?: () => void;
   onNewPage?: () => void;
-  onNewCanvas?: () => void;
   newButtonDisabled?: boolean;
   newButtonLoading?: boolean;
   searchPlaceholder?: string;
@@ -18,7 +17,6 @@ export default function SearchAndNewButtons({
   onNewClick,
   onNewFolder,
   onNewPage,
-  onNewCanvas,
   newButtonDisabled = false,
   newButtonLoading = false,
   searchPlaceholder = "Search...",
@@ -65,7 +63,7 @@ export default function SearchAndNewButtons({
     setShowDropdown(!showDropdown);
   }, [showDropdown]);
 
-  const handleNewItem = useCallback((type: 'folder' | 'page' | 'canvas') => {
+  const handleNewItem = useCallback((type: 'folder' | 'page') => {
     setShowDropdown(false);
     switch (type) {
       case 'folder':
@@ -74,13 +72,10 @@ export default function SearchAndNewButtons({
       case 'page':
         onNewPage?.();
         break;
-      case 'canvas':
-        onNewCanvas?.();
-        break;
       default:
         onNewClick();
     }
-  }, [onNewFolder, onNewPage, onNewCanvas, onNewClick]);
+  }, [onNewFolder, onNewPage, onNewClick]);
 
   if (isSearchActive) {
     return (
@@ -185,16 +180,6 @@ export default function SearchAndNewButtons({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span>Page</span>
-              </button>
-              <button
-                onClick={() => handleNewItem('canvas')}
-                className="w-full px-4 py-2 text-sm text-left hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-3 cursor-pointer"
-                style={{ color: 'var(--foreground)' }}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>Canvas</span>
               </button>
             </div>
           </div>

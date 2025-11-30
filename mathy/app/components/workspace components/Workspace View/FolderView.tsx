@@ -5,12 +5,10 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import PageCard from '../Pages/PageCard';
-import CanvasCard from '../Canvas/CanvasCard';
 import FolderCard from '../Folders/FolderCard';
 import WorkspaceLayout from './WorkspaceLayout';
 import SearchAndNewButtons from '../SearchAndNewButtons';
 import FolderTag from '../Folders/FolderTag';
-import CreateCanvasModal from '../Canvas/CreateCanvasModal';
 import { getFolderBreadcrumbPath, generateFolderBreadcrumbJSX } from '@/app/lib/breadcrumbUtils';
 
 interface FolderViewProps {
@@ -19,10 +17,9 @@ interface FolderViewProps {
 
 export default function FolderView({ folderId }: FolderViewProps) {
   const router = useRouter();
-  const { folders, pages, canvas, createPage, createFolder, createCanvas, deletePage, deleteCanvas, updateFolder, loading } = useWorkspace();
+  const { folders, pages, createPage, createFolder, deletePage, updateFolder, loading } = useWorkspace();
   const [folder, setFolder] = useState(folders.find(f => f.id === folderId));
   const [creatingPage, setCreatingPage] = useState(false);
-  const [creatingCanvas, setCreatingCanvas] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDescriptionField, setShowDescriptionField] = useState(false);
   const [folderDescription, setFolderDescription] = useState(folder?.description || '');
@@ -41,7 +38,6 @@ export default function FolderView({ folderId }: FolderViewProps) {
   // Get child folders and pages
   const childFolders = useMemo(() => folders.filter(f => f.parent_folder_id === folderId), [folders, folderId]);
   const folderPagesList = useMemo(() => pages.filter(p => p.folder_id === folderId), [pages, folderId]);
-  const folderCanvasList = useMemo(() => canvas.filter(c => c.folder_id === folderId), [canvas, folderId]);
 
   // Search filtering
   const filteredPages = useMemo(() => {
@@ -50,13 +46,6 @@ export default function FolderView({ folderId }: FolderViewProps) {
       page.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [folderPagesList, searchQuery]);
-
-  const filteredCanvas = useMemo(() => {
-    if (!searchQuery.trim()) return folderCanvasList;
-    return folderCanvasList.filter(canvas =>
-      canvas.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [folderCanvasList, searchQuery]);
 
   const filteredChildFolders = useMemo(() => {
     if (!searchQuery.trim()) return childFolders;
@@ -169,9 +158,6 @@ export default function FolderView({ folderId }: FolderViewProps) {
         console.log('Create folder in folder clicked');
       }}
       onNewPage={() => setCreatingPage(true)}
-      onNewCanvas={() => {
-        setCreatingCanvas(true);
-      }}
       newButtonDisabled={creatingPage}
       newButtonLoading={creatingPage}
       searchPlaceholder="Search pages..."
@@ -348,30 +334,8 @@ export default function FolderView({ folderId }: FolderViewProps) {
             </div>
           )}
 
-          {/* Canvas Grid */}
-          {filteredCanvas.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
-                Canvas {searchQuery && `(${filteredCanvas.length} found)`}
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredCanvas.map(canvasItem => (
-                  <CanvasCard
-                    key={canvasItem.id}
-                    canvas={canvasItem}
-                    folderName={folder?.name}
-                    folderColor={folder?.color}
-                    onDelete={deleteCanvas}
-                    onEdit={() => {/* TODO: Implement edit modal */ }}
-                    onMove={() => {/* TODO: Implement move functionality */ }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Search Results Empty State */}
-          {searchQuery && filteredPages.length === 0 && filteredChildFolders.length === 0 && filteredCanvas.length === 0 && (
+          {searchQuery && filteredPages.length === 0 && filteredChildFolders.length === 0 && (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
@@ -385,12 +349,6 @@ export default function FolderView({ folderId }: FolderViewProps) {
         </div>
       </div>
 
-      {/* Create Canvas Modal */}
-      <CreateCanvasModal
-        isOpen={creatingCanvas}
-        onClose={() => setCreatingCanvas(false)}
-        defaultFolderId={folderId}
-      />
     </WorkspaceLayout>
   );
 }

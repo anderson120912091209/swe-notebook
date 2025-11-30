@@ -3,20 +3,19 @@
  * Stores workspace data locally when user is not authenticated
  */
 
-import type { Folder, Page, Canvas } from '@/app/types/workspace';
+import type { Folder, Page } from '@/app/types/workspace';
 
 const CACHE_KEYS = {
   folders: 'workspace_cache_folders',
   pages: 'workspace_cache_pages',
-  canvas: 'workspace_cache_canvas',
   pendingSync: 'workspace_cache_pending_sync',
 } as const;
 
 interface PendingSyncItem {
   type: 'create' | 'update' | 'delete';
-  entityType: 'folder' | 'page' | 'canvas';
+  entityType: 'folder' | 'page';
   entityId: string;
-  data?: Folder | Page | Canvas;
+  data?: Folder | Page;
   timestamp: number;
 }
 
@@ -133,55 +132,6 @@ export const pagesCache = {
 };
 
 /**
- * Canvas Cache
- */
-export const canvasCache = {
-  get(): Canvas[] {
-    if (typeof window === 'undefined') return [];
-    try {
-      const cached = localStorage.getItem(CACHE_KEYS.canvas);
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  },
-
-  set(canvas: Canvas[]): void {
-    if (typeof window === 'undefined') return;
-    try {
-      localStorage.setItem(CACHE_KEYS.canvas, JSON.stringify(canvas));
-    } catch (error) {
-      console.error('Failed to save canvas to cache:', error);
-    }
-  },
-
-  add(canvas: Canvas): void {
-    const canvasList = this.get();
-    canvasList.push(canvas);
-    this.set(canvasList);
-  },
-
-  update(id: string, updates: Partial<Canvas>): void {
-    const canvasList = this.get();
-    const index = canvasList.findIndex(c => c.id === id);
-    if (index !== -1) {
-      canvasList[index] = { ...canvasList[index], ...updates };
-      this.set(canvasList);
-    }
-  },
-
-  remove(id: string): void {
-    const canvasList = this.get();
-    this.set(canvasList.filter(c => c.id !== id));
-  },
-
-  clear(): void {
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem(CACHE_KEYS.canvas);
-  },
-};
-
-/**
  * Pending Sync Queue
  * Tracks operations that need to be synced to server after login
  */
@@ -228,7 +178,6 @@ export const pendingSync = {
 export function clearAllCache(): void {
   foldersCache.clear();
   pagesCache.clear();
-  canvasCache.clear();
   pendingSync.clear();
 }
 

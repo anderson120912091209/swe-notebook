@@ -3,16 +3,15 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/app/contexts/AuthContext';
-import type { Folder, Page, Canvas, WorkspaceItem, ViewMode, Paper } from '@/app/types/workspace';
+import type { Folder, Page, WorkspaceItem, ViewMode, Paper } from '@/app/types/workspace';
 import * as workspaceAPI from '@/app/lib/api/workspace';
 import { createClient } from '@/app/lib/supabase/client';
-import { foldersCache, pagesCache, canvasCache, pendingSync, generateTempId, isTempId, clearAllCache } from '@/app/lib/cache/localStorageCache';
+import { foldersCache, pagesCache, pendingSync, generateTempId, isTempId, clearAllCache } from '@/app/lib/cache/localStorageCache';
 
 interface WorkspaceContextType {
   // Data
   folders: Folder[];
   pages: Page[];
-  canvas: Canvas[];
   workspaceItems: WorkspaceItem[];
   currentFolder: Folder | null;
   currentPage: Page | null;
@@ -36,12 +35,6 @@ interface WorkspaceContextType {
   deletePage: (pageId: string) => Promise<void>;
   movePageToFolder: (pageId: string, folderId: string | null) => Promise<void>;
   
-  // Actions - Canvas
-  createCanvas: (title: string, folderId?: string, icon?: string) => Promise<Canvas>;
-  updateCanvas: (canvasId: string, updates: Partial<Canvas>) => Promise<void>;
-  deleteCanvas: (canvasId: string) => Promise<void>;
-  moveCanvasToFolder: (canvasId: string, folderId: string | null) => Promise<void>;
-  
   // Actions - Papers
   createPaper: (metadata: Record<string, unknown>, source: string, type: 'doi' | 'arxiv' | 'pdf', file?: File) => Promise<Paper>;
   updatePaperStatus: (paperId: string, status: string, data?: Record<string, unknown>) => Promise<void>;
@@ -51,7 +44,7 @@ interface WorkspaceContextType {
   // Drag & Drop
   moveFolderToFolder: (folderId: string, targetFolderId: string | null) => Promise<void>;
   calculateFolderDepth: (folderId: string, targetParentId?: string | null) => number;
-  canDropItem: (dragType: 'folder' | 'page' | 'canvas', dragId: string, targetType: 'folder' | 'page' | 'canvas', targetId: string) => boolean;
+  canDropItem: (dragType: 'folder' | 'page', dragId: string, targetType: 'folder' | 'page', targetId: string) => boolean;
   
   // Navigation
   openFolder: (folderId: string) => void;
@@ -69,7 +62,6 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefin
 const QUERY_KEYS = {
   folders: (userId: string) => ['folders', userId],
   pages: (userId: string) => ['pages', userId],
-  canvas: (userId: string) => ['canvas', userId],
   workspaceItems: (userId: string) => ['workspaceItems', userId],
 } as const;
 
@@ -115,12 +107,6 @@ export function WorkspaceProvider({
     }
     return [];
   });
-  const [localCanvas, setLocalCanvas] = useState<Canvas[]>(() => {
-    if (typeof window !== 'undefined') {
-      return canvasCache.get();
-    }
-    return [];
-  });
 
   // Check local cache on mount and mark as checked
   useEffect(() => {
@@ -128,7 +114,6 @@ export function WorkspaceProvider({
       // Re-read cache to ensure we have the latest data
       setLocalFolders(foldersCache.get());
       setLocalPages(pagesCache.get());
-      setLocalCanvas(canvasCache.get());
       // Mark cache as checked after a microtask to ensure state is updated
       Promise.resolve().then(() => {
         setIsCacheChecked(true);
@@ -144,7 +129,6 @@ export function WorkspaceProvider({
     if (!user && typeof window !== 'undefined') {
       setLocalFolders(foldersCache.get());
       setLocalPages(pagesCache.get());
-      setLocalCanvas(canvasCache.get());
     }
   }, [user]);
 
@@ -170,17 +154,6 @@ export function WorkspaceProvider({
     enabled: !!user,
   });
 
-  // Fetch canvas with React Query (only when user is logged in)
-  const { 
-    data: serverCanvas = [], 
-    isLoading: canvasLoading,
-    error: canvasError 
-  } = useQuery({
-    queryKey: QUERY_KEYS.canvas(user?.id || ''),
-    queryFn: () => workspaceAPI.getCanvas(user!.id),
-    enabled: !!user,
-  });
-
   // Merge server data with local cache
   // When logged in: show server data + any unsynced local items
   // When not logged in: show only local cache
@@ -191,10 +164,6 @@ export function WorkspaceProvider({
   const pages = user
     ? [...serverPages, ...localPages.filter(p => isTempId(p.id))]
     : localPages;
-  
-  const canvas = user
-    ? [...serverCanvas, ...localCanvas.filter(c => isTempId(c.id))]
-    : localCanvas;
 
   // Fetch workspace items with React Query
   const { 
@@ -209,8 +178,8 @@ export function WorkspaceProvider({
 
   // Combined loading and error states
   // For guest users, also wait for cache to be checked before showing content
-  const loading = foldersLoading || pagesLoading || canvasLoading || workspaceItemsLoading || (!user && !isCacheChecked);
-  const error = foldersError || pagesError || canvasError || workspaceItemsError 
+  const loading = foldersLoading || pagesLoading || workspaceItemsLoading || (!user && !isCacheChecked);
+  const error = foldersError || pagesError || workspaceItemsError 
     ? 'Failed to load workspace data' 
     : null;
 
@@ -221,7 +190,6 @@ export function WorkspaceProvider({
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.folders(user.id) }),
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.pages(user.id) }),
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.canvas(user.id) }),
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user.id) }),
     ]);
   }, [user, queryClient]);
@@ -521,115 +489,6 @@ export function WorkspaceProvider({
   });
 
   // ============================================================================
-  // CANVAS MUTATIONS - Optimistic updates with automatic rollback on error
-  // ============================================================================
-
-  const createCanvasMutation = useMutation({
-    mutationFn: ({ 
-      userId, 
-      title, 
-      folderId, 
-      icon 
-    }: { 
-      userId: string; 
-      title: string; 
-      folderId?: string; 
-      icon?: string; 
-    }) => workspaceAPI.createCanvas(userId, title, icon, undefined, folderId),
-    onSuccess: (newCanvas) => {
-      queryClient.setQueryData<Canvas[]>(
-        QUERY_KEYS.canvas(user!.id),
-        (old = []) => [...old, newCanvas]
-      );
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user!.id) });
-    },
-  });
-
-  const updateCanvasMutation = useMutation({
-    mutationFn: ({ canvasId, updates }: { canvasId: string; updates: Partial<Canvas> }) =>
-      workspaceAPI.updateCanvas(canvasId, updates),
-    onMutate: async ({ canvasId, updates }) => {
-      // Mark as editing to pause real-time updates
-      setIsEditing(true);
-      if (editingTimerRef.current) clearTimeout(editingTimerRef.current);
-      
-      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.canvas(user!.id) });
-      
-      const previousCanvas = queryClient.getQueryData<Canvas[]>(QUERY_KEYS.canvas(user!.id));
-      
-      // Optimistically update
-      queryClient.setQueryData<Canvas[]>(
-        QUERY_KEYS.canvas(user!.id),
-        (old = []) => old.map(c => c.id === canvasId ? { ...c, ...updates } : c)
-      );
-      
-      return { previousCanvas };
-    },
-    onError: (err, variables, context) => {
-      setIsEditing(false);
-      if (context?.previousCanvas) {
-        queryClient.setQueryData(QUERY_KEYS.canvas(user!.id), context.previousCanvas);
-      }
-    },
-    onSettled: () => {
-      // Resume updates after 2 seconds of no editing
-      editingTimerRef.current = setTimeout(() => {
-        setIsEditing(false);
-      }, 2000);
-    },
-  });
-
-  const deleteCanvasMutation = useMutation({
-    mutationFn: (canvasId: string) => workspaceAPI.deleteCanvas(canvasId),
-    onMutate: async (canvasId) => {
-      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.canvas(user!.id) });
-      
-      const previousCanvas = queryClient.getQueryData<Canvas[]>(QUERY_KEYS.canvas(user!.id));
-      
-      // Optimistically remove
-      queryClient.setQueryData<Canvas[]>(
-        QUERY_KEYS.canvas(user!.id),
-        (old = []) => old.filter(c => c.id !== canvasId)
-      );
-      
-      return { previousCanvas };
-    },
-    onError: (err, canvasId, context) => {
-      if (context?.previousCanvas) {
-        queryClient.setQueryData(QUERY_KEYS.canvas(user!.id), context.previousCanvas);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspaceItems(user!.id) });
-    },
-  });
-
-  const moveCanvasMutation = useMutation({
-    mutationFn: ({ canvasId, folderId }: { canvasId: string; folderId: string | null }) =>
-      workspaceAPI.updateCanvas(canvasId, { folder_id: folderId || undefined }),
-    onMutate: async ({ canvasId, folderId }) => {
-      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.canvas(user!.id) });
-      
-      const previousCanvas = queryClient.getQueryData<Canvas[]>(QUERY_KEYS.canvas(user!.id));
-      
-      // Optimistically update
-      queryClient.setQueryData<Canvas[]>(
-        QUERY_KEYS.canvas(user!.id),
-        (old = []) => old.map(c => 
-          c.id === canvasId ? { ...c, folder_id: folderId || undefined } : c
-        )
-      );
-      
-      return { previousCanvas };
-    },
-    onError: (err, variables, context) => {
-      if (context?.previousCanvas) {
-        queryClient.setQueryData(QUERY_KEYS.canvas(user!.id), context.previousCanvas);
-      }
-    },
-  });
-
-  // ============================================================================
   // PUBLIC API - Wrapper functions for mutations
   // ============================================================================
 
@@ -808,27 +667,6 @@ export function WorkspaceProvider({
     await movePageMutation.mutateAsync({ pageId, folderId });
   };
 
-  const createCanvas = async (
-    title: string,
-    folderId?: string,
-    icon?: string
-  ): Promise<Canvas> => {
-    if (!user) throw new Error('User not authenticated');
-    return createCanvasMutation.mutateAsync({ userId: user.id, title, folderId, icon });
-  };
-
-  const updateCanvas = async (canvasId: string, updates: Partial<Canvas>) => {
-    await updateCanvasMutation.mutateAsync({ canvasId, updates });
-  };
-
-  const deleteCanvas = async (canvasId: string) => {
-    await deleteCanvasMutation.mutateAsync(canvasId);
-  };
-
-  const moveCanvasToFolder = async (canvasId: string, folderId: string | null) => {
-    await moveCanvasMutation.mutateAsync({ canvasId, folderId });
-  };
-
   const moveFolderToFolder = async (folderId: string, targetFolderId: string | null) => {
     await moveFolderMutation.mutateAsync({ folderId, targetFolderId });
   };
@@ -980,16 +818,14 @@ export function WorkspaceProvider({
   };
 
   const canDropItem = (
-    dragType: 'folder' | 'page' | 'canvas',
+    dragType: 'folder' | 'page',
     dragId: string,
-    targetType: 'folder' | 'page' | 'canvas',
+    targetType: 'folder' | 'page',
     targetId: string
   ): boolean => {
     if (dragId === targetId) return false;
     if (dragType === 'page' && targetType === 'page') return false;
-    if (dragType === 'canvas' && targetType === 'canvas') return false;
     if (targetType === 'page') return false;
-    if (targetType === 'canvas') return false;
     
     if (dragType === 'folder') {
       let checkId: string | undefined = targetId;
@@ -1003,8 +839,8 @@ export function WorkspaceProvider({
       if (newDepth >= 3) return false;
     }
     
-    // Canvas and page can be dropped into folders
-    if ((dragType === 'canvas' || dragType === 'page') && targetType === 'folder') {
+    // Page can be dropped into folders
+    if (dragType === 'page' && targetType === 'folder') {
       return true;
     }
     
@@ -1097,7 +933,6 @@ export function WorkspaceProvider({
           clearAllCache();
           setLocalFolders([]);
           setLocalPages([]);
-          setLocalCanvas([]);
         }
       } catch (error) {
         console.error('Failed to sync local data:', error);
@@ -1116,7 +951,6 @@ export function WorkspaceProvider({
     // Data from React Query
     folders,
     pages,
-    canvas,
     workspaceItems,
     currentFolder,
     currentPage,
@@ -1139,12 +973,6 @@ export function WorkspaceProvider({
     updatePage,
     deletePage,
     movePageToFolder,
-    
-    // Actions - Canvas
-    createCanvas,
-    updateCanvas,
-    deleteCanvas,
-    moveCanvasToFolder,
     
     // Actions - Papers
     createPaper,
