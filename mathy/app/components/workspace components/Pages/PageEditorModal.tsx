@@ -313,11 +313,9 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
       <ModalContent className="h-full sm:h-[95vh] 
       md:h-[90vh] lg:h-[85vh] rounded-lg 
       border-1 border-white/10 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
-        {() => (
-          <>
-            {/* Header */}
-            <ModalHeader className="flex h-16 items-center justify-between px-4 backdrop-blur 
-            sm:px-6 border-b border-gray-200" style={{ borderColor: 'var(--border-color)', background: 'var(--card-bg)' }}>
+        {/* Header */}
+        <ModalHeader className="flex h-16 items-center justify-between px-4 backdrop-blur 
+        sm:px-6 border-b border-gray-200" style={{ borderColor: 'var(--border-color)', background: 'var(--card-bg)' }}>
               {/* Left side - Folder tag and Title display */}
               <div className="flex items-center gap-3 flex-1">
                 {/* Folder Tag */}
@@ -463,8 +461,6 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                 </div>
               </div>
             </ModalBody>
-          </>
-        )}
       </ModalContent>
     </Modal>
   );

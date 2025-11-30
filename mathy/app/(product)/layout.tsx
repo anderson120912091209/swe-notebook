@@ -11,14 +11,54 @@ import Sidebar from '@/app/components/workspace components/Workspace View/Sideba
 function ProductLayoutContent({ children }: { children: React.ReactNode }) {
   const COLLAPSE_THRESHOLD = 1;
   const HIDDEN_PANEL_SIZE = 0.0001;
-  const DEFAULT_SIDEBAR_SIZE = 20;
+  const FIXED_SIDEBAR_WIDTH_PX = 240; // Fixed sidebar width in pixels (always the same size)
+  const MIN_SIDEBAR_WIDTH_PX = 180; // Minimum usable width in pixels
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const sidebarPanelRef = useRef<ImperativePanelHandle>(null);
-  const lastSidebarSizeRef = useRef<number>(DEFAULT_SIDEBAR_SIZE);
+  const lastSidebarSizePercentRef = useRef<number | null>(null); // Store as percentage for Panel
   const [shouldAnimateLayout, setShouldAnimateLayout] = useState(false);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const suppressAnimationResetRef = useRef(false);
+  const [panelSizes, setPanelSizes] = useState({ defaultSize: 20, minSize: 15, maxSize: 25 });
+
+  // Convert fixed pixel width to percentage for Panel component
+  // Panel uses percentages, so we need to convert our fixed pixel width
+  useEffect(() => {
+    const calculatePanelSizes = () => {
+      if (typeof window === 'undefined') return;
+      const screenWidth = window.innerWidth;
+      
+      // Convert fixed pixel width to percentage
+      const defaultSizePercent = (FIXED_SIDEBAR_WIDTH_PX / screenWidth) * 100;
+      const minSizePercent = (MIN_SIDEBAR_WIDTH_PX / screenWidth) * 100;
+      
+      // Cap max size at 40% to prevent sidebar from taking too much space
+      const maxSizePercent = Math.min((FIXED_SIDEBAR_WIDTH_PX * 1.5 / screenWidth) * 100, 40);
+      
+      const newSizes = {
+        defaultSize: Math.min(defaultSizePercent, 30), // Cap at 30% for very small screens
+        minSize: Math.min(minSizePercent, 25),
+        maxSize: maxSizePercent,
+      };
+      
+      setPanelSizes(newSizes);
+      
+      // If sidebar is open, maintain the fixed pixel width by resizing to the new percentage
+      if (sidebarOpen && sidebarPanelRef.current) {
+        const panel = sidebarPanelRef.current;
+        const currentSize = panel.getSize();
+        // Only resize if the calculated size differs significantly from current
+        if (Math.abs(currentSize - newSizes.defaultSize) > 1) {
+          panel.resize(newSizes.defaultSize);
+        }
+      }
+    };
+
+    calculatePanelSizes();
+    window.addEventListener('resize', calculatePanelSizes);
+    return () => window.removeEventListener('resize', calculatePanelSizes);
+  }, [sidebarOpen]);
 
   useEffect(() => {
     return () => {
@@ -42,10 +82,9 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
     suppressAnimationResetRef.current = true;
 
     if (sidebarOpen) {
-      const targetSize =
-        lastSidebarSizeRef.current > COLLAPSE_THRESHOLD
-          ? lastSidebarSizeRef.current
-          : DEFAULT_SIDEBAR_SIZE;
+      // Always use fixed pixel width (240px) converted to percentage when opening
+      // This ensures consistent size regardless of screen size
+      const targetSize = panelSizes.defaultSize;
 
       if (Math.abs(currentSize - targetSize) > 0.5) {
         requestAnimationFrame(() => {
@@ -58,7 +97,7 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
       }
     } else {
       if (currentSize > COLLAPSE_THRESHOLD) {
-        lastSidebarSizeRef.current = currentSize;
+        lastSidebarSizePercentRef.current = currentSize;
       }
       requestAnimationFrame(() => {
         panel.resize(HIDDEN_PANEL_SIZE);
@@ -74,7 +113,7 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
       setShouldAnimateLayout(false);
       animationTimeoutRef.current = null;
     }, 350);
-  }, [sidebarOpen]);
+  }, [sidebarOpen, panelSizes.defaultSize]);
 
   return (
     <WorkspaceProvider sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
@@ -82,9 +121,9 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
         <PanelGroup direction="horizontal" className="h-screen">
           <Panel
             ref={sidebarPanelRef}
-            defaultSize={15}
-            minSize={sidebarOpen ? 15 : 0}
-            maxSize={25}
+            defaultSize={panelSizes.defaultSize}
+            minSize={sidebarOpen ? panelSizes.minSize : 0}
+            maxSize={panelSizes.maxSize}
             onResize={(size) => {
               if (!suppressAnimationResetRef.current && shouldAnimateLayout) {
                 setShouldAnimateLayout(false);
@@ -94,7 +133,7 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
                 }
               }
               if (size > COLLAPSE_THRESHOLD) {
-                lastSidebarSizeRef.current = size;
+                lastSidebarSizePercentRef.current = size;
               }
               const shouldBeOpen = size > COLLAPSE_THRESHOLD;
               if (shouldBeOpen !== sidebarOpen) {

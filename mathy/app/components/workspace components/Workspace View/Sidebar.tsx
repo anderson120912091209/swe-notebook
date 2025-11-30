@@ -8,7 +8,6 @@ import {
   DragOverEvent,
   DragOverlay,
   DragStartEvent,
-  KeyboardSensor,
   PointerSensor,
   closestCorners,
   useSensor,
@@ -466,27 +465,44 @@ export default function Sidebar() {
   }, [showProfileMenu, showCreateMenu]);
 
   // Responsive auto-collapse: Close sidebar on narrow screens, open on wide screens
+  // Only responds to window resize events, not manual toggles
   useEffect(() => {
-    const handleResize = () => {
-      const isNarrow = window.innerWidth < 1024;
+    let previousWidth = window.innerWidth;
+    const BREAKPOINT = 1024;
 
-      if (isNarrow && sidebarOpen) {
-        // Auto-collapse on narrow screens
-        setSidebarOpen(false);
-      } else if (!isNarrow && !sidebarOpen) {
-        // Auto-open on wide screens
-        setSidebarOpen(true);
+    const handleResize = () => {
+      const currentWidth = window.innerWidth;
+      const wasNarrow = previousWidth < BREAKPOINT;
+      const isNarrow = currentWidth < BREAKPOINT;
+
+      // Only update if crossing the breakpoint threshold
+      if (wasNarrow !== isNarrow) {
+        if (isNarrow && sidebarOpen) {
+          // Just crossed to narrow - auto-collapse
+          setSidebarOpen(false);
+        } else if (!isNarrow && !sidebarOpen) {
+          // Just crossed to wide - auto-open
+          setSidebarOpen(true);
+        }
       }
+
+      previousWidth = currentWidth;
     };
 
-    // Set initial state
-    handleResize();
+    // Set initial state only on mount
+    const isNarrow = window.innerWidth < BREAKPOINT;
+    if (isNarrow && sidebarOpen) {
+      setSidebarOpen(false);
+    } else if (!isNarrow && !sidebarOpen) {
+      setSidebarOpen(true);
+    }
 
-    // Listen to resize events
+    // Listen to resize events only
     window.addEventListener('resize', handleResize);
 
     return () => window.removeEventListener('resize', handleResize);
-  }, [sidebarOpen, setSidebarOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only run on mount and respond to resize events
 
   // Drag & Drop state
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -879,13 +895,12 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="relative h-full overflow-hidden"
+      className="relative h-full w-full overflow-hidden"
       style={{
         background: 'var(--sidebar-bg)',
         borderRight: sidebarOpen ? '1px solid var(--border-color)' : 'none',
-        width: sidebarOpen ? '100%' : '0px',
-        minWidth: sidebarOpen ? '180px' : '0px', // This controls the actual sidebar width limit
-        transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1), border 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        // Width is controlled by the parent Panel component, so we don't set it here
+        transition: 'border 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
       <div
@@ -895,7 +910,6 @@ export default function Sidebar() {
           opacity: sidebarOpen ? 1 : 0,
           transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           transitionDelay: sidebarOpen ? '0.1s' : '0s',
-          minWidth: '180px', // Minimum usable width
         }}
       >
         {/* Header - Fixed height to match top header */}
@@ -995,14 +1009,29 @@ export default function Sidebar() {
               )}
             </div>
 
-            {/* Sidebar Toggle Button - Small */}
+            {/* Sidebar Toggle Button */}
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSidebarOpen(!sidebarOpen);
+              }}
               className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--hover-bg)] transition-colors flex-shrink-0 cursor-pointer"
               style={{ color: 'var(--foreground-muted)' }}
-              title="Hide sidebar"
+              title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+              aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg 
+                width="14" 
+                height="14" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+                style={{
+                  transform: sidebarOpen ? 'rotate(0deg)' : 'rotate(180deg)',
+                  transition: 'transform 0.2s ease'
+                }}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
