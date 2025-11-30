@@ -351,59 +351,6 @@ const RecentPage = React.memo(function RecentPage({ page, folder, isActive, isBe
 
 
 // ============================================================================
-// TRASH BUTTON COMPONENT - Droppable for deletion
-// ============================================================================
-const TrashButton = React.memo(function TrashButton() {
-  const { setNodeRef, isOver } = useDroppable({
-    id: 'trash-button',
-  });
-
-  return (
-    <button
-      ref={setNodeRef}
-      onClick={() => {
-        // You can implement trash functionality here
-        console.log('Trash clicked');
-      }}
-      className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer"
-      style={{
-        color: 'var(--foreground)',
-        background: isOver ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
-        border: isOver ? '2px dashed #ef4444' : 'none',
-      }}
-    >
-      <div className="w-5 h-5 flex items-center justify-center">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{
-            color: isOver ? '#ef4444' : 'var(--foreground-muted)',
-            transform: isOver ? 'scale(1.1)' : 'scale(1)',
-            transition: 'color 0.2s ease, transform 0.2s ease',
-          }}
-        >
-          <path d="M3 6h18" />
-          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-        </svg>
-      </div>
-      <span
-        className="text-sm font-medium"
-        style={{ color: isOver ? '#ef4444' : 'var(--foreground)' }}
-      >
-        {isOver ? 'Drop to Delete' : 'Trash'}
-      </span>
-    </button>
-  );
-});
-
-// ============================================================================
 // MAIN SIDEBAR COMPONENT
 // ============================================================================
 
@@ -735,32 +682,6 @@ export default function Sidebar() {
     // Format is "context-type-uuid", but UUIDs contain dashes, so we need to be careful
     const activeIdStr = active.id.toString();
     const overIdStr = over.id.toString();
-
-    // Check if dropped on trash
-    if (overIdStr === 'trash-button') {
-      // Handle different ID formats: folder-*, folder-page-*, recent-page-*
-      let dragType: 'folder' | 'page';
-      let dragId: string;
-
-      if (activeIdStr.startsWith('folder-page-')) {
-        dragType = 'page';
-        dragId = activeIdStr.substring('folder-page-'.length);
-      } else if (activeIdStr.startsWith('recent-page-')) {
-        dragType = 'page';
-        dragId = activeIdStr.substring('recent-page-'.length);
-      } else if (activeIdStr.startsWith('folder-')) {
-        dragType = 'folder';
-        dragId = activeIdStr.substring('folder-'.length);
-      } else {
-        // Fallback for old format
-        dragType = activeIdStr.split('-')[0] as 'folder' | 'page';
-        dragId = activeIdStr.substring(dragType.length + 1);
-      }
-
-      // Trigger delete confirmation
-      handleDeleteRequest(dragId, dragType);
-      return;
-    }
 
     // Parse drag item type and ID
     let dragType: 'folder' | 'page';
@@ -1172,16 +1093,6 @@ export default function Sidebar() {
                       </svg>
                     </div>
                     <span className="text-sm font-medium">Community</span>
-                    <span
-                      className="px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wide"
-                      style={{
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)', // Slightly more visible background
-                        color: '#60a5fa', // Lighter blue for better contrast on dark
-                        border: '1px solid rgba(59, 130, 246, 0.2)',
-                      }}
-                    >
-                      Building
-                    </span>
                   </button>
                 </Tooltip>
               </div>
@@ -1272,144 +1183,6 @@ export default function Sidebar() {
 
         {/* Bottom Menu Items */}
         <div className="pt-2 mt-auto pb-2">
-          {/* Main Menu Items */}
-          <div className="space-y-0.5 mb-3">
-            {/* Ask a Question */}
-            <button
-              onClick={() => {
-                // You can implement ask a question functionality here
-                console.log('Ask a question clicked');
-              }}
-              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
-              style={{ color: 'var(--foreground)' }}
-            >
-              <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ color: 'var(--foreground-muted)' }}
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                  <line x1="12" y1="17" x2="12.01" y2="17" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">Ask a question</span>
-            </button>
-
-            {/* Academy */}
-            <button
-              onClick={() => window.open('https://academy.example.com', '_blank')}
-              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
-              style={{ color: 'var(--foreground)' }}
-            >
-              <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ color: 'var(--foreground-muted)' }}
-                >
-                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                  <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">Academy</span>
-            </button>
-
-            {/* Documentation */}
-            <button
-              onClick={() => window.open('https://docs.example.com', '_blank')}
-              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
-              style={{ color: 'var(--foreground)' }}
-            >
-              <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ color: 'var(--foreground-muted)' }}
-                >
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">Documentation</span>
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: 'var(--foreground-muted)', marginLeft: 'auto' }}
-              >
-                <path d="M7 17L17 7" />
-                <path d="M7 7h10v10" />
-              </svg>
-            </button>
-
-            {/* Feedback */}
-            <button
-              onClick={() => window.open('https://feedback.example.com', '_blank')}
-              className="w-full flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--hover-bg)] cursor-pointer text-left"
-              style={{ color: 'var(--foreground)' }}
-            >
-              <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ color: 'var(--foreground-muted)' }}
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21,15 16,10 5,21" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">Feedback</span>
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: 'var(--foreground-muted)', marginLeft: 'auto' }}
-              >
-                <path d="M7 17L17 7" />
-                <path d="M7 7h10v10" />
-              </svg>
-            </button>
-
-            {/* Trash - Droppable for deletion */}
-            <TrashButton />
-          </div>
 
           {/* Bottom Icon Row */}
           <div className="flex items-center justify-start gap-4 px-3">
