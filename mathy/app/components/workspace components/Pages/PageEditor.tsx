@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useCreateBlockNote, SuggestionMenuController } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
-import { customSchema, getMathMenuItems } from '@/app/lib/blocknote-schema';
+import { customSchema, getMathMenuItems, getSlashMenuItems } from '@/app/lib/blocknote-schema';
 import { filterSuggestionItems } from '@blocknote/core';
 import { useTheme } from '@/app/contexts/ThemeContext';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
@@ -466,6 +466,14 @@ export default function PageEditor({ pageId }: PageEditorProps) {
               triggerCharacter="$"
               getItems={async (query) =>
                 filterSuggestionItems(getMathMenuItems(editor), query)
+              }
+            />
+            {/* / slash menu with inline math included */}
+            {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
+            <SuggestionMenuController
+              triggerCharacter="/"
+              getItems={async (query) =>
+                filterSuggestionItems(getSlashMenuItems(editor), query)
               }
             />
           </BlockNoteView>

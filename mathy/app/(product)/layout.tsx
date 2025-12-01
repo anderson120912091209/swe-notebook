@@ -20,7 +20,27 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
   const [shouldAnimateLayout, setShouldAnimateLayout] = useState(false);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const suppressAnimationResetRef = useRef(false);
-  const [panelSizes, setPanelSizes] = useState({ defaultSize: 20, minSize: 15, maxSize: 25 });
+  
+  // Calculate initial panel sizes based on screen width (if available)
+  // This ensures the defaultSize matches the calculated size from the start
+  const calculateInitialPanelSizes = () => {
+    if (typeof window === 'undefined') {
+      // Fallback for SSR - will be recalculated on client
+      return { defaultSize: 20, minSize: 15, maxSize: 25 };
+    }
+    const screenWidth = window.innerWidth;
+    const defaultSizePercent = (FIXED_SIDEBAR_WIDTH_PX / screenWidth) * 100;
+    const minSizePercent = (MIN_SIDEBAR_WIDTH_PX / screenWidth) * 100;
+    const maxSizePercent = Math.min((FIXED_SIDEBAR_WIDTH_PX * 1.5 / screenWidth) * 100, 40);
+    
+    return {
+      defaultSize: Math.min(defaultSizePercent, 30), // Cap at 30% for very small screens
+      minSize: Math.min(minSizePercent, 25),
+      maxSize: maxSizePercent,
+    };
+  };
+  
+  const [panelSizes, setPanelSizes] = useState(calculateInitialPanelSizes);
 
   // Convert fixed pixel width to percentage for Panel component
   // Panel uses percentages, so we need to convert our fixed pixel width

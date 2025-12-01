@@ -1,17 +1,22 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
+import { useAuth } from '@/app/contexts/AuthContext';
 import FolderCard from '../Folders/FolderCard';
 import PageCard from '../Pages/PageCard';
 import WorkspaceLayout from './WorkspaceLayout';
 import SearchAndNewButtons from '../SearchAndNewButtons';
 import WorkspaceHeaderSwitch, { TabType } from './WorkspaceHeaderSwitch';
+import OnboardingModal from '../../onboarding/OnboardingModal';
+import { getUserProfile } from '@/app/lib/api/onboarding';
+import { onboardingCache } from '@/app/lib/cache/onboardingCache';
 
 
 export default function WorkspaceView() {
     const { folders, pages, deleteFolder, deletePage, createPage, createFolder, loading } = useWorkspace();
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<TabType>('notebooks');
     const [searchQuery, setSearchQuery] = useState('');
     const [showDescriptionField, setShowDescriptionField] = useState(false);
@@ -19,6 +24,43 @@ export default function WorkspaceView() {
     const [creatingPage, setCreatingPage] = useState(false);
     const [creatingFolder, setCreatingFolder] = useState(false);
     const [activeFolderMenuId, setActiveFolderMenuId] = useState<string | null>(null);
+    const [showOnboarding, setShowOnboarding] = useState(false);
+    const [onboardingChecked, setOnboardingChecked] = useState(false);
+
+    // Check onboarding status on mount
+    useEffect(() => {
+        async function checkOnboarding() {
+            if (onboardingChecked) return;
+            
+            try {
+                if (user) {
+                    // Authenticated user - check Supabase
+                    const profile = await getUserProfile(user.id);
+                    if (profile && !profile.onboarding_completed) {
+                        setShowOnboarding(true);
+                    }
+                } else {
+                    // Guest user - check localStorage
+                    const localOnboardingCompleted = onboardingCache.isCompleted();
+                    if (!localOnboardingCompleted) {
+                        setShowOnboarding(true);
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking onboarding status:', error);
+                // On error, show onboarding for safety (better UX)
+                setShowOnboarding(true);
+            } finally {
+                setOnboardingChecked(true);
+            }
+        }
+
+        checkOnboarding();
+    }, [user, onboardingChecked]);
+
+    const handleCloseOnboarding = () => {
+        setShowOnboarding(false);
+    };
 
     // Get root-level folders and pages (memoized)
     const rootFolders = useMemo(() => folders.filter(f => !f.parent_folder_id), [folders]);
@@ -170,7 +212,7 @@ export default function WorkspaceView() {
                                     </h3>
                                 </div>
 
-                                <div 
+                                <div
                                     className="flex flex-wrap gap-4"
                                     style={{
                                         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -324,6 +366,10 @@ export default function WorkspaceView() {
                 )}
             </div>
 
+            <OnboardingModal
+                isOpen={showOnboarding}
+                onClose={handleCloseOnboarding}
+            />
         </WorkspaceLayout>
     );
 }

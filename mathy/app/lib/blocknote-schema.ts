@@ -1,6 +1,7 @@
 import { BlockNoteSchema, defaultBlockSpecs, defaultInlineContentSpecs } from '@blocknote/core';
 import { InlineMath } from '@/app/components/product components/InlineMath';
 import { LegacyMathSymbol } from '@/app/components/product components/LegacyMathSymbol';
+import { getDefaultReactSlashMenuItems, DefaultReactSuggestionItem } from '@blocknote/react';
 
 // Create a custom schema that includes the inline math content
 export const customSchema = BlockNoteSchema.create({
@@ -14,7 +15,7 @@ export const customSchema = BlockNoteSchema.create({
   },
 });
 
-// Get menu items for inserting math
+// Get menu items for inserting math (used with $ trigger)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getMathMenuItems(editor: any) {
   return [
@@ -36,5 +37,37 @@ export function getMathMenuItems(editor: any) {
       subtext: 'Insert inline math equation with live rendering',
     },
   ];
+}
+
+// Get custom inline math menu item (can be used in slash menu or other suggestion menus)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getInlineMathMenuItem(editor: any): DefaultReactSuggestionItem {
+  return {
+    title: 'Inline Math',
+    onItemClick: () => {
+      editor.insertInlineContent([
+        {
+          type: 'inlineMath',
+          props: {
+            latex: ' ',
+          },
+        },
+      ]);
+    },
+    aliases: ['math', 'latex', 'equation', 'formula', 'mathlive', 'inline math'],
+    group: 'Math',
+    icon: '𝑥',
+    subtext: 'Insert inline math equation with live rendering',
+  };
+}
+
+// Get slash menu items with inline math included
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getSlashMenuItems(editor: any): DefaultReactSuggestionItem[] {
+  const defaultItems = getDefaultReactSlashMenuItems(editor);
+  const inlineMathItem = getInlineMathMenuItem(editor);
+  
+  // Add inline math to the default slash menu items
+  return [...defaultItems, inlineMathItem];
 }
 

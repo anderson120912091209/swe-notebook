@@ -9,7 +9,8 @@ interface MathfieldElement extends HTMLElement {
   readOnly?: boolean;
   smartMode?: boolean;
   mathVirtualKeyboardPolicy?: 'auto' | 'manual' | 'sandboxed';
-  // focus() and blur() are already defined in HTMLElement, no need to redeclare
+  focus?: () => void;
+  blur?: () => void;
 }
 
 interface MathLiveInputProps {

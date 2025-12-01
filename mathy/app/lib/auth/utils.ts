@@ -28,7 +28,7 @@ export async function requireAuth() {
 export async function getUserProfile() {
   const supabase = await createClient();
   const user = await getUser();
-  
+
   if (!user) return null;
 
   const { data: profile } = await supabase
