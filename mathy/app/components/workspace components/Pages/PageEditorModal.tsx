@@ -457,7 +457,6 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
                         }
                       />
                       {/* / slash menu with inline math included */}
-                      {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
                       <SuggestionMenuController
                         triggerCharacter="/"
                         getItems={async (query) =>

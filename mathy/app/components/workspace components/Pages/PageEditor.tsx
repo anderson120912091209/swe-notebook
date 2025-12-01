@@ -469,7 +469,6 @@ export default function PageEditor({ pageId }: PageEditorProps) {
               }
             />
             {/* / slash menu with inline math included */}
-            {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
             <SuggestionMenuController
               triggerCharacter="/"
               getItems={async (query) =>

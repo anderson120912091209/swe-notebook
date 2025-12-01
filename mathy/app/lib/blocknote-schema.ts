@@ -2,6 +2,7 @@ import { BlockNoteSchema, defaultBlockSpecs, defaultInlineContentSpecs } from '@
 import { InlineMath } from '@/app/components/product components/InlineMath';
 import { LegacyMathSymbol } from '@/app/components/product components/LegacyMathSymbol';
 import { getDefaultReactSlashMenuItems, DefaultReactSuggestionItem } from '@blocknote/react';
+import React from 'react';
 
 // Create a custom schema that includes the inline math content
 export const customSchema = BlockNoteSchema.create({
@@ -56,7 +57,7 @@ export function getInlineMathMenuItem(editor: any): DefaultReactSuggestionItem {
     },
     aliases: ['math', 'latex', 'equation', 'formula', 'mathlive', 'inline math'],
     group: 'Math',
-    icon: '𝑥',
+    icon: React.createElement('span', null, '𝑥'),
     subtext: 'Insert inline math equation with live rendering',
   };
 }
