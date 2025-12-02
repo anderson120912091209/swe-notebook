@@ -25,41 +25,55 @@ export default function WorkspaceView() {
     const [creatingFolder, setCreatingFolder] = useState(false);
     const [activeFolderMenuId, setActiveFolderMenuId] = useState<string | null>(null);
     const [showOnboarding, setShowOnboarding] = useState(false);
-    const [onboardingChecked, setOnboardingChecked] = useState(false);
 
-    // Check onboarding status on mount
+    // Check onboarding status on mount and when user changes
     useEffect(() => {
         async function checkOnboarding() {
-            if (onboardingChecked) return;
-            
             try {
                 if (user) {
                     // Authenticated user - check Supabase
                     const profile = await getUserProfile(user.id);
                     if (profile && !profile.onboarding_completed) {
                         setShowOnboarding(true);
+                    } else {
+                        setShowOnboarding(false);
                     }
                 } else {
                     // Guest user - check localStorage
                     const localOnboardingCompleted = onboardingCache.isCompleted();
                     if (!localOnboardingCompleted) {
                         setShowOnboarding(true);
+                    } else {
+                        setShowOnboarding(false);
                     }
                 }
             } catch (error) {
                 console.error('Error checking onboarding status:', error);
                 // On error, show onboarding for safety (better UX)
                 setShowOnboarding(true);
-            } finally {
-                setOnboardingChecked(true);
             }
         }
 
         checkOnboarding();
-    }, [user, onboardingChecked]);
+    }, [user]);
 
-    const handleCloseOnboarding = () => {
+    const handleCloseOnboarding = async () => {
         setShowOnboarding(false);
+        // Re-check onboarding status after closing to ensure it's properly saved
+        // This is especially important for authenticated users to verify the database update
+        if (user) {
+            try {
+                const profile = await getUserProfile(user.id);
+                if (profile && profile.onboarding_completed) {
+                    setShowOnboarding(false);
+                } else {
+                    // If still not completed, show again (might be a sync issue)
+                    console.warn('Onboarding status not updated in database yet');
+                }
+            } catch (error) {
+                console.error('Error re-checking onboarding status:', error);
+            }
+        }
     };
 
     // Get root-level folders and pages (memoized)

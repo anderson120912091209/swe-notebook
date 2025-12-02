@@ -6,7 +6,6 @@ import { completeOnboarding } from '@/app/lib/api/onboarding';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { onboardingCache } from '@/app/lib/cache/onboardingCache';
 import KeyboardKey from './KeyboardKey';
-import Image from 'next/image';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -163,7 +162,7 @@ const STEPS = [
 
 export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const { user } = useAuth();
+  const { user } = useAuth(); 
   const [isCompleting, setIsCompleting] = useState(false);
 
   const handleNext = async () => {
@@ -173,13 +172,23 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
       setIsCompleting(true);
       try {
         if (user?.id) {
-          await completeOnboarding(user.id);
+          const updatedProfile = await completeOnboarding(user.id);
+          if (updatedProfile && updatedProfile.onboarding_completed) {
+            // Successfully updated, close the modal
+            onClose();
+          } else {
+            console.error('Onboarding completion not confirmed in database');
+            // Still close, but log the issue
+            onClose();
+          }
         } else {
           onboardingCache.setCompleted(true);
+          onClose();
         }
-        onClose();
       } catch (error) {
         console.error('Failed to complete onboarding:', error);
+        // Even on error, close the modal to prevent blocking the user
+        onClose();
       } finally {
         setIsCompleting(false);
       }
@@ -196,13 +205,20 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
     setIsCompleting(true);
     try {
       if (user?.id) {
-        await completeOnboarding(user.id);
+        const updatedProfile = await completeOnboarding(user.id);
+        if (updatedProfile && updatedProfile.onboarding_completed) {
+          onClose();
+        } else {
+          console.error('Onboarding completion not confirmed in database');
+          onClose();
+        }
       } else {
         onboardingCache.setCompleted(true);
+        onClose();
       }
-      onClose();
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
+      onClose();
     } finally {
       setIsCompleting(false);
     }

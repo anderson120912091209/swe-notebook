@@ -29,14 +29,19 @@ export async function completeOnboarding(userId: string | undefined) {
   }
 
   const supabase = createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
     .update({ onboarding_completed: true })
-    .eq('id', userId);
+    .eq('id', userId)
+    .select()
+    .single();
 
   if (error) {
     console.error('Error completing onboarding:', error);
     throw error;
   }
+
+  // Return the updated profile to confirm the update
+  return data;
 }
 
