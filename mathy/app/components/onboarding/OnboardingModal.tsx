@@ -6,146 +6,19 @@ import { completeOnboarding } from '@/app/lib/api/onboarding';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { onboardingCache } from '@/app/lib/cache/onboardingCache';
 import KeyboardKey from './KeyboardKey';
-import { useCreateBlockNote, SuggestionMenuController } from '@blocknote/react';
-import { BlockNoteView } from '@blocknote/mantine';
-import '@blocknote/mantine/style.css';
-import { customSchema, getMathMenuItems, getSlashMenuItems } from '@/app/lib/blocknote-schema';
-import { filterSuggestionItems } from '@blocknote/core';
-import { useTheme } from '@/app/contexts/ThemeContext';
-import MathLiveDisplay from '@/app/components/product components/MathLiveDisplay';
+import Image from 'next/image';
 
 interface OnboardingModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-// Interactive BlockNote editor component for onboarding demo
-function InteractiveEditorDemo() {
-  const { theme } = useTheme();
-  
-  // Create editor with initial content containing an example inline math
-  const editor = useCreateBlockNote({
-    schema: customSchema,
-    initialContent: [
-      {
-        type: 'paragraph',
-        content: [
-          {
-            type: 'text',
-            text: 'Try typing ',
-            styles: {},
-          },
-          {
-            type: 'text',
-            text: '$',
-            styles: { code: true },
-          },
-          {
-            type: 'text',
-            text: ' or ',
-            styles: {},
-          },
-          {
-            type: 'text',
-            text: '/math',
-            styles: { code: true },
-          },
-          {
-            type: 'text',
-            text: ' to insert inline math!',
-            styles: {},
-          },
-        ],
-      },
-    ],
-  });
-
-  return (
-    <>
-      <div className="w-full onboarding-editor-demo">
-        <BlockNoteView
-          editor={editor}
-          theme={theme}
-          className="[&_.bn-editor]:!bg-transparent [&_.bn-container]:!bg-transparent [&_.bn-editor]:!px-0 [&_.bn-editor]:!py-2"
-        >
-          {/* $ menu for inline math */}
-          {/* @ts-expect-error - SuggestionMenuController API is correct but TypeScript inference has issues */}
-          <SuggestionMenuController
-            triggerCharacter="$"
-            getItems={async (query) =>
-              filterSuggestionItems(getMathMenuItems(editor), query)
-            }
-          />
-          {/* / slash menu with inline math included */}
-          <SuggestionMenuController
-            triggerCharacter="/"
-            getItems={async (query) =>
-              filterSuggestionItems(getSlashMenuItems(editor), query)
-            }
-          />
-        </BlockNoteView>
-      </div>
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          .onboarding-editor-demo .bn-side-menu,
-          .onboarding-editor-demo .bn-block-handle,
-          .onboarding-editor-demo .bn-block-menu,
-          .onboarding-editor-demo .bn-formatting-toolbar {
-            display: none !important;
-          }
-        `
-      }} />
-    </>
-  );
-}
-
 const STEPS = [
   {
-    id: 'welcome',
-    title: 'Welcome to Clarity',
-    description: 'Your intelligent workspace for math and ideas',
-    content: (
-      <div className="space-y-6">
-        {/* Video/Image Container */}
-        <div 
-          className="w-full rounded-lg border overflow-hidden"
-          style={{ 
-            background: 'var(--hover-bg)', 
-            borderColor: 'var(--border-color)',
-            aspectRatio: '16/9',
-            minHeight: '200px',
-          }}
-        >
-          {/* Placeholder for video/image - you can replace this with an actual video or image */}
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center space-y-3">
-              <div className="text-4xl mb-2" style={{ color: 'var(--foreground-muted)' }}>
-                🎥
-              </div>
-              <p className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                Video or image placeholder
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Description */}
-        <div className="space-y-4 text-center max-w-lg mx-auto">
-          <h3 className="text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
-            Think Clearly, Work Efficiently
-          </h3>
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
-            Clarity helps you organize your thoughts, solve complex math problems, 
-            and share your knowledge seamlessly. Get started by creating your first page.
-          </p>
-        </div>
-      </div>
-    ),
-  },
-  {
+    //STEP 2 ONBOARDING PROCESS
     id: 'inline-math',
-    title: 'Inline Math',
-    description: 'Type math expressions anywhere in your notes',
+    title: 'Welcome to {clarity}',
+    description: 'Let\'s help you to get started with our math features!',
     content: (
       <div className="space-y-6">
         {/* Video Container */}
@@ -184,75 +57,13 @@ const STEPS = [
             <code className="px-1.5 py-0.5 rounded text-xs" style={{ background: 'var(--hover-bg)' }}>/math</code> anywhere in your text to start typing math.{' '}
             Your equations will render beautifully inline with your content.
           </p>
-          <div 
-            className="p-4 rounded-lg border mt-4"
-            style={{ 
-              background: 'var(--card-bg)', 
-              borderColor: 'var(--border-color)',
-            }}
-          >
-            <InteractiveEditorDemo />
-          </div>
+         
         </div>
       </div>
     ),
   },
-  {
-    id: 'math-block',
-    title: 'Math Blocks',
-    description: 'Create full math expressions with shortcuts',
-    content: (
-      <div className="space-y-6">
-        {/* Video/Image Container */}
-        <div 
-          className="w-full rounded-lg border overflow-hidden"
-          style={{ 
-            background: 'var(--hover-bg)', 
-            borderColor: 'var(--border-color)',
-            aspectRatio: '16/9',
-            minHeight: '200px',
-          }}
-        >
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center space-y-3">
-              <div className="text-4xl mb-2" style={{ color: 'var(--foreground-muted)' }}>
-                🎥
-              </div>
-              <p className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                Video or image placeholder
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Description and Keyboard Shortcut */}
-        <div className="space-y-4 max-w-lg mx-auto">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
-              Use <code className="px-2 py-1 rounded text-xs border mx-1" style={{ background: 'var(--hover-bg)', borderColor: 'var(--border-color)' }}>⌘ + M</code> for math blocks
-            </h3>
-            <KeyboardKey keys={['⌘', 'M']} />
-          </div>
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
-            Create dedicated math blocks for complex equations. Perfect for integrals, 
-            summations, and multi-line mathematical expressions.
-          </p>
-          <div 
-            className="p-5 rounded-lg border mt-4"
-            style={{ 
-              background: 'var(--card-bg)', 
-              borderColor: 'var(--border-color)',
-            }}
-          >
-            <div className="text-center">
-              <MathLiveDisplay value="\\int_0^{\\infty} e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}" />
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
+  
+  {//STEP 4 ONBOARDING PROCESS (NOW STEP 3)
     id: 'search-menu',
     title: 'Search Menu',
     description: 'Quick access to blocks and commands',
@@ -270,12 +81,16 @@ const STEPS = [
         >
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-center space-y-3">
-              <div className="text-4xl mb-2" style={{ color: 'var(--foreground-muted)' }}>
-                🎥
-              </div>
-              <p className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                Video or image placeholder
-              </p>
+              <video
+                src="/onboarding/slash_onboarding1.mp4"
+                className="w-full h-auto"
+                autoPlay
+                muted
+                loop
+                style={{
+                  display: 'block',
+                }}
+              />
             </div>
           </div>
         </div>
@@ -284,31 +99,19 @@ const STEPS = [
         <div className="space-y-4 max-w-lg mx-auto">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
-              Press <code className="px-2 py-1 rounded text-xs border mx-1" style={{ background: 'var(--hover-bg)', borderColor: 'var(--border-color)' }}>/</code> to search
+              Press <KeyboardKey className="px-1" keys={['/']} /> for Notion like menu
             </h3>
-            <KeyboardKey keys={['/']} />
           </div>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
             Open the command menu instantly to search for blocks, insert content, 
             or access actions. Type to filter and find what you need quickly.
           </p>
-          <div 
-            className="p-4 rounded-lg border mt-4"
-            style={{ 
-              background: 'var(--card-bg)', 
-              borderColor: 'var(--border-color)',
-            }}
-          >
-            <div className="flex items-center gap-2 text-sm">
-              <span style={{ color: 'var(--foreground-muted)' }}>/</span>
-              <span style={{ color: 'var(--foreground)' }}>Search for blocks, commands, and more...</span>
-            </div>
-          </div>
         </div>
       </div>
     ),
   },
   {
+    //LAST STEP MATH SUGGESTION AUTOCOMPLETION FEATURE 
     id: 'math-suggestions',
     title: 'Math Suggestions',
     description: 'Discover math symbols and functions',
@@ -326,12 +129,16 @@ const STEPS = [
         >
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-center space-y-3">
-              <div className="text-4xl mb-2" style={{ color: 'var(--foreground-muted)' }}>
-                🎥
-              </div>
-              <p className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                Video or image placeholder
-              </p>
+              <video
+                src="/onboarding/search_math_onboarding1.mp4"
+                className="w-full h-auto"
+                autoPlay
+                muted
+                loop
+                style={{
+                  display: 'block',
+                }}
+              />
             </div>
           </div>
         </div>
@@ -340,26 +147,14 @@ const STEPS = [
         <div className="space-y-4 max-w-lg mx-auto">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
-              Type <code className="px-2 py-1 rounded text-xs border mx-1" style={{ background: 'var(--hover-bg)', borderColor: 'var(--border-color)' }}>\</code> for suggestions
+              Use natural language <KeyboardKey className="px-1" keys={['\\']} /> to search for any math symbols.
             </h3>
-            <KeyboardKey keys={['\\']} />
           </div>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
             When typing math, use backslash to see a menu of available symbols, 
             functions, and operators. Browse Greek letters, integrals, sums, and more.
           </p>
-          <div 
-            className="p-4 rounded-lg border mt-4"
-            style={{ 
-              background: 'var(--card-bg)', 
-              borderColor: 'var(--border-color)',
-            }}
-          >
-            <div className="flex items-center gap-2 text-sm">
-              <span style={{ color: 'var(--foreground-muted)' }}>\</span>
-              <span style={{ color: 'var(--foreground)' }}>alpha, beta, gamma, integral, sum...</span>
-            </div>
-          </div>
+          
         </div>
       </div>
     ),
