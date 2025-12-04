@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
   DndContext,
   DragEndEvent,
@@ -114,7 +115,8 @@ const DraggableFolder = React.memo(function DraggableFolder({
   children,
   pageCount,
   depth,
-}: DraggableFolderProps) {
+  onMouseEnter,
+}: DraggableFolderProps & { onMouseEnter?: () => void }) {
   const { attributes, listeners, setNodeRef: setDragRef, transform } = useDraggable({
     id: `folder-${folder.id}`,
     data: { type: 'folder', id: folder.id },
@@ -144,6 +146,7 @@ const DraggableFolder = React.memo(function DraggableFolder({
           ${isActive ? 'bg-[var(--hover-bg)]' : 'hover:bg-[var(--hover-bg)]'}
           ${isDropTarget && isOver ? 'bg-[var(--active-bg)]' : ''}`}
         style={getIndentStyle(depth, false)}
+        onMouseEnter={onMouseEnter}
       >
         {/* Toggle/Icon Button - Swaps between Folder and Chevron */}
         <button
@@ -234,7 +237,14 @@ interface DraggablePageProps {
   depth: number;
 }
 
-const DraggablePage = React.memo(function DraggablePage({ page, isActive, isBeingDragged, onClick, depth }: DraggablePageProps) {
+const DraggablePage = React.memo(function DraggablePage({ 
+  page, 
+  isActive, 
+  isBeingDragged, 
+  onClick, 
+  depth,
+  onMouseEnter,
+}: DraggablePageProps & { onMouseEnter?: () => void }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: `folder-page-${page.id}`,
     data: { type: 'page', id: page.id },
@@ -261,6 +271,7 @@ const DraggablePage = React.memo(function DraggablePage({ page, isActive, isBein
         e.preventDefault();
         onClick();
       }}
+      onMouseEnter={onMouseEnter}
       className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 transition-colors ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
         }`}
       style={{
@@ -289,7 +300,14 @@ interface RecentPageProps {
   onClick: () => void;
 }
 
-const RecentPage = React.memo(function RecentPage({ page, folder, isActive, isBeingDragged, onClick }: RecentPageProps) {
+const RecentPage = React.memo(function RecentPage({ 
+  page, 
+  folder, 
+  isActive, 
+  isBeingDragged, 
+  onClick,
+  onMouseEnter,
+}: RecentPageProps & { onMouseEnter?: () => void }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: `recent-page-${page.id}`,
     data: { type: 'page', id: page.id },
@@ -315,6 +333,7 @@ const RecentPage = React.memo(function RecentPage({ page, folder, isActive, isBe
         e.preventDefault();
         onClick();
       }}
+      onMouseEnter={onMouseEnter}
       className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 transition-colors ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
         }`}
       style={{
@@ -559,6 +578,15 @@ export default function Sidebar() {
     router.push(`/notebook/page/${pageId}`);
   }, [router]);
 
+  // Prefetch handlers for instant navigation
+  const prefetchFolder = useCallback((folderId: string) => {
+    router.prefetch(`/notebook/folder/${folderId}`);
+  }, [router]);
+
+  const prefetchPage = useCallback((pageId: string) => {
+    router.prefetch(`/notebook/page/${pageId}`);
+  }, [router]);
+
   const handleLogout = useCallback(async () => {
     try {
       await signOut();
@@ -788,6 +816,7 @@ export default function Sidebar() {
         isDropTarget={isDropTarget}
         onToggle={(e) => toggleFolder(folder.id, e)}
         onClick={() => navigateToFolder(folder.id)}
+        onMouseEnter={() => prefetchFolder(folder.id)}
         pageCount={itemCount}
         depth={depth}
       >
@@ -805,6 +834,7 @@ export default function Sidebar() {
                 isActive={isActive(page.id, 'page')}
                 isBeingDragged={activeId === `folder-page-${page.id}`}
                 onClick={() => navigateToPage(page.id)}
+                onMouseEnter={() => prefetchPage(page.id)}
                 depth={depth + 1}
               />
             ))}
@@ -844,11 +874,12 @@ export default function Sidebar() {
             >
               {sidebarOpen && (
                 user?.user_metadata?.avatar_url ? (
-                  <img
+                  <Image
                     src={user.user_metadata.avatar_url}
                     alt="Profile"
-                    className="h-5 w-5 rounded-md flex-shrink-0 
-                  border-1 border-white/50 object-cover"
+                    width={20}
+                    height={20}
+                    className="rounded-md flex-shrink-0 border-1 border-white/50 object-cover"
                   />
                 ) : (
                   <span
@@ -1128,6 +1159,7 @@ export default function Sidebar() {
                           isActive={isActive(page.id, 'page')}
                           isBeingDragged={activeId === `recent-page-${page.id}`}
                           onClick={() => navigateToPage(page.id)}
+                          onMouseEnter={() => prefetchPage(page.id)}
                         />
                       );
                     })}

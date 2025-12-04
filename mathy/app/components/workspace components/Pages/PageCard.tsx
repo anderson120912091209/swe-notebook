@@ -65,7 +65,6 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
 
   // Create muted folder color for the tag
   const baseColor = parseHex(folderColor)?.hex ?? FALLBACK_COLOR;
-  const mutedFolderColor = lightenHex(baseColor, 0.7);
 
   const handleClick = () => {
     setShowEditorModal(true);

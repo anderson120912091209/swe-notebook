@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { createClient } from '@/app/lib/supabase/client';
+import { clearAllCache } from '@/app/lib/cache/localStorageCache';
 
 interface AuthContextType {
   user: User | null;
@@ -31,14 +32,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      const newUser = session?.user ?? null;
+      const previousUserId = user?.id;
+      const newUserId = newUser?.id;
+      
+      // CRITICAL: Clear localStorage when switching accounts or signing out
+      if (event === 'SIGNED_OUT' || 
+          (previousUserId && newUserId && previousUserId !== newUserId)) {
+        // User switched accounts or signed out - clear all local cache
+        console.warn('Auth state changed - clearing localStorage to prevent data leakage');
+        clearAllCache();
+      }
+      
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser(newUser);
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+  }, [supabase.auth, user?.id]);
 
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -59,6 +72,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error signing out:', error);
       throw error;
     }
+    
+    // CRITICAL: Clear all localStorage cache to prevent data leakage between accounts
+    clearAllCache();
+    
     // Redirect to notebook after sign out
     window.location.href = '/notebook';
   };

@@ -3,7 +3,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import type { Folder } from '@/app/types/workspace';
-import { useTheme } from '@/app/contexts/ThemeContext';
 import { CardMenu, ThreeDotButton } from '../Shared/CardMenu';
 
 interface FolderCardProps {
@@ -84,12 +83,38 @@ const FolderCard = React.memo(function FolderCard({
   onToggle
 }: FolderCardProps) {
   const router = useRouter();
-  const { theme } = useTheme();
+  const cardRef = React.useRef<HTMLDivElement>(null);
 
   // Internal state fallback if not controlled
   const [internalIsOpen, setInternalIsOpen] = React.useState(false);
   const isMenuOpen = isOpen !== undefined ? isOpen : internalIsOpen;
   const handleToggle = onToggle || setInternalIsOpen;
+
+  // Prefetch route on hover for instant navigation
+  const handleMouseEnter = React.useCallback(() => {
+    router.prefetch(`/notebook/folder/${folder.id}`);
+  }, [router, folder.id]);
+
+  // Prefetch route when card enters viewport (intersection observer)
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            router.prefetch(`/notebook/folder/${folder.id}`);
+            observer.disconnect(); // Only prefetch once
+          }
+        });
+      },
+      { rootMargin: '100px' } // Prefetch 100px before visible
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [folder.id, router]);
 
   const handleClick = () => {
     router.push(`/notebook/folder/${folder.id}`);
@@ -123,7 +148,9 @@ const FolderCard = React.memo(function FolderCard({
 
   return (
     <div
+      ref={cardRef}
       onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
       className="group relative p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between"
       style={{
         borderColor: 'var(--border-color)',

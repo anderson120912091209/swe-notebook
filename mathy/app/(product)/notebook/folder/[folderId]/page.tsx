@@ -1,5 +1,15 @@
+'use client';
+
 import { use } from 'react';
-import FolderView from '@/app/components/workspace components/Workspace View/FolderView';
+import dynamic from 'next/dynamic';
+
+// Dynamically import FolderView for code splitting and faster initial load
+const FolderView = dynamic(
+  () => import('@/app/components/workspace components/Workspace View/FolderView'),
+  {
+    ssr: false, // Disable SSR for faster client-side navigation
+  }
+);
 
 interface PageProps {
   params: Promise<{ folderId: string }>;

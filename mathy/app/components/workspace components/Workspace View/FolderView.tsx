@@ -18,7 +18,10 @@ interface FolderViewProps {
 export default function FolderView({ folderId }: FolderViewProps) {
   const router = useRouter();
   const { folders, pages, createPage, createFolder, deletePage, updateFolder, loading } = useWorkspace();
-  const [folder, setFolder] = useState(folders.find(f => f.id === folderId));
+  
+  // Use cached data immediately (optimistic rendering) - don't wait for loading
+  const folder = useMemo(() => folders.find(f => f.id === folderId), [folders, folderId]);
+  
   const [creatingPage, setCreatingPage] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDescriptionField, setShowDescriptionField] = useState(false);
@@ -26,14 +29,13 @@ export default function FolderView({ folderId }: FolderViewProps) {
   const [folderTitle, setFolderTitle] = useState(folder?.name || '');
   const [activeFolderMenuId, setActiveFolderMenuId] = useState<string | null>(null);
 
+  // Update title/description when folder changes
   useEffect(() => {
-    const currentFolder = folders.find(f => f.id === folderId);
-    setFolder(currentFolder);
-    if (currentFolder) {
-      setFolderTitle(currentFolder.name);
-      setFolderDescription(currentFolder.description || '');
+    if (folder) {
+      setFolderTitle(folder.name);
+      setFolderDescription(folder.description || '');
     }
-  }, [folderId, folders]);
+  }, [folder]);
 
   // Get child folders and pages
   const childFolders = useMemo(() => folders.filter(f => f.parent_folder_id === folderId), [folders, folderId]);
@@ -112,14 +114,64 @@ export default function FolderView({ folderId }: FolderViewProps) {
     }
   }, [folder, folderId, updateFolder]);
 
-  if (loading && !folder) {
+  // Show skeleton only if folder not in cache and still loading
+  if (!folder && loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-center" style={{ color: 'var(--foreground-muted)' }}>
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-current mx-auto mb-4"></div>
-          <p>Loading folder...</p>
+      <WorkspaceLayout
+        header={null}
+        rightHeader={null}
+        breadcrumb={null}
+        title=""
+        description=""
+        showDescriptionField={false}
+        onToggleDescription={() => {}}
+        showHamburgerButton={true}
+      >
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="animate-pulse space-y-6">
+            {/* Title skeleton */}
+            <div className="h-8 bg-gray-200 rounded w-1/4" style={{ background: 'var(--hover-bg)' }}></div>
+            {/* Cards skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="h-32 rounded-xl" style={{ background: 'var(--hover-bg)' }}></div>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </WorkspaceLayout>
+    );
+  }
+  
+  // Show error state if folder not found after loading
+  if (!folder && !loading) {
+    return (
+      <WorkspaceLayout
+        header={null}
+        rightHeader={null}
+        breadcrumb={null}
+        title="Folder Not Found"
+        description=""
+        showDescriptionField={false}
+        onToggleDescription={() => {}}
+        showHamburgerButton={true}
+      >
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="text-center py-12">
+            <p style={{ color: 'var(--foreground-muted)' }}>Folder not found</p>
+            <button
+              onClick={() => router.push('/notebook')}
+              className="mt-4 px-4 py-2 rounded-md"
+              style={{ 
+                background: 'var(--hover-bg)',
+                color: 'var(--foreground)'
+              }}
+            >
+              Back to Workspace
+            </button>
+          </div>
+        </div>
+      </WorkspaceLayout>
     );
   }
 

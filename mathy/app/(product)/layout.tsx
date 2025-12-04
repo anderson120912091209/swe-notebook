@@ -21,30 +21,26 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const suppressAnimationResetRef = useRef(false);
   
-  // Calculate initial panel sizes based on screen width (if available)
-  // This ensures the defaultSize matches the calculated size from the start
-  const calculateInitialPanelSizes = () => {
-    if (typeof window === 'undefined') {
-      // Fallback for SSR - will be recalculated on client
-      return { defaultSize: 20, minSize: 15, maxSize: 25 };
-    }
-    const screenWidth = window.innerWidth;
-    const defaultSizePercent = (FIXED_SIDEBAR_WIDTH_PX / screenWidth) * 100;
-    const minSizePercent = (MIN_SIDEBAR_WIDTH_PX / screenWidth) * 100;
-    const maxSizePercent = Math.min((FIXED_SIDEBAR_WIDTH_PX * 1.5 / screenWidth) * 100, 40);
-    
-    return {
-      defaultSize: Math.min(defaultSizePercent, 30), // Cap at 30% for very small screens
-      minSize: Math.min(minSizePercent, 25),
-      maxSize: maxSizePercent,
-    };
-  };
+  // CRITICAL: Use consistent initial values for SSR and client hydration
+  // This prevents hydration mismatches. We'll calculate actual sizes after mount.
+  // Always return the same values - never check window during initial render!
+  const INITIAL_PANEL_SIZES = { defaultSize: 20, minSize: 15, maxSize: 25 };
   
-  const [panelSizes, setPanelSizes] = useState(calculateInitialPanelSizes);
+  const [panelSizes, setPanelSizes] = useState(INITIAL_PANEL_SIZES);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Mark component as mounted after hydration completes
+  // This ensures we only calculate window-dependent values after hydration
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Convert fixed pixel width to percentage for Panel component
   // Panel uses percentages, so we need to convert our fixed pixel width
+  // IMPORTANT: Only run this AFTER hydration (isMounted === true)
   useEffect(() => {
+    if (!isMounted) return; // Wait for hydration to complete first!
+    
     const calculatePanelSizes = () => {
       if (typeof window === 'undefined') return;
       const screenWidth = window.innerWidth;
@@ -78,7 +74,7 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
     calculatePanelSizes();
     window.addEventListener('resize', calculatePanelSizes);
     return () => window.removeEventListener('resize', calculatePanelSizes);
-  }, [sidebarOpen]);
+  }, [sidebarOpen, isMounted]);
 
   useEffect(() => {
     return () => {

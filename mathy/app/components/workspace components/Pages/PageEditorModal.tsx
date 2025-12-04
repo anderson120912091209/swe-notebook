@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, Component, ErrorInfo, ReactNode } from 'react';
 import { useCreateBlockNote, SuggestionMenuController } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
@@ -104,7 +104,103 @@ const getUserDisplayName = (user: User | null): string => {
          'you';
 };
 
-export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorModalProps) {
+// Error Boundary to catch BlockNote initialization errors
+class BlockNoteErrorBoundary extends Component<
+    { children: ReactNode; fallback: ReactNode },
+    { hasError: boolean }
+> {
+    constructor(props: { children: ReactNode; fallback: ReactNode }) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        console.error('BlockNote Error Boundary caught:', error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return this.props.fallback;
+        }
+        return this.props.children;
+    }
+}
+
+// Helper function to deeply validate blocks structure
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function validateBlock(block: any, depth = 0): boolean {
+    // Prevent infinite recursion
+    if (depth > 10) return false;
+    
+    if (!block || typeof block !== 'object') return false;
+    if (typeof block.id !== 'string' || block.id.length === 0) return false;
+    if (typeof block.type !== 'string' || block.type.length === 0) return false;
+    
+    // Validate props if present (should be object or undefined)
+    if (block.props !== undefined && typeof block.props !== 'object') return false;
+    
+    // Validate content if present (should be array or undefined)
+    if (block.content !== undefined && !Array.isArray(block.content)) return false;
+    
+    // Recursively validate children if present
+    if (block.children !== undefined) {
+        if (!Array.isArray(block.children)) return false;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (!block.children.every((child: any) => validateBlock(child, depth + 1))) return false;
+    }
+    
+    return true;
+}
+
+// Helper function to validate blocks structure
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function validateBlocks(blocks: any): boolean {
+    if (!Array.isArray(blocks)) return false;
+    if (blocks.length === 0) return false;
+    
+    // Validate each block deeply
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return blocks.every((block: any) => validateBlock(block));
+}
+
+// Helper function to sanitize and validate blocks before passing to BlockNote
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function sanitizeBlocks(content: any): any[] | undefined {
+    if (!content) return undefined;
+    
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let blocks: any = undefined;
+        
+        // Extract blocks from different possible formats
+        if (content.blocks && Array.isArray(content.blocks)) {
+            blocks = content.blocks.length > 0 ? content.blocks : undefined;
+        } else if (Array.isArray(content)) {
+            blocks = content.length > 0 ? content : undefined;
+        }
+        
+        // Deeply validate blocks structure - if invalid, return undefined to use default
+        if (blocks && !validateBlocks(blocks)) {
+            console.warn('Invalid blocks structure detected, using default content', {
+                blocksCount: blocks.length,
+                sampleBlock: blocks[0],
+            });
+            return undefined;
+        }
+        
+        return blocks;
+    } catch (error) {
+        console.error('Error parsing content for preview:', error);
+        return undefined;
+    }
+}
+
+// Inner component that uses the hook - wrapped in error boundary
+function PageEditorModalInner({ isOpen, onClose, pageId }: PageEditorModalProps) {
   const { theme } = useTheme();
   const { user } = useAuth();
   const { pages, folders, updatePage } = useWorkspace();
@@ -176,32 +272,14 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
   }, [showMenu]);
 
   // Initialize BlockNote editor with safe content parsing
-  const getInitialContent = () => {
-    if (!page?.content) return undefined;
-    
-    try {
-      // If content has blocks array, use it
-      if (page.content.blocks && Array.isArray(page.content.blocks)) {
-        // If blocks array is empty, return undefined to use BlockNote default
-        return page.content.blocks.length > 0 ? page.content.blocks : undefined;
-      }
-      
-      // If content is already an array, use it directly
-      if (Array.isArray(page.content)) {
-        return page.content.length > 0 ? page.content : undefined;
-      }
-      
-      // Otherwise return undefined to use default
-      return undefined;
-    } catch (error) {
-      console.error('Error parsing initial content:', error);
-      return undefined;
-    }
-  };
+  // Use sanitizeBlocks for deep validation
+  const initialContent = React.useMemo(() => {
+    return sanitizeBlocks(page?.content);
+  }, [page?.content]);
 
   const editor = useCreateBlockNote({
     schema: customSchema,
-    initialContent: getInitialContent(),
+    initialContent: initialContent, // Will be undefined if invalid - safe for BlockNote
   });
 
 
@@ -470,6 +548,49 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
             </ModalBody>
       </ModalContent>
     </Modal>
+  );
+}
+
+// Outer component with error boundary
+export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorModalProps) {
+  const fallback = (
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose}
+      size="full"
+      classNames={{
+        base: "w-full h-[95vh] max-w-full",
+        wrapper: "items-start sm:items-center justify-center",
+        backdrop: "bg-black/50"
+      }}
+    >
+      <ModalContent className="h-full" style={{ background: 'var(--card-bg)' }}>
+        <ModalHeader>
+          <span style={{ color: 'var(--foreground)' }}>Error Loading Editor</span>
+        </ModalHeader>
+        <ModalBody>
+          <div className="p-8 text-center" style={{ color: 'var(--foreground-muted)' }}>
+            <p>Unable to load the page editor. The content may be corrupted.</p>
+            <button
+              onClick={onClose}
+              className="mt-4 px-4 py-2 rounded-md"
+              style={{ 
+                background: 'var(--hover-bg)',
+                color: 'var(--foreground)'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
+  );
+
+  return (
+    <BlockNoteErrorBoundary fallback={fallback}>
+      <PageEditorModalInner isOpen={isOpen} onClose={onClose} pageId={pageId} />
+    </BlockNoteErrorBoundary>
   );
 }
 

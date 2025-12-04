@@ -124,13 +124,29 @@ export function WorkspaceProvider({
     }
   }, []);
 
-  // Sync local cache to state when user changes
+  // CRITICAL: Clear localStorage when user logs in or switches accounts
+  // This prevents data leakage between different user accounts
   useEffect(() => {
-    if (!user && typeof window !== 'undefined') {
+    if (user && typeof window !== 'undefined') {
+      // User just logged in or switched accounts
+      // Clear all local cache to prevent cross-account data contamination
+      const cachedFolders = foldersCache.get();
+      const cachedPages = pagesCache.get();
+      
+      // Only clear if there's cached data (prevents unnecessary operations)
+      if (cachedFolders.length > 0 || cachedPages.length > 0) {
+        console.warn('User logged in - clearing guest data to prevent leakage');
+        clearAllCache();
+        setLocalFolders([]);
+        setLocalPages([]);
+      }
+    } else if (!user && typeof window !== 'undefined') {
+      // User logged out - reload guest data
       setLocalFolders(foldersCache.get());
       setLocalPages(pagesCache.get());
     }
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]); // Track user.id to detect account switches
 
   // Fetch folders with React Query (only when user is logged in)
   const { 
@@ -155,15 +171,15 @@ export function WorkspaceProvider({
   });
 
   // Merge server data with local cache
-  // When logged in: show server data + any unsynced local items
-  // When not logged in: show only local cache
+  // SECURITY: Only merge server data when logged in
+  // Guest data should NEVER appear when user is authenticated
   const folders = user 
-    ? [...serverFolders, ...localFolders.filter(f => isTempId(f.id))]
-    : localFolders;
+    ? serverFolders // Only show server data, don't merge with local cache
+    : localFolders; // Only show local cache for guests
   
   const pages = user
-    ? [...serverPages, ...localPages.filter(p => isTempId(p.id))]
-    : localPages;
+    ? serverPages // Only show server data, don't merge with local cache
+    : localPages; // Only show local cache for guests
 
   // Fetch workspace items with React Query
   const { 
@@ -885,63 +901,18 @@ export function WorkspaceProvider({
   };
 
   // ============================================================================
-  // SYNC LOCAL CACHE TO SERVER WHEN USER LOGS IN
+  // SECURITY NOTE: LOCAL DATA SYNC DISABLED
   // ============================================================================
-
-  useEffect(() => {
-    if (!user) return;
-
-    const syncLocalDataToServer = async () => {
-      const pendingItems = pendingSync.get();
-      if (pendingItems.length === 0) return;
-
-      try {
-        // Process pending sync items in order
-        for (const item of pendingItems) {
-          try {
-            if (item.type === 'create' && item.data) {
-              if (item.entityType === 'folder') {
-                const folder = item.data as Folder;
-                await createFolderMutation.mutateAsync({
-                  userId: user.id,
-                  name: folder.name,
-                  icon: folder.icon,
-                  color: folder.color,
-                  description: folder.description,
-                  parentId: folder.parent_folder_id ?? undefined,
-                });
-              } else if (item.entityType === 'page') {
-                const page = item.data as Page;
-                await createPageMutation.mutateAsync({
-                  userId: user.id,
-                  title: page.title,
-                  folderId: page.folder_id ?? undefined,
-                  icon: page.icon,
-                });
-              }
-            }
-            // Remove from pending queue after successful sync
-            pendingSync.remove(item.entityId);
-          } catch (error) {
-            console.error(`Failed to sync ${item.entityType} ${item.entityId}:`, error);
-            // Keep in queue to retry later
-          }
-        }
-
-        // Clear local cache after successful sync
-        if (pendingSync.get().length === 0) {
-          clearAllCache();
-          setLocalFolders([]);
-          setLocalPages([]);
-        }
-      } catch (error) {
-        console.error('Failed to sync local data:', error);
-      }
-    };
-
-    syncLocalDataToServer();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]); // Only run when user.id changes (user logs in)
+  // Previously, we synced localStorage data to the server when users logged in.
+  // This was REMOVED due to a critical security vulnerability:
+  // - localStorage is shared across all accounts on the same browser
+  // - Guest data could leak into logged-in accounts
+  // - Account A's data could appear in Account B
+  // 
+  // DECISION: When users log in, their localStorage is cleared immediately.
+  // Guest users must manually transfer data before logging in.
+  // This prevents cross-account data contamination.
+  // ============================================================================
 
   // ============================================================================
   // CONTEXT VALUE
