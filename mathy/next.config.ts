@@ -8,6 +8,18 @@ const nextConfig: NextConfig = {
   // Disable image optimization for static export
   images: {
     unoptimized: process.env.ELECTRON === 'true',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.googleusercontent.com',
+        pathname: '/**',
+      },
+    ],
   },
 
   // Configure for Electron
