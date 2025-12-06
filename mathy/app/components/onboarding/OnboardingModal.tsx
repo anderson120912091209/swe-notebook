@@ -6,6 +6,7 @@ import { completeOnboarding } from '@/app/lib/api/onboarding';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { onboardingCache } from '@/app/lib/cache/onboardingCache';
 import KeyboardKey from './KeyboardKey';
+import posthog from 'posthog-js';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -169,6 +170,9 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
+      posthog.capture('onboarding_completed', {
+        total_steps: STEPS.length,
+      });
       setIsCompleting(true);
       try {
         if (user?.id) {
@@ -202,6 +206,10 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
   };
 
   const handleSkip = async () => {
+    posthog.capture('onboarding_skipped', {
+      skipped_at_step_index: currentStep,
+      skipped_at_step_id: STEPS[currentStep].id,
+    });
     setIsCompleting(true);
     try {
       if (user?.id) {

@@ -25,6 +25,23 @@ const nextConfig: NextConfig = {
   // Configure for Electron
   trailingSlash: true,
 
+  // PostHog rewrites
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+    ];
+  },
+
+  // This is required to support PostHog trailing slash API requests
+  skipTrailingSlashRedirect: true,
+
   // Remove experimental.esmExternals for Turbopack compatibility
   // This was causing the Turbopack error
 

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
+import posthog from 'posthog-js';
 
 interface CreatePageModalProps {
   onClose: () => void;
@@ -29,6 +30,11 @@ export default function CreatePageModal({ onClose, defaultFolderId }: CreatePage
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
+
+    posthog.capture('page_created', {
+      title_length: title.trim().length,
+      folder_selected: !!folderId,
+    });
 
     setCreating(true);
     try {
@@ -160,4 +166,3 @@ export default function CreatePageModal({ onClose, defaultFolderId }: CreatePage
     </div>
   );
 }
-

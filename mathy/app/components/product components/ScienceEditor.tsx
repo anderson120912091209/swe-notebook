@@ -1,5 +1,6 @@
 'use client';
 
+import posthog from 'posthog-js';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useCreateBlockNote, SuggestionMenuController } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
@@ -116,6 +117,8 @@ export const ScienceEditor: React.FC = () => {
       return;
     }
 
+    posthog.capture('math-equation-saved', { latex_length: latex.trim().length });
+
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
@@ -200,7 +203,10 @@ export const ScienceEditor: React.FC = () => {
                 {section.items.map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => setActivePageId(item.id)}
+                    onClick={() => {
+                      posthog.capture('page-switched', { page_id: item.id, page_title: item.title });
+                      setActivePageId(item.id);
+                    }}
                     className="flex w-full items-start gap-3 rounded-md px-3 py-2 text-left transition"
                     style={{
                       background: activePageId === item.id ? 'var(--active-bg)' : 'transparent',
@@ -238,7 +244,10 @@ export const ScienceEditor: React.FC = () => {
         <header className="flex h-16 items-center justify-between px-4 backdrop-blur sm:px-8" style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--sidebar-bg)' }}>
           <div className="flex flex-1 items-center gap-3">
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={() => {
+                posthog.capture('sidebar-toggled', { open: !sidebarOpen });
+                setSidebarOpen(!sidebarOpen);
+              }}
               className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-[var(--hover-bg)]"
               style={{ color: 'var(--foreground)' }}
               title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}

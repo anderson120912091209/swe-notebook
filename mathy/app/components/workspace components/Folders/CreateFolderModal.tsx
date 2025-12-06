@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
+import posthog from 'posthog-js';
 
 interface CreateFolderModalProps {
   onClose: () => void;
@@ -52,6 +53,10 @@ export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderMo
         undefined, // No icon
         color
       );
+      posthog.capture('folder_created', {
+        folder_name_length: trimmedName.length,
+        folder_color: color,
+      });
       if (onSuccess) {
         onSuccess(newFolder.id);
       }
@@ -136,7 +141,10 @@ export default function CreateFolderModal({ onClose, onSuccess }: CreateFolderMo
                   <button
                     key={folderColor}
                     type="button"
-                    onClick={() => setColor(folderColor)}
+                    onClick={() => {
+                      posthog.capture('folder_color_selected', { color: folderColor });
+                      setColor(folderColor);
+                    }}
                     className={`w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center ${color === folderColor ? 'ring-2 ring-offset-2 ring-offset-[#171717] scale-110' : 'hover:scale-110 opacity-70 hover:opacity-100'
                       }`}
                     style={{

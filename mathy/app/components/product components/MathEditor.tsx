@@ -1,6 +1,7 @@
 // MathEditor component for live editing of math expressions
 
 import React, { useState, useEffect, useRef, useReducer, useMemo } from 'react';
+import posthog from 'posthog-js';
 import { tokenize } from '@/app/lib/math-dsl/lexer';
 import { parse } from '@/app/lib/math-dsl/parser';
 import { MathExpression } from '@/app/lib/math-dsl/renderer';
@@ -148,6 +149,10 @@ const MathEditor: React.FC<MathEditorProps> = ({
     if (index < 0 || index >= state.suggestions.length) return;
     
     const suggestion = state.suggestions[index];
+    posthog.capture('math_suggestion_used', { 
+      suggestion: suggestion.value,
+      suggestion_type: suggestion.type
+    });
     const cursorPosition = inputRef.current?.selectionStart || 0;
     const { newSrc, newCursorPosition } = applySuggestion(state.src, cursorPosition, suggestion);
     
@@ -198,6 +203,10 @@ const MathEditor: React.FC<MathEditorProps> = ({
       if (state.suggestions.length > 0 && state.selectedSuggestion >= 0) {
         handleSelectSuggestion(state.selectedSuggestion);
       } else if (state.src.trim()) {
+        posthog.capture('math_expression_saved', { 
+          expression_length: state.src.length,
+          save_method: 'enter_key'
+        });
         onSave(state.src);
         setIsEditing(false);
       } else {
@@ -214,6 +223,10 @@ const MathEditor: React.FC<MathEditorProps> = ({
     const relatedTarget = e.relatedTarget as HTMLElement;
     if (!relatedTarget || !relatedTarget.closest('.math-editor-container')) {
       if (state.src.trim()) {
+        posthog.capture('math_expression_saved', { 
+          expression_length: state.src.length,
+          save_method: 'blur'
+        });
         onSave(state.src);
       } else {
         onCancel();
@@ -226,6 +239,10 @@ const MathEditor: React.FC<MathEditorProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         if (state.src.trim()) {
+          posthog.capture('math_expression_saved', { 
+            expression_length: state.src.length,
+            save_method: 'click_outside'
+          });
           onSave(state.src);
         } else {
           onCancel();

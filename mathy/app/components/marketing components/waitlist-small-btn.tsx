@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useNamespaceTranslation } from "../../lib/i18n/LanguageContext";
+import posthog from 'posthog-js';
 
 export default function WaitlistSmallBtn() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -11,6 +12,7 @@ export default function WaitlistSmallBtn() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
+      posthog.capture('waitlist_form_submitted');
       setIsSubmitted(true);
       // LINK THIS SHIT TO BACKEND HEREE*************
       console.log("Email submitted:", email);

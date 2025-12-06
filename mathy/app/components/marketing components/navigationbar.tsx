@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useNamespaceTranslation } from "../../lib/i18n/LanguageContext";
 import LanguageSwitcher from "../product components/LanguageSwitcher";
 import ClientOnly from "../ClientOnly";
+import posthog from 'posthog-js';
 
 /*Navigation Bar Component == DONE
 Component used in Layout.tsx of Landing Page (marketing/layout.tsx)*/
@@ -19,6 +20,7 @@ export default function NavigationBar() {
           {/* Logo Section - Minimalist Black Logo */}
           <Link
             href="/"
+            onClick={() => posthog.capture('marketing-nav-logo-clicked', { href: '/' })}
             className="hover:opacity-80 transition-opacity flex items-center gap-2"
           >
             <div className="flex items-center justify-center">
@@ -42,6 +44,7 @@ export default function NavigationBar() {
             <ClientOnly fallback={
               <Link
                 href="/pricing"
+                onClick={() => posthog.capture('marketing-nav-link-clicked', { link_text: 'Pricing', href: '/pricing' })}
                 className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] 
                 transition-colors duration-200"
               >
@@ -50,6 +53,7 @@ export default function NavigationBar() {
             }>
               <Link
                 href="/pricing"
+                onClick={() => posthog.capture('marketing-nav-link-clicked', { link_text: 'Pricing', href: '/pricing' })}
                 className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] 
                 transition-colors duration-200"
               >
@@ -60,6 +64,7 @@ export default function NavigationBar() {
             <ClientOnly fallback={
               <Link
                 href="/guide"
+                onClick={() => posthog.capture('marketing-nav-link-clicked', { link_text: 'Guide', href: '/guide' })}
                 className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] 
                 transition-colors duration-200"
               >
@@ -68,6 +73,7 @@ export default function NavigationBar() {
             }>
               <Link
                 href="/guide"
+                onClick={() => posthog.capture('marketing-nav-link-clicked', { link_text: 'Guide', href: '/guide' })}
                 className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] 
                 transition-colors duration-200"
               >
@@ -78,6 +84,7 @@ export default function NavigationBar() {
             <ClientOnly fallback={
               <Link
                 href="/blogs"
+                onClick={() => posthog.capture('marketing-nav-link-clicked', { link_text: 'Blogs', href: '/blogs' })}
                 className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] 
                 transition-colors duration-200"
               >
@@ -86,6 +93,7 @@ export default function NavigationBar() {
             }>
               <Link
                 href="/blogs"
+                onClick={() => posthog.capture('marketing-nav-link-clicked', { link_text: 'Blogs', href: '/blogs' })}
                 className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] 
                 transition-colors duration-200"
               >
@@ -96,6 +104,7 @@ export default function NavigationBar() {
             <ClientOnly fallback={
               <Link
                 href="/login"
+                onClick={() => posthog.capture('marketing-nav-login-clicked', { href: '/login' })}
                 className="rounded-full bg-[var(--color-text-primary)] px-5 py-2
                 text-sm transition-all hover:opacity-80 text-[var(--color-bg-primary)] font-medium"
               >
@@ -104,6 +113,7 @@ export default function NavigationBar() {
             }>
               <Link
                 href="/login"
+                onClick={() => posthog.capture('marketing-nav-login-clicked', { href: '/login' })}
                 className="rounded-full bg-[var(--color-text-primary)] px-5 py-2
                 text-sm transition-all hover:opacity-80 text-[var(--color-bg-primary)] font-medium"
               >

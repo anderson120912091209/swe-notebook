@@ -57,6 +57,8 @@
     "lucide-react": "^0.544.0",
     "mathlive": "npm:@anderson120912091209/mathlive-custom@^1.0.4",
     "next": "15.5.2",
+    "posthog-js": "^1.302.2",
+    "posthog-node": "^5.17.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-mathquill": "^1.0.4",

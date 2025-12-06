@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useNamespaceTranslation } from '../../lib/i18n/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
+import posthog from 'posthog-js';
 
 export default function SignInCard() {
   const { t: tAuth } = useNamespaceTranslation('auth');
@@ -13,12 +14,18 @@ export default function SignInCard() {
   const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
+    posthog.capture('auth_sign_in_attempt', { method: 'google' });
     try {
       setLoading(true);
       setError(null);
       await signInWithGoogle();
     } catch (err) {
-      setError('Failed to sign in with Google. Please try again.');
+      const errorMessage = 'Failed to sign in with Google. Please try again.';
+      setError(errorMessage);
+      posthog.capture('auth_sign_in_failure', { 
+        method: 'google', 
+        error: (err as Error)?.message || errorMessage 
+      });
       console.error(err);
     } finally {
       setLoading(false);
