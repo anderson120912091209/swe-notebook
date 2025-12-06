@@ -150,8 +150,8 @@ const MathEditor: React.FC<MathEditorProps> = ({
     
     const suggestion = state.suggestions[index];
     posthog.capture('math_suggestion_used', { 
-      suggestion: suggestion.value,
-      suggestion_type: suggestion.type
+      suggestion: suggestion.keyword,
+      suggestion_display: suggestion.display,
     });
     const cursorPosition = inputRef.current?.selectionStart || 0;
     const { newSrc, newCursorPosition } = applySuggestion(state.src, cursorPosition, suggestion);
