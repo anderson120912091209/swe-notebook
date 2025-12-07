@@ -14,7 +14,6 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { Tooltip } from "@heroui/react";
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/contexts/AuthContext';
@@ -272,8 +271,7 @@ const DraggablePage = React.memo(function DraggablePage({
         onClick();
       }}
       onMouseEnter={onMouseEnter}
-      className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 transition-colors ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
-        }`}
+      className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 transition-colors ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''}`}
       style={{
         ...style,
         color: 'var(--foreground)',
@@ -334,8 +332,7 @@ const RecentPage = React.memo(function RecentPage({
         onClick();
       }}
       onMouseEnter={onMouseEnter}
-      className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 transition-colors ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''
-        }`}
+      className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm text-left hover:bg-[var(--hover-bg)] active:scale-[0.98] min-w-0 transition-colors ${isActive ? 'font-medium bg-[var(--hover-bg)]' : ''}`}
       style={{
         ...style,
         color: 'var(--foreground)',
@@ -868,8 +865,7 @@ export default function Sidebar() {
           <div className="flex items-center gap-2 w-full min-w-0">
             <button
               onClick={navigateToWorkspace}
-              className="flex-1 flex items-center gap-2 px-3 py-1.5 
-            rounded-md hover:bg-[var(--hover-bg)] text-left min-w-0 cursor-pointer transition-colors"
+              className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-[var(--hover-bg)] text-left min-w-0 cursor-pointer transition-colors"
               style={{ color: 'var(--foreground)' }}
             >
               {sidebarOpen && (
@@ -899,8 +895,7 @@ export default function Sidebar() {
               <button
                 ref={createButtonRef}
                 onClick={() => setShowCreateMenu(!showCreateMenu)}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-md 
-                transition-all flex-shrink-0 cursor-pointer font-medium text-sm shadow-sm hover:shadow-md"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-md transition-all flex-shrink-0 cursor-pointer font-medium text-sm shadow-sm hover:shadow-md"
                 style={{
                   background: accentBackground,
                   color: '#ffffff',
