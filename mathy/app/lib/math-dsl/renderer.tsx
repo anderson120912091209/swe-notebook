@@ -190,7 +190,7 @@ export const MathExpression = React.memo(MathExpressionComponent);
 /**
  * Render AST to HTML string (for copy/paste)
  */
-export function renderToHTML(ast: ASTNode, theme: 'light' | 'dark' = 'light'): string {
+export function renderToHTML(ast: ASTNode, _theme: 'light' | 'dark' = 'light'): string {
   // This is a simplified version - in a real implementation,
   // you'd want to use a proper HTML serializer
   return `<span class="math-expression">${ast.value || 'expression'}</span>`;

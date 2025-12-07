@@ -31,11 +31,12 @@ interface CodeBlockProps {
         };
         id: string; //block id needed for updates
     }; 
-    editor: any; //second prop: the editor object 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    editor: any; //second prop: the BlockNote editor object 
 } 
 
 // Placeholder for code execution - you'll need to implement this
-const executeCode = async (code: string, language: string): Promise<string> => {
+const executeCode = async (_code: string, _language: string): Promise<string> => {
     // TODO: Implement actual code execution logic
     // This could call a backend API endpoint
     throw new Error('Code execution not yet implemented');
@@ -64,8 +65,9 @@ const CodeBlockRenderer: React.FC<CodeBlockProps> = ({block, editor}) => {
             editor.updateBlock(block.id, {
                 props: {...block.props, output: result}
             });
-        } catch (error: any) {
-            setOutput(`Error: ${error.message}`);
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            setOutput(`Error: ${errorMessage}`);
         } finally {
             setIsExecuting(false);
         }

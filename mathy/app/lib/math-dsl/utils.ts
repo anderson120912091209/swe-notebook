@@ -1,6 +1,6 @@
 // Helper functions for the math DSL system
 
-import { ASTNode, ASTNodeType, Token, TokenType } from './types';
+import { ASTNode, Token } from './types';
 
 /**
  * Generate a stable ID for AST nodes

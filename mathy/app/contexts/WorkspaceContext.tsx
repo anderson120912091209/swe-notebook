@@ -690,13 +690,17 @@ export function WorkspaceProvider({
       setLocalPages(updatedPages);
       
       if (!user) {
-        pendingSync.add({
-          type: 'update',
-          entityType: 'page',
-          entityId: pageId,
-          data: { folder_id: folderId || undefined },
-          timestamp: Date.now(),
-        });
+        // Find the updated page to add to pending sync
+        const updatedPage = updatedPages.find(p => p.id === pageId);
+        if (updatedPage) {
+          pendingSync.add({
+            type: 'update',
+            entityType: 'page',
+            entityId: pageId,
+            data: updatedPage,
+            timestamp: Date.now(),
+          });
+        }
       }
       return;
     }

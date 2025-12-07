@@ -18,7 +18,7 @@ export async function uploadPDF(
 ): Promise<string> {
   const filePath = `${userId}/pdfs/${paperId}.pdf`;
 
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from('research-papers')
     .upload(filePath, file, {
       cacheControl: '3600',

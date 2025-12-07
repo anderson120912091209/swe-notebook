@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { translations } from './translations';
 import type { 
   Language, 
@@ -75,7 +75,8 @@ export function LanguageProvider({ children, defaultLanguage }: LanguageProvider
     if (detectedLanguage !== language) {
       setLanguageState(detectedLanguage);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally empty - only run on mount
 
   // Update language and persist to localStorage
   const setLanguage = (newLanguage: Language) => {
@@ -109,7 +110,7 @@ export function LanguageProvider({ children, defaultLanguage }: LanguageProvider
     
     try {
       return new Intl.NumberFormat(language === 'zh-TW' ? 'zh-TW' : 'en-US').format(number);
-    } catch (error) {
+    } catch {
       return number.toString();
     }
   };
@@ -124,7 +125,7 @@ export function LanguageProvider({ children, defaultLanguage }: LanguageProvider
         month: 'long',
         day: 'numeric',
       }).format(date);
-    } catch (error) {
+    } catch {
       return date.toLocaleDateString();
     }
   };
@@ -150,7 +151,7 @@ export function LanguageProvider({ children, defaultLanguage }: LanguageProvider
       } else {
         return rtf.format(Math.floor(diffInSeconds / 86400), 'day');
       }
-    } catch (error) {
+    } catch {
       return '';
     }
   };

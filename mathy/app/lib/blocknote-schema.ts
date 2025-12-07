@@ -2,7 +2,6 @@ import { BlockNoteSchema, defaultBlockSpecs, defaultInlineContentSpecs } from '@
 import { InlineMath } from '@/app/components/product components/InlineMath';
 import { LegacyMathSymbol } from '@/app/components/product components/LegacyMathSymbol';
 import { getDefaultReactSlashMenuItems, DefaultReactSuggestionItem } from '@blocknote/react';
-import {CodeBlock} from '@/app/components/product components/CodeBlock';
 import React from 'react';
 
 // Create a custom schema that includes the inline math content
