@@ -15,7 +15,7 @@ import { onboardingCache } from '@/app/lib/cache/onboardingCache';
 
 
 export default function WorkspaceView() {
-    const { folders, pages, deleteFolder, deletePage, createPage, createFolder, loading } = useWorkspace();
+    const { folders, pages, deleteFolder, deletePage, createPage, createFolder, movePageToFolder, loading } = useWorkspace();
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<TabType>('notebooks');
     const [searchQuery, setSearchQuery] = useState('');
@@ -351,9 +351,10 @@ export default function WorkspaceView() {
                                                         page={page}
                                                         folderName={folder?.name}
                                                         folderColor={folder?.color}
+                                                        folders={folders}
                                                         onDelete={deletePage}
                                                         onEdit={() => {/* TODO: Implement edit modal */ }}
-                                                        onMove={() => {/* TODO: Implement move functionality */ }}
+                                                        onMove={movePageToFolder}
                                                     />
                                                 </div>
                                             );

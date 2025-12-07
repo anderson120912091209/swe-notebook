@@ -680,6 +680,27 @@ export function WorkspaceProvider({
   };
 
   const movePageToFolder = async (pageId: string, folderId: string | null) => {
+    if (!user || isTempId(pageId)) {
+      // Guest user or moving local item: update cache
+      const pages = pagesCache.get();
+      const updatedPages = pages.map(p => 
+        p.id === pageId ? { ...p, folder_id: folderId || undefined } : p
+      );
+      pagesCache.set(updatedPages);
+      setLocalPages(updatedPages);
+      
+      if (!user) {
+        pendingSync.add({
+          type: 'update',
+          entityType: 'page',
+          entityId: pageId,
+          data: { folder_id: folderId || undefined },
+          timestamp: Date.now(),
+        });
+      }
+      return;
+    }
+    
     await movePageMutation.mutateAsync({ pageId, folderId });
   };
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import type { Page } from '@/app/types/workspace';
 import MovePageModal from './MovePageModal';
 import PageEditorModal from './PageEditorModal';
@@ -60,8 +61,11 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [showEditorModal, setShowEditorModal] = useState(false);
   const [showFolderDropdown, setShowFolderDropdown] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const [isMounted, setIsMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const folderDropdownRef = useRef<HTMLDivElement>(null);
+  const folderButtonRef = useRef<HTMLButtonElement>(null);
 
   // Create muted folder color for the tag
   const baseColor = parseHex(folderColor)?.hex ?? FALLBACK_COLOR;
@@ -98,13 +102,23 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
     }
   };
 
+  // Track mounted state for portal
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false);
       }
-      if (folderDropdownRef.current && !folderDropdownRef.current.contains(event.target as Node)) {
+      if (
+        folderDropdownRef.current && 
+        !folderDropdownRef.current.contains(event.target as Node) &&
+        folderButtonRef.current &&
+        !folderButtonRef.current.contains(event.target as Node)
+      ) {
         setShowFolderDropdown(false);
       }
     };
@@ -112,6 +126,21 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Calculate dropdown position when opening
+  const handleToggleFolderDropdown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    
+    if (!showFolderDropdown && folderButtonRef.current) {
+      const rect = folderButtonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.top - 8, // Position above the button with some spacing
+        left: rect.left,
+      });
+    }
+    
+    setShowFolderDropdown(!showFolderDropdown);
+  };
 
   return (
     <>
@@ -141,63 +170,20 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
               {folderName}
             </span>
           ) : (
-            <div className="relative" ref={folderDropdownRef}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowFolderDropdown(!showFolderDropdown);
-                }}
-                className="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-medium border border-dashed transition-colors hover:bg-[var(--hover-bg)]"
-                style={{
-                  color: 'var(--foreground-muted)',
-                  borderColor: 'var(--border-color)'
-                }}
-              >
-                <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Add to folder
-              </button>
-
-              {/* Folder Dropdown */}
-              {showFolderDropdown && (
-                <div
-                  className="absolute bottom-full left-0 mb-1 w-48 rounded-lg shadow-lg border z-20"
-                  style={{
-                    background: 'var(--card-bg)',
-                    borderColor: 'var(--border-color)'
-                  }}
-                >
-                  <div className="py-1">
-                    {folders.length > 0 ? (
-                      folders.map((folder) => (
-                        <button
-                          key={folder.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (onMove) {
-                              onMove(page.id, folder.id);
-                            }
-                            setShowFolderDropdown(false);
-                          }}
-                          className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-2"
-                          style={{ color: 'var(--foreground)' }}
-                        >
-                          <svg className="w-4 h-4" fill={folder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
-                            <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                          </svg>
-                          {folder.name}
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-3 py-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                        No folders available
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            <button
+              ref={folderButtonRef}
+              onClick={handleToggleFolderDropdown}
+              className="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-medium border border-dashed transition-colors hover:bg-[var(--hover-bg)]"
+              style={{
+                color: 'var(--foreground-muted)',
+                borderColor: 'var(--border-color)'
+              }}
+            >
+              <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add to folder
+            </button>
           )}
 
           {/* Overflow Menu */}
@@ -305,6 +291,51 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
         onClose={() => setShowEditorModal(false)}
         pageId={page.id}
       />
+
+      {/* Folder Dropdown (Portal) */}
+      {isMounted && showFolderDropdown && createPortal(
+        <div
+          ref={folderDropdownRef}
+          className="w-48 rounded-lg shadow-lg border z-[9999]"
+          style={{
+            position: 'fixed',
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            transform: 'translateY(-100%)',
+            background: 'var(--card-bg)',
+            borderColor: 'var(--border-color)',
+          }}
+        >
+          <div className="py-1">
+            {folders.length > 0 ? (
+              folders.map((folder) => (
+                <button
+                  key={folder.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onMove) {
+                      onMove(page.id, folder.id);
+                    }
+                    setShowFolderDropdown(false);
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--hover-bg)] transition-colors flex items-center gap-2"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  <svg className="w-4 h-4" fill={folder.color || '#6b7280'} stroke="none" viewBox="0 0 24 24">
+                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                  </svg>
+                  {folder.name}
+                </button>
+              ))
+            ) : (
+              <div className="px-3 py-2 text-sm" style={{ color: 'var(--foreground-muted)' }}>
+                No folders available
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 });

@@ -17,7 +17,7 @@ interface FolderViewProps {
 
 export default function FolderView({ folderId }: FolderViewProps) {
   const router = useRouter();
-  const { folders, pages, createPage, createFolder, deletePage, updateFolder, loading } = useWorkspace();
+  const { folders, pages, createPage, createFolder, deletePage, updateFolder, movePageToFolder, loading } = useWorkspace();
   
   // Use cached data immediately (optimistic rendering) - don't wait for loading
   const folder = useMemo(() => folders.find(f => f.id === folderId), [folders, folderId]);
@@ -356,9 +356,10 @@ export default function FolderView({ folderId }: FolderViewProps) {
                     page={page}
                     folderName={folder?.name}
                     folderColor={folder?.color}
+                    folders={folders}
                     onDelete={deletePage}
                     onEdit={() => {/* TODO: Implement edit modal */ }}
-                    onMove={() => {/* TODO: Implement move functionality */ }}
+                    onMove={movePageToFolder}
                   />
                 ))}
               </div>
