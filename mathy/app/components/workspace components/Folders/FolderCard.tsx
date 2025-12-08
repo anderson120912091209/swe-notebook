@@ -151,7 +151,7 @@ const FolderCard = React.memo(function FolderCard({
       ref={cardRef}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
-      className="group relative p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between"
+      className="group relative p-4 rounded-xl border cursor-pointer flex flex-col justify-between"
       style={{
         borderColor: 'var(--border-color)',
         backgroundColor: 'var(--card-bg)',
@@ -159,15 +159,6 @@ const FolderCard = React.memo(function FolderCard({
         height: '110px'
       }}
     >
-      {/* Subtle gradient overlay on hover */}
-      <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none rounded-xl"
-        style={{
-          background: `radial-gradient(circle at top right, ${baseColor}15 0%, transparent 70%)`,
-          transition: 'opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}
-      />
-
       <div className="flex items-start justify-between relative">
         <div
           className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -188,7 +179,7 @@ const FolderCard = React.memo(function FolderCard({
         <div className="relative h-6 min-w-[24px] flex items-center justify-end z-20">
           {/* Page Count - Visible by default, hidden on hover */}
           <span
-            className={`text-xs font-medium px-2 py-1 rounded-full bg-[var(--hover-bg)] transition-opacity duration-200 ${isMenuOpen ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`}
+            className={`text-xs font-medium px-2 py-1 rounded-full bg-[var(--hover-bg)] ${isMenuOpen ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`}
             style={{ color: 'var(--foreground-muted)' }}
           >
             {pageCount}
