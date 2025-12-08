@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b0b0bff;
+  --foreground: #ffffff;
 
-  /* Layout Colors - Light Mode */
-  --sidebar-bg: #F5F5F7;
-  --page-bg: #FFFFFF;
-  --outer-bg: #F5F5F7;
+  /* Layout Colors - Dark Mode (default) */
+  --sidebar-bg: #1a1a1a;
+  --page-bg: #171717;
+  --outer-bg: #111111ff;
 }
 
 @theme inline {
@@ -16,12 +16,12 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Integrity-inspired Monochrome Palette */
-  --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F5F5F7;
-  --color-text-primary: #000000;
-  --color-text-secondary: #666666;
-  --color-border-subtle: #E5E5E5;
+  /* Integrity-inspired Monochrome Palette - Dark Mode */
+  --color-bg-primary: #1f1f1f;
+  --color-bg-secondary: #1a1a1a;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #999999;
+  --color-border-subtle: #282828ff;
 }
 
 /* Dark mode media query removed - theme is now controlled by ThemeContext */
