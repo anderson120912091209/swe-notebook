@@ -14,6 +14,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 import WorkspaceLayout from '@/app/components/workspace components/Workspace View/WorkspaceLayout';
 import { getFolderBreadcrumbPath, generateFolderBreadcrumbJSX } from '@/app/lib/breadcrumbUtils';
+import { CustomSuggestionMenu } from './CustomSuggestionMenu';
 
 const FALLBACK_COLOR = '#9CC5FF';
 
@@ -106,97 +107,97 @@ const getUserDisplayName = (user: User | null): string => {
 
 // Error Boundary to catch BlockNote initialization errors
 class BlockNoteErrorBoundary extends Component<
-    { children: ReactNode; fallback: ReactNode },
-    { hasError: boolean }
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
 > {
-    constructor(props: { children: ReactNode; fallback: ReactNode }) {
-        super(props);
-        this.state = { hasError: false };
-    }
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-    static getDerivedStateFromError() {
-        return { hasError: true };
-    }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
 
-    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error('BlockNote Error Boundary caught:', error, errorInfo);
-    }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('BlockNote Error Boundary caught:', error, errorInfo);
+  }
 
-    render() {
-        if (this.state.hasError) {
-            return this.props.fallback;
-        }
-        return this.props.children;
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
     }
+    return this.props.children;
+  }
 }
 
 // Helper function to deeply validate blocks structure
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function validateBlock(block: any, depth = 0): boolean {
-    // Prevent infinite recursion
-    if (depth > 10) return false;
-    
-    if (!block || typeof block !== 'object') return false;
-    if (typeof block.id !== 'string' || block.id.length === 0) return false;
-    if (typeof block.type !== 'string' || block.type.length === 0) return false;
-    
-    // Validate props if present (should be object or undefined)
-    if (block.props !== undefined && typeof block.props !== 'object') return false;
-    
-    // Validate content if present (should be array or undefined)
-    if (block.content !== undefined && !Array.isArray(block.content)) return false;
-    
-    // Recursively validate children if present
-    if (block.children !== undefined) {
-        if (!Array.isArray(block.children)) return false;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (!block.children.every((child: any) => validateBlock(child, depth + 1))) return false;
-    }
-    
-    return true;
+  // Prevent infinite recursion
+  if (depth > 10) return false;
+
+  if (!block || typeof block !== 'object') return false;
+  if (typeof block.id !== 'string' || block.id.length === 0) return false;
+  if (typeof block.type !== 'string' || block.type.length === 0) return false;
+
+  // Validate props if present (should be object or undefined)
+  if (block.props !== undefined && typeof block.props !== 'object') return false;
+
+  // Validate content if present (should be array or undefined)
+  if (block.content !== undefined && !Array.isArray(block.content)) return false;
+
+  // Recursively validate children if present
+  if (block.children !== undefined) {
+    if (!Array.isArray(block.children)) return false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!block.children.every((child: any) => validateBlock(child, depth + 1))) return false;
+  }
+
+  return true;
 }
 
 // Helper function to validate blocks structure
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function validateBlocks(blocks: any): boolean {
-    if (!Array.isArray(blocks)) return false;
-    if (blocks.length === 0) return false;
-    
-    // Validate each block deeply
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return blocks.every((block: any) => validateBlock(block));
+  if (!Array.isArray(blocks)) return false;
+  if (blocks.length === 0) return false;
+
+  // Validate each block deeply
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return blocks.every((block: any) => validateBlock(block));
 }
 
 // Helper function to sanitize and validate blocks before passing to BlockNote
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function sanitizeBlocks(content: any): any[] | undefined {
-    if (!content) return undefined;
-    
-    try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let blocks: any = undefined;
-        
-        // Extract blocks from different possible formats
-        if (content.blocks && Array.isArray(content.blocks)) {
-            blocks = content.blocks.length > 0 ? content.blocks : undefined;
-        } else if (Array.isArray(content)) {
-            blocks = content.length > 0 ? content : undefined;
-        }
-        
-        // Deeply validate blocks structure - if invalid, return undefined to use default
-        if (blocks && !validateBlocks(blocks)) {
-            console.warn('Invalid blocks structure detected, using default content', {
-                blocksCount: blocks.length,
-                sampleBlock: blocks[0],
-            });
-            return undefined;
-        }
-        
-        return blocks;
-    } catch (error) {
-        console.error('Error parsing content for preview:', error);
-        return undefined;
+  if (!content) return undefined;
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let blocks: any = undefined;
+
+    // Extract blocks from different possible formats
+    if (content.blocks && Array.isArray(content.blocks)) {
+      blocks = content.blocks.length > 0 ? content.blocks : undefined;
+    } else if (Array.isArray(content)) {
+      blocks = content.length > 0 ? content : undefined;
     }
+
+    // Deeply validate blocks structure - if invalid, return undefined to use default
+    if (blocks && !validateBlocks(blocks)) {
+      console.warn('Invalid blocks structure detected, using default content', {
+        blocksCount: blocks.length,
+        sampleBlock: blocks[0],
+      });
+      return undefined;
+    }
+
+    return blocks;
+  } catch (error) {
+    console.error('Error parsing content for preview:', error);
+    return undefined;
+  }
 }
 
 // Inner component that uses the hook - wrapped in error boundary
@@ -537,6 +538,7 @@ function PageEditorInner({ pageId }: PageEditorProps) {
             editor={editor}
             theme={theme}
             onChange={handleContentChange}
+            slashMenu={false}
             className="font-[family-name:var(--font-geist-sans)] [&_.bn-editor]:!bg-transparent [&_.bn-container]:!bg-transparent [&_.bn-editor]:!px-0"
           >
             {/* $ menu for inline math */}
@@ -546,6 +548,7 @@ function PageEditorInner({ pageId }: PageEditorProps) {
               getItems={async (query) =>
                 filterSuggestionItems(getMathMenuItems(editor), query)
               }
+              suggestionMenuComponent={CustomSuggestionMenu}
             />
             {/* / slash menu with inline math included */}
             <SuggestionMenuController
@@ -553,6 +556,7 @@ function PageEditorInner({ pageId }: PageEditorProps) {
               getItems={async (query) =>
                 filterSuggestionItems(getSlashMenuItems(editor), query)
               }
+              suggestionMenuComponent={CustomSuggestionMenu}
             />
           </BlockNoteView>
         </div>
@@ -571,7 +575,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
       title="Error"
       description=""
       showDescriptionField={false}
-      onToggleDescription={() => {}}
+      onToggleDescription={() => { }}
       showHamburgerButton={true}
     >
       <div className="flex items-center justify-center h-full p-8">
@@ -585,7 +589,7 @@ export default function PageEditor({ pageId }: PageEditorProps) {
           <button
             onClick={() => window.history.back()}
             className="px-4 py-2 rounded-md"
-            style={{ 
+            style={{
               background: 'var(--hover-bg)',
               color: 'var(--foreground)'
             }}
