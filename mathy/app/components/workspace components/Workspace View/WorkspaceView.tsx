@@ -10,6 +10,8 @@ import WorkspaceLayout from './WorkspaceLayout';
 import SearchAndNewButtons from '../SearchAndNewButtons';
 import WorkspaceHeaderSwitch, { TabType } from './WorkspaceHeaderSwitch';
 import OnboardingModal from '../../onboarding/OnboardingModal';
+import CreatePageModal from '../Pages/CreatePageModal';
+import CreateFolderModal from '../Folders/CreateFolderModal';
 import { getUserProfile } from '@/app/lib/api/onboarding';
 import { onboardingCache } from '@/app/lib/cache/onboardingCache';
 
@@ -126,22 +128,6 @@ export default function WorkspaceView() {
         );
     }
 
-    if (filteredRootFolders.length === 0 && filteredRootPages.length === 0 && !searchQuery) {
-        return (
-            <div className="flex-1 flex items-center justify-center p-8">
-                <div className="text-center max-w-md">
-                    <div className="text-6xl mb-4">📚</div>
-                    <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>
-                        Welcome to your workspace!
-                    </h2>
-                    <p className="mb-6" style={{ color: 'var(--foreground-muted)' }}>
-                        Get started by creating your first folder or page using the buttons in the sidebar.
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
 
     const headerContent = (
         <>
@@ -213,6 +199,80 @@ export default function WorkspaceView() {
                 {/* Notebooks Section */}
                 {activeTab === 'notebooks' && (
                     <div>
+
+                        {/* Empty State */}
+                        {filteredRootFolders.length === 0 && filteredRootPages.length === 0 && !searchQuery && (
+                            <div className="flex flex-col items-center justify-center animate-in fade-in duration-500" style={{ minHeight: 'calc(100vh - 400px)' }}>
+                                <div className="flex items-center justify-center gap-3">
+                                    <button
+                                        onClick={() => setCreatingPage(true)}
+                                        className="group relative flex flex-col justify-between w-[180px] h-[100px] p-4 rounded-xl transition-all duration-200 hover:scale-[1.0] cursor-pointer"
+                                        style={{
+                                            backgroundColor: 'rgba(128, 128, 128, 0.08)',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'rgba(128, 128, 128, 0.15)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'rgba(128, 128, 128, 0.08)';
+                                        }}
+                                    >
+                                        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#6B8DD6] text-white shadow-sm">
+                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                <polyline points="10 9 9 9 8 9"></polyline>
+                                            </svg>
+                                        </div>
+                                        <span className="text-sm font-medium text-left" style={{ color: 'var(--foreground)' }}>New Page</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => setCreatingFolder(true)}
+                                        className="group relative flex flex-col justify-between w-[180px] h-[100px] p-4 rounded-xl transition-all duration-200 hover:scale-[1.0] cursor-pointer"
+                                        style={{
+                                            backgroundColor: 'rgba(128, 128, 128, 0.08)',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'rgba(128, 128, 128, 0.15)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'rgba(128, 128, 128, 0.08)';
+                                        }}
+                                    >
+                                        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#5E9EA0] text-white shadow-sm">
+                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                        </div>
+                                        <span className="text-sm font-medium text-left" style={{ color: 'var(--foreground)' }}>New Folder</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => setShowOnboarding(true)}
+                                        className="group relative flex flex-col justify-between w-[180px] h-[100px] p-4 rounded-xl transition-all duration-200 hover:scale-[1.0] cursor-pointer"
+                                        style={{
+                                            backgroundColor: 'rgba(128, 128, 128, 0.08)',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'rgba(128, 128, 128, 0.15)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'rgba(128, 128, 128, 0.08)';
+                                        }}
+                                    >
+                                        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#9B87D6] text-white shadow-sm">
+                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"></path>
+                                            </svg>
+                                        </div>
+                                        <span className="text-sm font-medium text-left" style={{ color: 'var(--foreground)' }}>Tutorials</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Folders Section */}
                         {filteredRootFolders.length > 0 && (
@@ -385,6 +445,19 @@ export default function WorkspaceView() {
                 isOpen={showOnboarding}
                 onClose={handleCloseOnboarding}
             />
+
+            {/* Modals */}
+            {creatingPage && (
+                <CreatePageModal
+                    onClose={() => setCreatingPage(false)}
+                />
+            )}
+
+            {creatingFolder && (
+                <CreateFolderModal
+                    onClose={() => setCreatingFolder(false)}
+                />
+            )}
         </WorkspaceLayout>
     );
 }
