@@ -284,112 +284,87 @@ export default function FolderView({ folderId }: FolderViewProps) {
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
 
-          {/* Child Folders */}
-          {filteredChildFolders.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
-                Folders {searchQuery && `(${filteredChildFolders.length} found)`}
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {/* Create Folder Card - Dashed */}
-                <div
-                  onClick={handleCreateFolder}
-                  className="p-4 rounded-xl border-2 border-dashed cursor-pointer hover:bg-[var(--hover-bg)] transition-all group flex flex-col justify-between h-[120px]"
-                  style={{ borderColor: 'var(--border-color)' }}
-                >
-                  <svg
-                    className="w-8 h-8 text-[var(--foreground-muted)] group-hover:text-[var(--foreground)] transition-colors"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                  </svg>
-                  <span className="font-medium text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                    Create folder
-                  </span>
-                </div>
-
-                {filteredChildFolders.map(childFolder => (
-                  <FolderCard
-                    key={childFolder.id}
-                    folder={childFolder}
-                    pageCount={pages.filter(p => p.folder_id === childFolder.id).length}
-                    onDelete={deleteFolder}
-                    onEdit={() => setEditingFolder(childFolder)}
-                    onMove={() => setMovingFolder(childFolder)}
-                    isOpen={activeFolderMenuId === childFolder.id}
-                    onToggle={(open) => setActiveFolderMenuId(open ? childFolder.id : null)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Pages Grid */}
-          {filteredPages.length > 0 ? (
-            <div>
-              <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
-                Pages {searchQuery && `(${filteredPages.length} found)`}
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {/* Create Page Card - Dashed */}
-                <div
-                  onClick={handleCreatePage}
-                  className="p-4 rounded-xl border-2 border-dashed cursor-pointer hover:bg-[var(--hover-bg)] transition-all group flex flex-col justify-between h-[320px]"
-                  style={{ borderColor: 'var(--border-color)' }}
-                >
-                  <svg
-                    className="w-8 h-8 text-[var(--foreground-muted)] group-hover:text-[var(--foreground)] transition-colors"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                  </svg>
-                  <span className="font-medium text-sm" style={{ color: 'var(--foreground-muted)' }}>
-                    Create page
-                  </span>
-                </div>
-
-                {filteredPages.map(page => (
-                  <PageCard
-                    key={page.id}
-                    page={page}
-                    folderName={folder?.name}
-                    folderColor={folder?.color}
-                    folders={folders}
-                    onDelete={deletePage}
-                    onEdit={() => {/* TODO: Implement edit modal */ }}
-                    onMove={movePageToFolder}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : !searchQuery && (
-            <div className="text-center py-16">
-              <div className="text-6xl mb-4">📄</div>
-              <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
-                No pages yet
-              </h3>
-              <p className="mb-6" style={{ color: 'var(--foreground-muted)' }}>
-                Create your first page in this folder to get started.
-              </p>
-              <button
-                onClick={handleCreatePage}
-                disabled={creatingPage}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full hover:bg-[var(--hover-bg)] transition-all duration-200 active:scale-95 disabled:opacity-50"
-                style={{ color: 'var(--foreground)', border: '1px solid var(--border-color)' }}
+          {/* Child Folders - Always visible */}
+          <div className="mb-8">
+            <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
+              Folders {searchQuery && `(${filteredChildFolders.length} found)`}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {/* Create Folder Card - Dashed */}
+              <div
+                onClick={handleCreateFolder}
+                className="p-4 rounded-xl border-2 border-dashed cursor-pointer hover:bg-[var(--hover-bg)] transition-all group flex flex-col justify-between h-[120px]"
+                style={{ borderColor: 'var(--border-color)' }}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <svg
+                  className="w-8 h-8 text-[var(--foreground-muted)] group-hover:text-[var(--foreground)] transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                 </svg>
-                <span>{creatingPage ? 'Creating...' : 'Create Page'}</span>
-              </button>
+                <span className="font-medium text-sm" style={{ color: 'var(--foreground-muted)' }}>
+                  Create folder
+                </span>
+              </div>
+
+              {filteredChildFolders.map(childFolder => (
+                <FolderCard
+                  key={childFolder.id}
+                  folder={childFolder}
+                  pageCount={pages.filter(p => p.folder_id === childFolder.id).length}
+                  onDelete={deleteFolder}
+                  onEdit={() => setEditingFolder(childFolder)}
+                  onMove={() => setMovingFolder(childFolder)}
+                  isOpen={activeFolderMenuId === childFolder.id}
+                  onToggle={(open) => setActiveFolderMenuId(open ? childFolder.id : null)}
+                />
+              ))}
             </div>
-          )}
+          </div>
+
+          {/* Pages Grid - Always visible */}
+          <div>
+            <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--foreground)' }}>
+              Pages {searchQuery && `(${filteredPages.length} found)`}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {/* Create Page Card - Dashed */}
+              <div
+                onClick={handleCreatePage}
+                className="p-4 rounded-xl border-2 border-dashed cursor-pointer hover:bg-[var(--hover-bg)] transition-all group flex flex-col justify-between h-[320px]"
+                style={{ borderColor: 'var(--border-color)' }}
+              >
+                <svg
+                  className="w-8 h-8 text-[var(--foreground-muted)] group-hover:text-[var(--foreground)] transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                <span className="font-medium text-sm" style={{ color: 'var(--foreground-muted)' }}>
+                  Create page
+                </span>
+              </div>
+
+              {filteredPages.map(page => (
+                <PageCard
+                  key={page.id}
+                  page={page}
+                  folderName={folder?.name}
+                  folderColor={folder?.color}
+                  folders={folders}
+                  onDelete={deletePage}
+                  onEdit={() => {/* TODO: Implement edit modal */ }}
+                  onMove={movePageToFolder}
+                />
+              ))}
+            </div>
+          </div>
 
           {/* Search Results Empty State */}
           {searchQuery && filteredPages.length === 0 && filteredChildFolders.length === 0 && (
