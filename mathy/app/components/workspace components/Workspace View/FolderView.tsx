@@ -9,6 +9,8 @@ import FolderCard from '../Folders/FolderCard';
 import WorkspaceLayout from './WorkspaceLayout';
 import SearchAndNewButtons from '../SearchAndNewButtons';
 import FolderTag from '../Folders/FolderTag';
+import EditFolderModal from '../Folders/EditFolderModal';
+import MoveFolderModal from '../Folders/MoveFolderModal';
 import { getFolderBreadcrumbPath, generateFolderBreadcrumbJSX } from '@/app/lib/breadcrumbUtils';
 
 interface FolderViewProps {
@@ -17,7 +19,7 @@ interface FolderViewProps {
 
 export default function FolderView({ folderId }: FolderViewProps) {
   const router = useRouter();
-  const { folders, pages, createPage, createFolder, deletePage, updateFolder, movePageToFolder, loading } = useWorkspace();
+  const { folders, pages, createPage, createFolder, deletePage, deleteFolder, updateFolder, movePageToFolder, moveFolderToFolder, loading } = useWorkspace();
   
   // Use cached data immediately (optimistic rendering) - don't wait for loading
   const folder = useMemo(() => folders.find(f => f.id === folderId), [folders, folderId]);
@@ -28,6 +30,8 @@ export default function FolderView({ folderId }: FolderViewProps) {
   const [folderDescription, setFolderDescription] = useState(folder?.description || '');
   const [folderTitle, setFolderTitle] = useState(folder?.name || '');
   const [activeFolderMenuId, setActiveFolderMenuId] = useState<string | null>(null);
+  const [editingFolder, setEditingFolder] = useState<typeof folders[0] | null>(null);
+  const [movingFolder, setMovingFolder] = useState<typeof folders[0] | null>(null);
 
   // Update title/description when folder changes
   useEffect(() => {
@@ -205,10 +209,7 @@ export default function FolderView({ folderId }: FolderViewProps) {
   const rightHeaderContent = (
     <SearchAndNewButtons
       onNewClick={() => setCreatingPage(true)}
-      onNewFolder={() => {
-        // TODO: Implement folder creation within folder
-        console.log('Create folder in folder clicked');
-      }}
+      onNewFolder={handleCreateFolder}
       onNewPage={() => setCreatingPage(true)}
       newButtonDisabled={creatingPage}
       newButtonLoading={creatingPage}
@@ -315,6 +316,9 @@ export default function FolderView({ folderId }: FolderViewProps) {
                     key={childFolder.id}
                     folder={childFolder}
                     pageCount={pages.filter(p => p.folder_id === childFolder.id).length}
+                    onDelete={deleteFolder}
+                    onEdit={() => setEditingFolder(childFolder)}
+                    onMove={() => setMovingFolder(childFolder)}
                     isOpen={activeFolderMenuId === childFolder.id}
                     onToggle={(open) => setActiveFolderMenuId(open ? childFolder.id : null)}
                   />
@@ -401,6 +405,27 @@ export default function FolderView({ folderId }: FolderViewProps) {
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      {editingFolder && (
+        <EditFolderModal
+          folder={editingFolder}
+          onClose={() => setEditingFolder(null)}
+          onSuccess={() => setEditingFolder(null)}
+        />
+      )}
+
+      {movingFolder && (
+        <MoveFolderModal
+          isOpen={true}
+          folder={movingFolder}
+          onClose={() => setMovingFolder(null)}
+          onMove={async (targetFolderId) => {
+            await moveFolderToFolder(movingFolder.id, targetFolderId);
+            setMovingFolder(null);
+          }}
+        />
+      )}
 
     </WorkspaceLayout>
   );

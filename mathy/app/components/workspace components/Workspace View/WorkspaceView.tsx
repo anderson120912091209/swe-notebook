@@ -12,12 +12,14 @@ import WorkspaceHeaderSwitch, { TabType } from './WorkspaceHeaderSwitch';
 import OnboardingModal from '../../onboarding/OnboardingModal';
 import CreatePageModal from '../Pages/CreatePageModal';
 import CreateFolderModal from '../Folders/CreateFolderModal';
+import EditFolderModal from '../Folders/EditFolderModal';
+import MoveFolderModal from '../Folders/MoveFolderModal';
 import { getUserProfile } from '@/app/lib/api/onboarding';
 import { onboardingCache } from '@/app/lib/cache/onboardingCache';
 
 
 export default function WorkspaceView() {
-    const { folders, pages, deleteFolder, deletePage, createPage, createFolder, movePageToFolder, loading } = useWorkspace();
+    const { folders, pages, deleteFolder, deletePage, createPage, createFolder, movePageToFolder, moveFolderToFolder, loading } = useWorkspace();
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<TabType>('notebooks');
     const [searchQuery, setSearchQuery] = useState('');
@@ -27,6 +29,8 @@ export default function WorkspaceView() {
     const [creatingFolder, setCreatingFolder] = useState(false);
     const [activeFolderMenuId, setActiveFolderMenuId] = useState<string | null>(null);
     const [showOnboarding, setShowOnboarding] = useState(false);
+    const [editingFolder, setEditingFolder] = useState<typeof folders[0] | null>(null);
+    const [movingFolder, setMovingFolder] = useState<typeof folders[0] | null>(null);
 
     // Check onboarding status on mount and when user changes
     useEffect(() => {
@@ -298,7 +302,8 @@ export default function WorkspaceView() {
                                             folder={folder}
                                             pageCount={getFolderPageCount(folder.id)}
                                             onDelete={deleteFolder}
-                                            onEdit={() => {/* TODO: Implement edit modal */ }}
+                                            onEdit={() => setEditingFolder(folder)}
+                                            onMove={() => setMovingFolder(folder)}
                                             isOpen={activeFolderMenuId === folder.id}
                                             onToggle={(open) => setActiveFolderMenuId(open ? folder.id : null)}
                                         />
@@ -456,6 +461,26 @@ export default function WorkspaceView() {
             {creatingFolder && (
                 <CreateFolderModal
                     onClose={() => setCreatingFolder(false)}
+                />
+            )}
+
+            {editingFolder && (
+                <EditFolderModal
+                    folder={editingFolder}
+                    onClose={() => setEditingFolder(null)}
+                    onSuccess={() => setEditingFolder(null)}
+                />
+            )}
+
+            {movingFolder && (
+                <MoveFolderModal
+                    isOpen={true}
+                    folder={movingFolder}
+                    onClose={() => setMovingFolder(null)}
+                    onMove={async (targetFolderId) => {
+                        await moveFolderToFolder(movingFolder.id, targetFolderId);
+                        setMovingFolder(null);
+                    }}
                 />
             )}
         </WorkspaceLayout>
