@@ -7,7 +7,7 @@ export default function LoginPage () {
     return ( 
         <div className="min-h-screen bg-[var(--background)] relative transition-colors duration-200">
             <FlowingDotsBackground />
-            <SignInCard />
+                <SignInCard />
         </div>
     )
 }

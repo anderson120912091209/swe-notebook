@@ -1,13 +1,28 @@
 import { createClient } from '@/app/lib/supabase/client';
 
+export interface UserProfile {
+  onboarding_completed: boolean;
+  role?: 'student' | 'researcher' | 'professional' | 'other';
+  field_of_study?: string;
+  university?: string;
+  university_domain?: string;
+}
+
+export interface OnboardingData {
+  role: 'student' | 'researcher' | 'professional' | 'other';
+  field_of_study: string;
+  university?: string;
+  university_domain?: string;
+}
+
 /**
  * Get user profile including onboarding status
  */
-export async function getUserProfile(userId: string) {
+export async function getUserProfile(userId: string): Promise<UserProfile | null> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('onboarding_completed')
+    .select('onboarding_completed, role, field_of_study, university, university_domain')
     .eq('id', userId)
     .single();
 
@@ -20,9 +35,12 @@ export async function getUserProfile(userId: string) {
 }
 
 /**
- * Mark onboarding as completed for a user
+ * Complete onboarding with user information
  */
-export async function completeOnboarding(userId: string | undefined) {
+export async function completeOnboarding(
+  userId: string | undefined,
+  onboardingData: OnboardingData
+) {
   if (!userId) {
     // For guest users, we'll handle this in localStorage
     return;
@@ -31,7 +49,13 @@ export async function completeOnboarding(userId: string | undefined) {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .update({ onboarding_completed: true })
+    .update({
+      onboarding_completed: true,
+      role: onboardingData.role,
+      field_of_study: onboardingData.field_of_study,
+      university: onboardingData.university,
+      university_domain: onboardingData.university_domain,
+    })
     .eq('id', userId)
     .select()
     .single();
@@ -44,4 +68,5 @@ export async function completeOnboarding(userId: string | undefined) {
   // Return the updated profile to confirm the update
   return data;
 }
+
 

@@ -10,11 +10,11 @@ export default function AuthLayout({
 }) {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <div className="min-h-screen">
-          {children}
-        </div>
-      </AuthProvider>
+    <AuthProvider>
+      <div className="min-h-screen">
+        {children}
+      </div>
+    </AuthProvider>
     </ThemeProvider>
   );
 }

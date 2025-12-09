@@ -91,7 +91,7 @@ export default function SignInCard() {
         <div className="w-full max-w-[360px] space-y-8">
           <div className="space-y-2">
             <h1 className="text-3xl font-normal tracking-tight" style={{ color: 'var(--foreground)' }}>
-              Keep your science & math in the flow.
+              Math & science in the flow.
             </h1>
             <p className="text-lg font-normal" style={{ color: 'var(--foreground-muted)' }}>
               Create your account
