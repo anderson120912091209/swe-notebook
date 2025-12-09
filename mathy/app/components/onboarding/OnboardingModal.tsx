@@ -303,7 +303,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         onboardingCache.setCompleted(true);
       }
       onClose();
-    } catch (e) {
+    } catch {
       onClose();
     } finally {
       setIsCompleting(false);
@@ -381,9 +381,9 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
 
                   {currentStepData.type === 'user-info' && currentStepData.fieldType === 'role' && (
                     <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
-                      {[
+                      {([
                         {
-                          value: 'student',
+                          value: 'student' as const,
                           label: 'Student',
                           icon: (
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -393,7 +393,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                           )
                         },
                         {
-                          value: 'researcher',
+                          value: 'researcher' as const,
                           label: 'Researcher',
                           icon: (
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -404,7 +404,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                           )
                         },
                         {
-                          value: 'professional',
+                          value: 'professional' as const,
                           label: 'Professional',
                           icon: (
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -416,7 +416,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                           )
                         },
                         {
-                          value: 'other',
+                          value: 'other' as const,
                           label: 'Other',
                           icon: (
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -426,12 +426,12 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                             </svg>
                           )
                         },
-                      ].map((opt) => {
+                      ] as const).map((opt) => {
                         const isSelected = role === opt.value;
                         return (
                           <button
                             key={opt.value}
-                            onClick={() => setRole(opt.value as any)}
+                            onClick={() => setRole(opt.value)}
                             className={`flex flex-col items-center justify-center p-5 rounded-xl border transition-all duration-200 ${isSelected ? 'ring-2 ring-offset-2 ring-offset-[var(--card-bg)]' : 'hover:scale-[1.02]'}`}
                             style={{
                               backgroundColor: isSelected ? 'var(--foreground)' : 'var(--hover-bg)',
@@ -439,7 +439,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                               color: isSelected ? 'var(--background)' : 'var(--foreground)',
                               boxShadow: isSelected ? '0 10px 20px -5px rgba(0,0,0,0.2)' : 'none',
                               '--ring-color': 'var(--foreground)',
-                            } as any}
+                            } as React.CSSProperties & { '--ring-color': string }}
                           >
                             <span className="mb-3 opacity-90">{opt.icon}</span>
                             <span className="font-semibold text-sm">{opt.label}</span>
@@ -539,18 +539,11 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
 
                   {currentStepData.type === 'feature' && (
                     <div className="flex flex-col items-center gap-6">
-                      {/* Browser Window Style Container */}
+                      {/* Video Container */}
                       <div
-                        className="w-full rounded-lg overflow-hidden shadow-2xl border relative group"
+                        className="w-full rounded-lg overflow-hidden shadow-2xl border"
                         style={{ borderColor: 'var(--border-color)', backgroundColor: '#000' }}
                       >
-                        {/* Window Controls */}
-                        <div className="h-6 flex items-center gap-1.5 px-3 absolute top-0 left-0 z-10 w-full bg-gradient-to-b from-white/10 to-transparent">
-                          <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
-                        </div>
-
                         <video
                           src={currentStepData.videoSrc}
                           className="w-full aspect-[16/9] object-cover"
