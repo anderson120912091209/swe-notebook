@@ -1,24 +1,13 @@
 'use client'
 
 import SignInCard from '../../components/auth components/signin-card';
+import FlowingDotsBackground from '../../components/auth components/FlowingDotsBackground';
 
 export default function LoginPage () { 
     return ( 
-        
-        <div className = "min-h-screen relative overflow-hidden">
-            {/* A video background */}
-            <div className= "absolute inset-0 w-full h-full">
-                <video autoPlay muted loop
-                className="w-full h-full object-cover"
-                style={{transform: "scale(1.17) translateY(0%)"}}>
-                <source src="/videos/sky-wide-4k.mp4" type="video/mp4" />
-                </video>
-            </div>
-
-            {/* Overlay Content - Sign In Card */}
-            <div className="absolute inset-0 flex items-center justify-center">
-                <SignInCard />
-            </div>
+        <div className="min-h-screen bg-[var(--background)] relative transition-colors duration-200">
+            <FlowingDotsBackground />
+            <SignInCard />
         </div>
     )
 }

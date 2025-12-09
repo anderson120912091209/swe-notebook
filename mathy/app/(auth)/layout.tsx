@@ -1,6 +1,7 @@
 'use client';
 
 import { AuthProvider } from '@/app/contexts/AuthContext';
+import { ThemeProvider } from '@/app/contexts/ThemeContext';
 
 export default function AuthLayout({
   children,
@@ -8,10 +9,12 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-      <div className="min-h-screen">
-        {children}
-      </div>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <div className="min-h-screen">
+          {children}
+        </div>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
