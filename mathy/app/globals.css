@@ -8,7 +8,7 @@
   --sidebar-bg: #1a1a1a;
   --page-bg: #191919;
   --container-bg: #0e0e0e;
-  --outer-bg: #090909;
+  --outer-bg: #0e0e0e;
 }
 
 @theme inline {
@@ -69,6 +69,26 @@ video {
 .bn-container code:not(math-field):not(math-field *):not([class*="math-field"]),
 .bn-container pre:not(math-field):not(math-field *):not([class*="math-field"]) {
   font-family: var(--font-geist-mono), monospace;
+}
+
+/* Custom Inline Code Styling - Premium Design */
+.bn-container code:not(math-field):not(math-field *):not([class*="math-field"]) {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 0.85em !important;
+  padding: 3px 6px !important;
+  border-radius: 6px !important;
+  background-color: rgba(120, 120, 120, 0.15) !important; /* Neutral translucent background */
+  border: 1px solid rgba(120, 120, 120, 0.2) !important;
+  color: var(--foreground) !important;
+  transition: all 0.2s ease;
+  vertical-align: baseline;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.bn-container code:not(math-field):not(math-field *):not([class*="math-field"]):hover {
+  background-color: rgba(120, 120, 120, 0.25) !important;
+  border-color: rgba(120, 120, 120, 0.3) !important;
 }
 
 /* BlockNote Suggestion Menu Customization */

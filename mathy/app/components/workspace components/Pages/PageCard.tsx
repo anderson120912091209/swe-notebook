@@ -114,7 +114,7 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
         setShowMenu(false);
       }
       if (
-        folderDropdownRef.current && 
+        folderDropdownRef.current &&
         !folderDropdownRef.current.contains(event.target as Node) &&
         folderButtonRef.current &&
         !folderButtonRef.current.contains(event.target as Node)
@@ -130,7 +130,7 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
   // Calculate dropdown position when opening
   const handleToggleFolderDropdown = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    
+
     if (!showFolderDropdown && folderButtonRef.current) {
       const rect = folderButtonRef.current.getBoundingClientRect();
       setDropdownPosition({
@@ -138,7 +138,7 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
         left: rect.left,
       });
     }
-    
+
     setShowFolderDropdown(!showFolderDropdown);
   };
 
@@ -146,8 +146,8 @@ const PageCard = React.memo(function PageCard({ page, folderName, folderColor, f
     <>
       <div
         onClick={handleClick}
-        className="group relative flex flex-col rounded-xl border border-[rgba(128,128,128,0.2)] cursor-pointer 
-        h-[320px] overflow-hidden"
+        className="group relative flex flex-col rounded-xl border border-transparent hover:border-[rgba(128,128,128,0.2)] cursor-pointer 
+        h-[320px] overflow-hidden transition-all duration-200"
         style={{
           background: 'var(--card-bg)',
         }}
