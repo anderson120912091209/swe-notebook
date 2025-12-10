@@ -283,6 +283,38 @@ function PageEditorModalInner({ isOpen, onClose, pageId }: PageEditorModalProps)
     initialContent: initialContent, // Will be undefined if invalid - safe for BlockNote
   });
 
+  // Auto-focus editor when modal opens
+  useEffect(() => {
+    if (isOpen && editor) {
+      // Wait for modal animation to complete before focusing
+      const focusTimer = setTimeout(() => {
+        try {
+          // Focus the editor - this will place cursor at the first block
+          editor.focus();
+          
+          // If there are blocks, ensure cursor is at the start of the first block
+          const blocks = editor.document;
+          if (blocks && blocks.length > 0) {
+            const firstBlock = blocks[0];
+            // Try to set selection to the start of the first block
+            try {
+              editor.setTextCursorPosition(firstBlock, 'start');
+            } catch {
+              // Fallback: just focus the editor
+              editor.focus();
+            }
+          } else {
+            // No blocks yet, just focus - BlockNote will create a default block
+            editor.focus();
+          }
+        } catch (error) {
+          console.warn('Failed to auto-focus editor:', error);
+        }
+      }, 350); // Wait for modal animation (300ms) + small buffer
+
+      return () => clearTimeout(focusTimer);
+    }
+  }, [isOpen, editor]);
 
   // Auto-save content with debouncing
   const handleContentChange = useCallback(async () => {
@@ -360,8 +392,9 @@ function PageEditorModalInner({ isOpen, onClose, pageId }: PageEditorModalProps)
       isOpen={isOpen}
       onClose={onClose}
       size="full"
+      hideCloseButton
       classNames={{
-        base: `w-full h-[95vh] max-w-full mt-[5vh] sm:max-w-[95vw] sm:w-[95vw] sm:h-[95vh] sm:mt-0 md:max-w-[85vw] md:w-[85vw] md:h-[90vh] lg:max-w-[70vw] lg:w-[68vw] lg:h-[85vh] transition-all duration-300 ease-out ${isExpanding ? 'opacity-0 scale-95' : ''
+        base: `w-full h-[95vh] max-w-full mt-[5vh] sm:max-w-[95vw] sm:w-[95vw] sm:h-[95vh] sm:mt-0 md:max-w-[85vw] md:w-[85vw] md:h-[90vh] lg:max-w-[70vw] lg:w-[68vw] lg:h-[85vh] transition-all duration-300 ease-out focus:outline-none focus-visible:outline-none ${isExpanding ? 'opacity-0 scale-95' : ''
           }`,
         wrapper: "items-start sm:items-center justify-center",
         backdrop: "bg-black/50"
@@ -388,9 +421,12 @@ function PageEditorModalInner({ isOpen, onClose, pageId }: PageEditorModalProps)
         initial: { opacity: 0, scale: 0.95 },
       }}
     >
-      <ModalContent className="h-full sm:h-[95vh] 
+      <ModalContent 
+        className="h-full sm:h-[95vh] 
       md:h-[90vh] lg:h-[85vh] rounded-lg 
-      border-1 border-white/10 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
+      border-1 border-white/10 overflow-hidden focus:outline-none focus-visible:outline-none" 
+        style={{ background: 'var(--card-bg)', outline: 'none' }}
+      >
         {/* Header */}
         <ModalHeader className="flex h-16 items-center justify-between px-4 backdrop-blur 
         sm:px-6 border-b border-gray-200" style={{ borderColor: 'var(--border-color)', background: 'var(--card-bg)' }}>

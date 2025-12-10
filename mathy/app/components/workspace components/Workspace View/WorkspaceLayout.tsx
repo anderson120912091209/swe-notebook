@@ -111,7 +111,7 @@ function TopNavigationBar({
   onRefresh: () => void;
 }) {
   return (
-    <header className="flex h-12 items-center justify-between px-4 
+    <header className="flex h-11 items-center justify-between px-4 
     backdrop-blur" style={{ background: 'var(--outer-bg)' }}>
       <div className="flex items-center gap-1">
         {/* Sidebar Toggle */}
@@ -163,13 +163,13 @@ function MainContentContainer({ children }: { children: React.ReactNode }) {
       className="rounded-2xl overflow-hidden"
       style={{
         height: 'calc(100vh - 1rem - 2.5rem)',
-        width: 'calc(100vw - 1rem)',
-        maxWidth: 'calc(100% - 1rem)',
+        width: 'calc(100%-1rem)',
+        maxWidth: '100%',
         marginLeft: '0.5rem',
         marginRight: '0.5rem',
         marginTop: '0rem',
         marginBottom: '0.5rem',
-        background: 'var(--page-bg)',
+        background: 'var(--container-bg)',
         border: '1px solid var(--border-color)'
       }}
     >
@@ -296,7 +296,7 @@ function PageHeader({
   rightHeader?: React.ReactNode;
 }) {
   return (
-    <header className={`${HEADER_SPACING.container} backdrop-blur`} style={{ background: 'var(--page-bg)' }}>
+    <header className={`${HEADER_SPACING.container} backdrop-blur`} style={{ background: 'var(--container-bg)' }}>
       <div className="flex items-start justify-between">
         {/* Left Side */}
         <div className="flex-1">

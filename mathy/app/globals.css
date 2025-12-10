@@ -7,7 +7,8 @@
   /* Layout Colors - Dark Mode (default) */
   --sidebar-bg: #1a1a1a;
   --page-bg: #171717;
-  --outer-bg: #111111ff;
+  --container-bg: #0e0e0e;
+  --outer-bg: #070707;
 }
 
 @theme inline {
@@ -353,4 +354,23 @@ math-field .ML__popover-item.selected .ML__popover-shortcut {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Remove focus outline from HeroUI Modal components */
+[data-slot="base"],
+[data-slot="base"]:focus,
+[data-slot="base"]:focus-visible,
+[data-slot="content"],
+[data-slot="content"]:focus,
+[data-slot="content"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove focus ring from HeroUI Modal */
+.heroui-modal,
+.heroui-modal *,
+.heroui-modal *:focus,
+.heroui-modal *:focus-visible {
+  outline: none !important;
 }

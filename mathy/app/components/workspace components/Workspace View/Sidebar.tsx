@@ -901,8 +901,7 @@ export default function Sidebar() {
     <aside
       className="relative h-full w-full overflow-hidden"
       style={{
-        background: 'var(--sidebar-bg)',
-        borderRight: sidebarOpen ? '1px solid var(--border-color)' : 'none',
+        background: 'var(--outer-bg)',
         // Width is controlled by the parent Panel component, so we don't set it here
         transition: 'border 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }}

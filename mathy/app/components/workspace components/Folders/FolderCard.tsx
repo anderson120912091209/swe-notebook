@@ -153,8 +153,8 @@ const FolderCard = React.memo(function FolderCard({
       ref={cardRef}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
-      className="group relative p-4 rounded-xl border border-transparent transition-all duration-200 cursor-pointer flex flex-col justify-between
-      hover:bg-[var(--hover-bg)] hover:border-[rgba(128,128,128,0.2)]"
+      className="group relative p-4 rounded-xl border
+      border-[rgba(128,128,128,0.2)] cursor-pointer flex flex-col justify-between"
       style={{
         backgroundColor: 'var(--card-bg)',
         width: '256px',

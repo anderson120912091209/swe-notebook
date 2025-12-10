@@ -133,7 +133,7 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <WorkspaceProvider sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-      <div className="h-screen overflow-hidden" style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
+      <div className="h-screen overflow-hidden" style={{ background: 'var(--outer-bg)', color: 'var(--foreground)' }}>
         <PanelGroup direction="horizontal" className="h-screen">
           <Panel
             ref={sidebarPanelRef}
@@ -167,14 +167,12 @@ function ProductLayoutContent({ children }: { children: React.ReactNode }) {
             className="bg-transparent transition-colors duration-200"
             style={{
               backgroundColor: 'transparent',
-              width: sidebarOpen ? '1px' : '0px',
-              transition: shouldAnimateLayout ? 'width 0.3s ease, background-color 0.2s ease' : 'background-color 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as unknown as HTMLElement).style.backgroundColor = 'var(--border-color)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as unknown as HTMLElement).style.backgroundColor = 'transparent';
+              width: sidebarOpen ? '4px' : '0px',
+              transition: shouldAnimateLayout ? 'width 0.3s ease' : 'none',
+              zIndex: 50,
+              marginLeft: '-2px',
+              marginRight: '-2px',
+              position: 'relative'
             }}
           />
           <Panel
