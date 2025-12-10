@@ -15,11 +15,6 @@ interface OnboardingModalProps {
   onClose: () => void;
 }
 
-interface University {
-  name: string;
-  domain: string;
-  country: string;
-}
 
 type OnboardingStep =
   | {
@@ -143,13 +138,6 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
   const [role, setRole] = useState<'student' | 'researcher' | 'professional' | 'other'>('student');
   const [fieldOfStudy, setFieldOfStudy] = useState('');
   const [university, setUniversity] = useState('');
-  const [universityDomain, setUniversityDomain] = useState('');
-
-  // University search
-  const [universitySearch, setUniversitySearch] = useState('');
-  const [universities, setUniversities] = useState<University[]>([]);
-  const [loadingUniversities, setLoadingUniversities] = useState(false);
-  const [showUniversityDropdown, setShowUniversityDropdown] = useState(false);
 
   // Filter steps based on role
   const activeSteps = React.useMemo(() => {
@@ -174,39 +162,6 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
     }
   }, [isOpen]);
 
-  // Fetch universities
-  useEffect(() => {
-    if (universitySearch.length < 2 || role !== 'student') {
-      setUniversities([]);
-      return;
-    }
-
-    const fetchUniversities = async () => {
-      setLoadingUniversities(true);
-      try {
-        const response = await fetch(
-          `http://universities.hipolabs.com/search?name=${encodeURIComponent(universitySearch)}`
-        );
-        const data = await response.json();
-        setUniversities(data.slice(0, 10));
-      } catch (error) {
-        console.error('Error fetching universities:', error);
-        setUniversities([]);
-      } finally {
-        setLoadingUniversities(false);
-      }
-    };
-
-    const timer = setTimeout(fetchUniversities, 300);
-    return () => clearTimeout(timer);
-  }, [universitySearch, role]);
-
-  const handleSelectUniversity = (uni: University) => {
-    setUniversity(uni.name);
-    setUniversityDomain(uni.domain);
-    setUniversitySearch(uni.name);
-    setShowUniversityDropdown(false);
-  };
 
   const canProceed = () => {
     if (currentStepData.type === 'feature') return true;
@@ -222,7 +177,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
       field_of_study: fieldOfStudy,
       ...(role === 'student' && university && {
         university,
-        university_domain: universityDomain
+        university_domain: '' // No longer using domain from API
       }),
     };
 
@@ -266,7 +221,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         const onboardingData: OnboardingData = {
           role,
           field_of_study: fieldOfStudy,
-          ...(role === 'student' && university && { university, university_domain: universityDomain }),
+          ...(role === 'student' && university && { university, university_domain: '' }),
         };
 
         if (user?.id) {
@@ -485,16 +440,12 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                   )}
 
                   {currentStepData.type === 'user-info' && currentStepData.fieldType === 'university' && (
-                    <div className="max-w-md mx-auto relative">
+                    <div className="max-w-md mx-auto">
                       <input
                         type="text"
-                        value={universitySearch}
-                        onChange={(e) => {
-                          setUniversitySearch(e.target.value);
-                          setShowUniversityDropdown(true);
-                        }}
-                        onFocus={() => setShowUniversityDropdown(true)}
-                        placeholder="Search university..."
+                        value={university}
+                        onChange={(e) => setUniversity(e.target.value)}
+                        placeholder="Enter your university..."
                         autoFocus
                         className="w-full text-lg px-5 py-4 rounded-xl border outline-none transition-all focus:ring-2"
                         style={{
@@ -504,36 +455,6 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                           boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
                         }}
                       />
-
-                      {/* Dropdown */}
-                      <AnimatePresence>
-                        {showUniversityDropdown && universitySearch.length >= 2 && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            className="absolute top-full left-0 right-0 mt-2 rounded-xl border overflow-hidden shadow-xl z-20 max-h-[220px] overflow-y-auto custom-scrollbar"
-                            style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}
-                          >
-                            {loadingUniversities ? (
-                              <div className="p-4 text-center text-sm opacity-60" style={{ color: 'var(--foreground)' }}>Searching...</div>
-                            ) : universities.length > 0 ? (
-                              universities.map((uni, i) => (
-                                <button
-                                  key={i}
-                                  onClick={() => handleSelectUniversity(uni)}
-                                  className="w-full text-left px-5 py-3 hover:bg-[var(--hover-bg)] transition-colors border-b last:border-0 border-[var(--border-color)]"
-                                >
-                                  <div className="font-medium text-sm" style={{ color: 'var(--foreground)' }}>{uni.name}</div>
-                                  <div className="text-xs opacity-60" style={{ color: 'var(--foreground-muted)' }}>{uni.country}</div>
-                                </button>
-                              ))
-                            ) : (
-                              <div className="p-4 text-center text-sm opacity-60" style={{ color: 'var(--foreground)' }}>No results found</div>
-                            )}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
                     </div>
                   )}
 
