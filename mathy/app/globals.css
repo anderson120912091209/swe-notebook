@@ -6,9 +6,9 @@
 
   /* Layout Colors - Dark Mode (default) */
   --sidebar-bg: #1a1a1a;
-  --page-bg: #171717;
+  --page-bg: #191919;
   --container-bg: #0e0e0e;
-  --outer-bg: #070707;
+  --outer-bg: #090909;
 }
 
 @theme inline {

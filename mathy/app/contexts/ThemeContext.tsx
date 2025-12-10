@@ -63,8 +63,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         root.style.setProperty('--input-border', '#4a4a4a');
         root.style.setProperty('--math-bg', '#2a2a2a');
         root.style.setProperty('--math-border', '#444444');
-        root.style.setProperty('--outer-bg', '#070707');
-        root.style.setProperty('--container-bg', '#0e0e0e');
+        root.style.setProperty('--outer-bg', '#0f0f0f');
+        root.style.setProperty('--container-bg', '#151515');
         root.style.setProperty('--page-bg', '#171717'); // Dark grey for page containers
       } else {
         // Warm, cream-based light theme inspired by the reference
