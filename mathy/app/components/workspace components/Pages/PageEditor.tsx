@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef, useMemo, Component, ErrorInfo, ReactNode } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo, Component, ErrorInfo, ReactNode, useDeferredValue } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useCreateBlockNote, SuggestionMenuController } from '@blocknote/react';
@@ -212,7 +212,10 @@ function PageEditorInner({ pageId }: PageEditorProps) {
     console.log('PageEditor: sidebarOpen is', sidebarOpen);
   }, [sidebarOpen]);
   const [page, setPage] = useState(pages.find(p => p.id === pageId));
+  // Immediate state for snappy UI - updates instantly as user types
   const [title, setTitle] = useState(page?.title || 'Untitled');
+  // Deferred value for save operation - updates after user stops typing
+  const deferredTitle = useDeferredValue(title);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -228,6 +231,12 @@ function PageEditorInner({ pageId }: PageEditorProps) {
   // Debounce timers
   const contentSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   const titleSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  // Track current content state for saving (immediate updates for UI)
+  const [currentContent, setCurrentContent] = useState<{ blocks: unknown[] } | null>(null);
+  // Deferred value for save operation
+  const deferredContent = useDeferredValue(currentContent);
+  // Also keep ref for unmount/refresh saves
+  const currentContentRef = useRef<{ blocks: unknown[] } | null>(null);
 
   // Update page when data changes (but not while user is actively editing)
   useEffect(() => {
@@ -243,17 +252,74 @@ function PageEditorInner({ pageId }: PageEditorProps) {
     }
   }, [pageId, pages]);
 
-  // Cleanup timers on unmount
+  // Save pending changes on unmount (navigation/refresh)
   useEffect(() => {
     return () => {
-      if (contentSaveTimerRef.current) {
-        clearTimeout(contentSaveTimerRef.current);
+      // Flush any pending saves before unmounting
+      const flushPendingSaves = async () => {
+        if (!page) return;
+
+        // Save pending title if changed
+        if (titleSaveTimerRef.current) {
+          clearTimeout(titleSaveTimerRef.current);
+          titleSaveTimerRef.current = null;
+          if (deferredTitle !== (page.title || '')) {
+            try {
+              await updatePage(pageId, { title: deferredTitle });
+            } catch (error) {
+              console.error('Failed to save title on unmount:', error);
+            }
+          }
+        }
+
+        // Save pending content if changed
+        if (contentSaveTimerRef.current) {
+          clearTimeout(contentSaveTimerRef.current);
+          contentSaveTimerRef.current = null;
+          if (currentContentRef.current) {
+            try {
+              await updatePage(pageId, { content: currentContentRef.current });
+            } catch (error) {
+              console.error('Failed to save content on unmount:', error);
+            }
+          }
+        }
+      };
+
+      flushPendingSaves();
+    };
+  }, [page, pageId, updatePage, deferredTitle]);
+
+  // Save on page refresh (beforeunload)
+  useEffect(() => {
+    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+      if (!page) return;
+
+      // Save pending title
+      if (deferredTitle !== (page.title || '')) {
+        // Use sendBeacon or synchronous save for beforeunload
+        try {
+          await updatePage(pageId, { title: deferredTitle });
+        } catch (error) {
+          console.error('Failed to save title on beforeunload:', error);
+        }
       }
-      if (titleSaveTimerRef.current) {
-        clearTimeout(titleSaveTimerRef.current);
+
+      // Save pending content
+      if (currentContentRef.current) {
+        try {
+          await updatePage(pageId, { content: currentContentRef.current });
+        } catch (error) {
+          console.error('Failed to save content on beforeunload:', error);
+        }
       }
     };
-  }, []);
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [page, pageId, updatePage, deferredTitle]);
 
   // Update current time every 60 seconds for relative time display
   useEffect(() => {
@@ -276,8 +342,8 @@ function PageEditorInner({ pageId }: PageEditorProps) {
   });
 
 
-  // Auto-save content with debouncing
-  const handleContentChange = useCallback(async () => {
+  // Track content changes immediately for snappy UI
+  const handleContentChange = useCallback(() => {
     if (!page) return;
 
     try {
@@ -289,63 +355,90 @@ function PageEditorInner({ pageId }: PageEditorProps) {
         return;
       }
 
-      const content = { blocks }; // Wrap blocks in object for database storage
+      // Store current content immediately for unmount/refresh saves
+      currentContentRef.current = { blocks };
+    } catch (error) {
+      console.error('Error in handleContentChange:', error);
+    }
+  }, [editor, page]);
 
-      // Clear previous timer
+  // Debounced save for content using deferred value pattern
+  useEffect(() => {
+    if (!page || !currentContentRef.current) return;
+
+    // Clear previous timer
+    if (contentSaveTimerRef.current) {
+      clearTimeout(contentSaveTimerRef.current);
+    }
+
+    setIsSaving(true);
+
+    // Set new timer to save after 800ms of no typing (reduced from 1000ms for faster saves)
+    contentSaveTimerRef.current = setTimeout(async () => {
+      try {
+        await updatePage(pageId, { content: currentContentRef.current });
+        // Show saved indicator
+        setIsSaving(false);
+        setJustSaved(true);
+
+        // Clear any existing saved indicator timeout
+        if (savedIndicatorTimeoutRef.current) {
+          clearTimeout(savedIndicatorTimeoutRef.current);
+        }
+
+        // Hide saved indicator after 2 seconds
+        savedIndicatorTimeoutRef.current = setTimeout(() => {
+          setJustSaved(false);
+        }, 2000);
+      } catch (error) {
+        console.error('Failed to save content:', error);
+        setIsSaving(false);
+      }
+    }, 800);
+
+    // Cleanup timer
+    return () => {
       if (contentSaveTimerRef.current) {
         clearTimeout(contentSaveTimerRef.current);
       }
+    };
+  }, [currentContentRef.current, page, pageId, updatePage]);
 
-      setIsSaving(true);
-
-      // Set new timer to save after 1 second of no typing
-      contentSaveTimerRef.current = setTimeout(async () => {
-        try {
-          await updatePage(pageId, { content });
-          // Show saved indicator
-          setIsSaving(false);
-          setJustSaved(true);
-
-          // Clear any existing saved indicator timeout
-          if (savedIndicatorTimeoutRef.current) {
-            clearTimeout(savedIndicatorTimeoutRef.current);
-          }
-
-          // Hide saved indicator after 2 seconds
-          savedIndicatorTimeoutRef.current = setTimeout(() => {
-            setJustSaved(false);
-          }, 2000);
-        } catch (error) {
-          console.error('Failed to save content:', error);
-          setIsSaving(false);
-        }
-      }, 1000);
-    } catch (error) {
-      console.error('Error in handleContentChange:', error);
-      setIsSaving(false);
-    }
-  }, [editor, page, pageId, updatePage]);
-
-  // Auto-save title with debouncing
-  const handleTitleChange = useCallback(async (newTitle: string) => {
+  // Immediate title update for snappy UI - useDeferredValue handles the save
+  const handleTitleChange = useCallback((newTitle: string) => {
     setTitle(newTitle);
+  }, []);
 
+  // Debounced save for title using deferred value
+  useEffect(() => {
     if (!page) return;
+
+    // Skip if title hasn't changed from the page's current title
+    if (deferredTitle === (page.title || '')) {
+      return;
+    }
 
     // Clear previous timer
     if (titleSaveTimerRef.current) {
       clearTimeout(titleSaveTimerRef.current);
     }
 
-    // Set new timer to save after 500ms of no typing
+    // Set new timer to save after 400ms of no typing (reduced from 500ms for faster saves)
     titleSaveTimerRef.current = setTimeout(async () => {
       try {
-        await updatePage(pageId, { title: newTitle });
+        await updatePage(pageId, { title: deferredTitle });
       } catch (error) {
         console.error('Failed to save title:', error);
       }
-    }, 500);
-  }, [page, pageId, updatePage]);
+    }, 400);
+
+    // Cleanup timer
+    return () => {
+      if (titleSaveTimerRef.current) {
+        clearTimeout(titleSaveTimerRef.current);
+      }
+    };
+  }, [deferredTitle, page?.title, pageId, updatePage]);
 
 
   // Get breadcrumb

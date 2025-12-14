@@ -139,12 +139,12 @@ BEGIN
   
   -- Create a default "Getting Started" folder
   INSERT INTO public.folders (user_id, name, icon, color, "position")
-  VALUES (new.id, 'Getting Started', '🚀', '#3B82F6', 0)
+  VALUES (new.id, 'Folder', '📁', '#3B82F6', 0)
   RETURNING id INTO default_folder_id;
   
   -- Create default "Quick Captures" notebook (not in any folder)
   INSERT INTO public.notebooks (user_id, title, is_default, "position")
-  VALUES (new.id, 'Quick Captures', true, 0);
+  VALUES (new.id, 'Getting Started', true, 0);
   
   -- Create a welcome page in the default folder
   INSERT INTO public.notebooks (
@@ -157,9 +157,9 @@ BEGIN
   )
   VALUES (
     new.id, 
-    'Welcome to Mathy! 👋', 
+    'Getting Started', 
     default_folder_id,
-    '👋',
+    NULL,
     0,
     jsonb_build_object('blocks', jsonb_build_array()) -- Empty blocks - BlockNote will create default
   );

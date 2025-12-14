@@ -40,7 +40,7 @@ export default function SignInCard() {
       <header className="flex justify-between items-center px-6 py-8 sm:px-10 mb-8">
         <div className="flex items-center">
           <Image 
-            src="/logos/claritylogo-italics.png" 
+            src={theme === 'dark' ? "/logos/clarity-italics-white.png" : "/logos/claritylogo-italics.png"} 
             alt="Clarity" 
             width={100} 
             height={32} 

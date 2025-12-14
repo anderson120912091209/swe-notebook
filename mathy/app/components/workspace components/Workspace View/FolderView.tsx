@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef, useDeferredValue } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
@@ -27,11 +27,15 @@ export default function FolderView({ folderId }: FolderViewProps) {
   const [creatingPage, setCreatingPage] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDescriptionField, setShowDescriptionField] = useState(false);
+  // Immediate state for snappy UI - updates instantly as user types
   const [folderDescription, setFolderDescription] = useState(folder?.description || '');
+  // Deferred value for save operation - updates after user stops typing
+  const deferredDescription = useDeferredValue(folderDescription);
   const [folderTitle, setFolderTitle] = useState(folder?.name || '');
   const [activeFolderMenuId, setActiveFolderMenuId] = useState<string | null>(null);
   const [editingFolder, setEditingFolder] = useState<typeof folders[0] | null>(null);
   const [movingFolder, setMovingFolder] = useState<typeof folders[0] | null>(null);
+  const descriptionSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Update title/description when folder changes
   useEffect(() => {
@@ -40,6 +44,41 @@ export default function FolderView({ folderId }: FolderViewProps) {
       setFolderDescription(folder.description || '');
     }
   }, [folder]);
+
+  // Debounced save for folder description using deferred value
+  useEffect(() => {
+    // Skip if no folder or description hasn't changed from the folder's current description
+    if (!folder) return;
+    
+    const currentFolderDescription = folder.description || '';
+    if (deferredDescription === currentFolderDescription) {
+      return;
+    }
+
+    // Clear previous timer
+    if (descriptionSaveTimerRef.current) {
+      clearTimeout(descriptionSaveTimerRef.current);
+    }
+
+    // Set new timer to save after 500ms of no typing
+    descriptionSaveTimerRef.current = setTimeout(async () => {
+      try {
+        await updateFolder(folderId, { description: deferredDescription });
+        console.log('Folder description updated successfully:', deferredDescription);
+      } catch (error) {
+        console.error('Failed to update folder description:', error);
+        // Revert the local state on error
+        setFolderDescription(currentFolderDescription);
+      }
+    }, 500);
+
+    // Cleanup timer on unmount or when dependencies change
+    return () => {
+      if (descriptionSaveTimerRef.current) {
+        clearTimeout(descriptionSaveTimerRef.current);
+      }
+    };
+  }, [deferredDescription, folder?.description, folderId, updateFolder]);
 
   // Get child folders and pages
   const childFolders = useMemo(() => folders.filter(f => f.parent_folder_id === folderId), [folders, folderId]);
@@ -266,16 +305,9 @@ export default function FolderView({ folderId }: FolderViewProps) {
         />
       }
       description={folderDescription}
-      onDescriptionChange={async (desc) => {
+      onDescriptionChange={(desc) => {
+        // Update immediately for snappy UI feel - useDeferredValue handles the save
         setFolderDescription(desc);
-        try {
-          await updateFolder(folderId, { description: desc });
-          console.log('Folder description updated successfully:', desc);
-        } catch (error) {
-          console.error('Failed to update folder description:', error);
-          // Revert the local state on error
-          setFolderDescription(folder?.description || '');
-        }
       }}
       showDescriptionField={showDescriptionField}
       onToggleDescription={() => setShowDescriptionField(!showDescriptionField)}
