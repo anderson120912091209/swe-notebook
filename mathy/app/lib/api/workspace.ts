@@ -203,6 +203,8 @@ export async function movePageToFolder(
 export async function getWorkspaceItems(userId: string): Promise<WorkspaceItem[]> {
   const { data, error } = await supabase
     .rpc('get_workspace_items', { user_uuid: userId });
+  // Note: This RPC call may return 400 (Bad Request) if the function is missing or has a signature mismatch.
+  // This is expected behavior during development/migration and is handled by the fallback below.
 
   if (error) {
     // Fallback to manual query if RPC function doesn't exist yet

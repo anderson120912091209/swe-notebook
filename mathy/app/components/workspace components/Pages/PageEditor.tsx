@@ -205,7 +205,7 @@ function PageEditorInner({ pageId }: PageEditorProps) {
   const router = useRouter();
   const { theme } = useTheme();
   const { user } = useAuth();
-  const { pages, folders, updatePage, sidebarOpen } = useWorkspace();
+  const { pages, folders, updatePage, sidebarOpen, loading } = useWorkspace();
 
   // Debug sidebar state
   useEffect(() => {
@@ -274,6 +274,32 @@ function PageEditorInner({ pageId }: PageEditorProps) {
     schema: customSchema,
     initialContent: initialContent, // Will be undefined if invalid - safe for BlockNote
   });
+
+  // Sync editor content when page content updates from external source (e.g. initial load completion)
+  // This handles the case where the editor initializes with empty/default content before the real data arrives
+  useEffect(() => {
+    if (!editor || !page?.content) return;
+
+    const syncContent = async () => {
+      // Check if editor is currently effectively empty (default state)
+      const editorBlocks = editor.document;
+      const isEmpty = !editorBlocks ||
+        editorBlocks.length === 0 ||
+        (editorBlocks.length === 1 &&
+          (!editorBlocks[0].content || (Array.isArray(editorBlocks[0].content) && editorBlocks[0].content.length === 0)) &&
+          (!editorBlocks[0].children || editorBlocks[0].children.length === 0));
+
+      const incomingBlocks = sanitizeBlocks(page.content);
+
+      // Only overwrite if editor is empty and we have valid incoming content
+      if (isEmpty && incomingBlocks && incomingBlocks.length > 0) {
+        console.log('Syncing editor content from remote update');
+        editor.replaceBlocks(editor.document, incomingBlocks);
+      }
+    };
+
+    syncContent();
+  }, [editor, page?.content]);
 
 
   // Auto-save content with debouncing
@@ -383,6 +409,18 @@ function PageEditorInner({ pageId }: PageEditorProps) {
     );
   };
 
+
+  // Show loading state while fetching data and page is not yet found
+  if (loading && !page) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center" style={{ color: 'var(--foreground-muted)' }}>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-current mx-auto mb-4"></div>
+          <p>Loading page...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!page) {
     return (
