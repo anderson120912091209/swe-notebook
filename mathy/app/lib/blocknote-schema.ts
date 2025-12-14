@@ -5,11 +5,9 @@ import { getDefaultReactSlashMenuItems, DefaultReactSuggestionItem } from '@bloc
 import React from 'react';
 
 // Create a custom schema that includes the inline math content
-// Using default codeBlock for now (CodeBlock implementation removed due to compatibility issues)
 export const customSchema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
-    // codeBlock: using default from defaultBlockSpecs
   },
   inlineContentSpecs: {
     ...defaultInlineContentSpecs,
