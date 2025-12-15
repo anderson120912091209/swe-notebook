@@ -106,11 +106,12 @@ const getUserDisplayName = (user: User | null): string => {
 };
 
 // Error Boundary to catch BlockNote initialization errors
+// Error Boundary to catch BlockNote initialization errors
 class BlockNoteErrorBoundary extends Component<
-  { children: ReactNode; fallback: ReactNode },
+  { children: ReactNode; fallback: ReactNode; isOpen: boolean },
   { hasError: boolean }
 > {
-  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+  constructor(props: { children: ReactNode; fallback: ReactNode; isOpen: boolean }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -123,7 +124,16 @@ class BlockNoteErrorBoundary extends Component<
     console.error('BlockNote Error Boundary caught:', error, errorInfo);
   }
 
+  componentDidUpdate(prevProps: { isOpen: boolean }) {
+    // If the modal is opening, reset the error state
+    if (this.props.isOpen && !prevProps.isOpen && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
+  }
+
   render() {
+    // If closed, we can reset/ignore error state logic to ensure fresh start
+    // But keeping it simple: just show fallback if error, unless we just reset it
     if (this.state.hasError) {
       return this.props.fallback;
     }
@@ -291,7 +301,7 @@ function PageEditorModalInner({ isOpen, onClose, pageId }: PageEditorModalProps)
         try {
           // Focus the editor - this will place cursor at the first block
           editor.focus();
-          
+
           // If there are blocks, ensure cursor is at the start of the first block
           const blocks = editor.document;
           if (blocks && blocks.length > 0) {
@@ -421,10 +431,10 @@ function PageEditorModalInner({ isOpen, onClose, pageId }: PageEditorModalProps)
         initial: { opacity: 0, scale: 0.95 },
       }}
     >
-      <ModalContent 
+      <ModalContent
         className="h-full sm:h-[95vh] 
       md:h-[90vh] lg:h-[85vh] rounded-lg 
-      border-1 border-white/10 overflow-hidden focus:outline-none focus-visible:outline-none" 
+      border-1 border-white/10 overflow-hidden focus:outline-none focus-visible:outline-none"
         style={{ background: 'var(--card-bg)', outline: 'none' }}
       >
         {/* Header */}
@@ -626,8 +636,8 @@ export default function PageEditorModal({ isOpen, onClose, pageId }: PageEditorM
   );
 
   return (
-    <BlockNoteErrorBoundary fallback={fallback}>
-      <PageEditorModalInner isOpen={isOpen} onClose={onClose} pageId={pageId} />
+    <BlockNoteErrorBoundary fallback={fallback} isOpen={isOpen}>
+      {isOpen && <PageEditorModalInner isOpen={isOpen} onClose={onClose} pageId={pageId} />}
     </BlockNoteErrorBoundary>
   );
 }
